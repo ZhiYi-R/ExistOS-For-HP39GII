@@ -72,7 +72,7 @@
 
 #define portCRITICAL_NESTING_IN_TCB     1
 
-extern uint32_t Timer_Count;
+extern volatile uint32_t Timer_Count;
 //extern volatile unsigned long ulHighFrequencyTimerTicks; 
 #define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() ( Timer_Count = 0 )
 #define portGET_RUN_TIME_COUNTER_VALUE()	( Timer_Count )

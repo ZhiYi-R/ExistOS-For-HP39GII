@@ -605,7 +605,7 @@ public:
 
     void setText(const char *_text) {
         size_t text_len = strlen(_text) + 1;
-        char *new_text = (char *)realloc(this->text, text_len);
+        char *new_text = (char *)pvPortRealloc(this->text, text_len);
         if (new_text) {
             this->text = new_text;
             memcpy(this->text, _text, text_len);

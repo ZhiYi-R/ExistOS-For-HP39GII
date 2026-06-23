@@ -325,7 +325,7 @@ static uint32_t *MTD_GetStatusBuf()
 int MTD_ReadPhyPage(uint32_t page, uint32_t offset, uint32_t len, uint8_t *buffer)
 {
     MTD_Operates newOpa;
-    int retVal;
+    int retVal = 0;
 
     newOpa.opa = MTD_PHY_READ;
     newOpa.page = page;
@@ -390,7 +390,7 @@ int MTD_WritePhyPage(uint32_t page,uint8_t *buffer)
     
     while (!deviceInited)
     {
-        ;
+        vTaskDelay(2);
     }
     
     g_mtd_write_cnt++;
@@ -461,7 +461,7 @@ int MTD_EraseAllBLock(void)
 int MTD_ReadPhyPageMeta(uint32_t page, uint32_t len, uint8_t *buffer)
 {
     MTD_Operates newOpa;
-    int retVal;
+    int retVal = 0;
 
     newOpa.opa = MTD_PHY_READ_META;
     newOpa.page = page;

@@ -49,7 +49,7 @@ unsigned int faultAddress;
 volatile unsigned int insAddress;
 unsigned int FSR;
 volatile uint32_t swapping = 0;
-extern bool g_vm_in_pagefault;
+extern volatile bool g_vm_in_pagefault;
 extern TaskHandle_t upSystem;
 extern uint32_t savedBy;
 

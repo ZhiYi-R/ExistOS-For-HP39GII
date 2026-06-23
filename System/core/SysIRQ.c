@@ -13,7 +13,7 @@
 
 #include "SystemUI.h"
 
-uint32_t Timer_Count = 0;
+volatile uint32_t Timer_Count = 0;
 
 extern uint32_t g_key;
 extern uint32_t g_ket_press;
@@ -57,6 +57,7 @@ volatile void IRQ_ISR(uint32_t IRQNum, uint32_t par1, uint32_t par2, uint32_t pa
 
     case LL_IRQ_MMU:
         VROMIRQLoad(par1);
+        break;
         //printf("MMU Fault:%08x\n", par1);
 
     default:

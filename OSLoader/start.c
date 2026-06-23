@@ -325,7 +325,7 @@ void VM_Unconscious(TaskHandle_t task, char *res, uint32_t address) {
         vTaskSuspend(pLLAPITask);
         LLIRQ_enable(false);
 
-        uint32_t *pRegFram = (uint32_t *)(((uint32_t *)pSysTask)[1]);
+        uint32_t *pRegFram = (uint32_t *)(((uint32_t *)task)[1]);
         pRegFram -= 16;
 
         DisplayClean();
@@ -333,8 +333,9 @@ void VM_Unconscious(TaskHandle_t task, char *res, uint32_t address) {
         DisplayPutStr(16, 5, "System Panic! ", 255, 0, 16);
         DisplayFillBox(8, 24, 248, 120, 208);
 
-        if (res != NULL) {
-            DisplayPutStr(240 - 8 * strlen(res), 5, strcat(res, " "), 208, 0, 16);
+        if (res != NULL && res[0]) {
+            snprintf(buf, sizeof(buf), "%s ", res);
+            DisplayPutStr(240 - 8 * strlen(buf), 5, buf, 208, 0, 16);
         }
 
         DisplayPutStr(24, 16 * 2 - 8, "[ON+F5] > Maintenance Menu", 96, 208, 16);

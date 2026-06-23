@@ -56,6 +56,12 @@ void dhara_nand_mark_bad(const struct dhara_nand *n, dhara_block_t b) {
     printf("MARK BAD BLOCK\n");
     uint8_t *tempbuf = pvPortMalloc(2048);
     uint8_t *tempmeta = pvPortMalloc(19);
+    if (!tempbuf || !tempmeta) {
+        printf("MALLOC FAIL\n");
+        if (tempbuf) vPortFree(tempbuf);
+        if (tempmeta) vPortFree(tempmeta);
+        return;
+    }
     MTD_ReadPhyPage((DATA_START_BLOCK + b) * pMtdinfo->PagesPerBlock, 0, 2048, tempbuf);
     memset(tempmeta, 0, 19);
     *((uint32_t *)&tempmeta[0]) = BAD_BLOCK;
@@ -148,6 +154,7 @@ int dhara_nand_copy(const struct dhara_nand *n,
     if (ret < 0) {
         *err = DHARA_E_ECC;
         printf("COPY RD ERR\n");
+        vPortFree(CopyBuffer);
         return -1;
     }
     ret = MTD_WritePhyPage(dst + (DATA_START_BLOCK * pMtdinfo->PagesPerBlock), (uint8_t *)CopyBuffer);
