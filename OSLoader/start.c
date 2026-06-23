@@ -213,7 +213,7 @@ void System(void *par) {
     for (int i = 120; i <= 150; ++i)
         DisplayFillBox(i - 2, 84, i, 92, 72);
 
-    if (((*bootAddr != 0xEF5AE0EF) && (*(bootAddr + 1) != 0xFECDAFDE)) || (isInterrupted = portIsKeyDown(KEY_F3))) {
+    if (((*bootAddr != 0xEF5AE0EF) || (*(bootAddr + 1) != 0xFECDAFDE)) || (isInterrupted = portIsKeyDown(KEY_F3))) {
         slowDownEnable(false);
         // DisplayClean();
         // DisplayPutStr(0, 16 * 0, "========[Exist OS Loader]======", 0, 255, 16);
@@ -958,7 +958,7 @@ void TaskUSBLog(void *_) {
 
                 } else if (log_j > log_i) {
                     if (SYS_LOG_BUFSIZE - log_j <= ava) {
-                        tud_cdc_write(&log_buf[log_j], SYS_LOG_BUFSIZE - log_j + 1);
+                        tud_cdc_write(&log_buf[log_j], SYS_LOG_BUFSIZE - log_j);
                         tud_cdc_write_flush();
                         log_j = 0;
                     } else {

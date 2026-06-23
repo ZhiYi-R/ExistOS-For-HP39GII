@@ -153,8 +153,8 @@ void MTD_Task()
                     INFO("Cur opa.buf:%p\n", curOpa.buf);
                     if(retry_cnt)
                     {
-                        goto retry;
                         retry_cnt--;
+                        goto retry;
                     }else{
                         mtd_opa_done = true;
                         ECCResult = 0x0E0E0E0E;

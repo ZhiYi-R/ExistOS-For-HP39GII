@@ -34,10 +34,8 @@ int EVM_Flash_Read(const struct lfs_config *c, lfs_block_t block,
 {
     printf("lfs_read:b:%d,off:%d,size:%d\n",block, off, size);
 
-    //ll_flash_page_read(block, 1, read_buf);
-    //memcpy(buffer, &read_buf[off], size);
-
-    ll_flash_page_read(block, 1, buffer);
+    ll_flash_page_read(block, 1, read_buf);
+    memcpy(buffer, &read_buf[off], size);
     return 0;
 }
 
@@ -45,12 +43,9 @@ int EVM_Flash_Prog(const struct lfs_config *c, lfs_block_t block,
             lfs_off_t off, const void *buffer, lfs_size_t size)
 {
     printf("lfs_prog:b:%d,off:%d,size:%d\n",block, off, size);
-    /*
     ll_flash_page_read(block, 1, write_buf);
     memcpy(&write_buf[off], buffer, size);
-    ll_flash_page_write(block, 1, write_buf);*/
-
-    ll_flash_page_write(block, 1, (char *)buffer);
+    ll_flash_page_write(block, 1, write_buf);
     return 0;
 }
     
@@ -159,16 +154,19 @@ mount_flash:
             lv_obj_set_size(spinner, 50, 50);
             lv_obj_center(spinner);
 
-            lfs_format(&lfs, &lfs_cfg);
-            lfs_mount(&lfs, &lfs_cfg);
+            err = lfs_format(&lfs, &lfs_cfg);
+            if (!err) {
+                err = lfs_mount(&lfs, &lfs_cfg);
+            }
 
-            if (err) {
+            if (!err) {
                 SystemUIMsgBox("Format " FS_FLASH_PATH " Succeeded.", "Format", 0);
             } else {
                 SystemUIMsgBox("Format " FS_FLASH_PATH " Failed.", "Format", 0);
             }
+            return;
         }
-        goto mount_flash;
+        return;
 
     }
 

@@ -181,7 +181,7 @@ _ssize_t _write_r(struct _reent *pReent, int fd, const void *buf, size_t nbytes)
         int k = 0;
         while (k < nbytes) {
             log_buf[log_i++] = ((char *)buf)[k++];
-            if (log_i > SYS_LOG_BUFSIZE) {
+            if (log_i >= SYS_LOG_BUFSIZE) {
                 log_i = 0;
             }
         }

@@ -22,18 +22,16 @@ static inline int VROMMapCheck(uint32_t memAddress, uint32_t mapSize) {
     }
 
     while (map) {
-        if (map->next) {
-            if ((memAddress >= map->map_vm_addr) && (memAddress < map->map_vm_addr + mapSize)) {
-                return 1;
-            }
-            if (((memAddress + mapSize) >= map->map_vm_addr) && ((memAddress + mapSize) < (map->map_vm_addr + map->map_size))) {
-                return 1;
-            }
-            map = map->next;
+        uint32_t req_end = memAddress + mapSize;
+        uint32_t map_end = map->map_vm_addr + map->map_size;
+        if ((memAddress < map_end) && (req_end > map->map_vm_addr)) {
+            return 1;
         }else{
-            break;
+            map = map->next;
         }
     }
+
+    return 0;
 }
 
 int VROMLoaderCreateFileMap(FIL *f, uint32_t inFileStart, uint32_t memAddress, uint32_t mapSize) {
@@ -112,16 +110,16 @@ int VROMLoaderDeleteMap(uint32_t vaddr) {
         return 0;
     }
     VROMMapInfo_t *map = vmmap_list;
-    VROMMapInfo_t *map_prev = vmmap_list;
+    VROMMapInfo_t *map_prev = NULL;
 
     while (map) {
         if ((vaddr >= map->map_vm_addr) && (vaddr < map->map_vm_addr + map->map_size)) {
             if (map == vmmap_list) {
+                vmmap_list = map->next;
                 vPortFree(map);
-                vmmap_list = NULL;
                 return 0;
             } else {
-                map_prev->next = NULL;
+                map_prev->next = map->next;
                 vPortFree(map);
                 return 0;
             }
@@ -139,5 +137,8 @@ int VROMIRQLoad(uint32_t vaddr) {
     if (map) {
         f_lseek(map->map_f, vaddr - map->map_vm_addr + map->map_file_start);
         f_read(map->map_f, (uint8_t *)vaddr, MEM_PAGE_SIZE, &br);
+        return 0;
     }
+
+    return -1;
 }
