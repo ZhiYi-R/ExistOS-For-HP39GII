@@ -211,7 +211,7 @@ void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
                                     uint32_t *pulTimerTaskStackSize) {
     *ppxTimerTaskTCBBuffer = (StaticTask_t *)pvPortMalloc(sizeof(StaticTask_t));
     *ppxTimerTaskStackBuffer = (StackType_t *)pvPortMalloc(configMINIMAL_STACK_SIZE * 4);
-    *pulTimerTaskStackSize = configMINIMAL_STACK_SIZE;
+    *pulTimerTaskStackSize = configMINIMAL_STACK_SIZE * 4;
 }
 
 void vApplicationMallocFailedHook() {

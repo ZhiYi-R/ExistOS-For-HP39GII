@@ -593,6 +593,9 @@ public:
             key = ll_vm_check_key();
             press = key >> 16;
             keyVal = key & 0xFFFF;
+            if (!press) {
+                vTaskDelay(20);
+            }
         } while (!press);
         if (keyVal == KEY_ENTER)
             return true;
