@@ -58,6 +58,7 @@ dkms.conf
 # VS code config
 .vscode/
 *.code-workspace
+.clangd
 
 # Cmake files
 # Makefile
