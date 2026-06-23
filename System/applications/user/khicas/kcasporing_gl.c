@@ -198,46 +198,87 @@ void vGL_putChar(int x0, int y0, char ch, int fg, int bg, int fontSize) {
 
 }
 
+
+static const char *utf8_to_ascii(unsigned int cp) {
+    switch (cp) {
+    case 0x03C0: return "pi";
+    case 0x221E: return "infinity";
+    case 0x221A: return "sqrt";
+    case 0x222B: return "int";
+    case 0x2264: return "<=";
+    case 0x2265: return ">=";
+    case 0x2260: return "!=";
+    case 0x2192: return "->";
+    case 0x03B1: return "alpha";
+    case 0x03B2: return "beta";
+    case 0x03B8: return "theta";
+    case 0x03A3: return "Sigma";
+    case 0x00D7: return "*";
+    case 0x00F7: return "/";
+    default: return NULL;
+    }
+}
+
+static int utf8_decode(const char *s, unsigned int *cp) {
+    unsigned char c = (unsigned char)s[0];
+    if (c < 0x80) { *cp = c; return 1; }
+    if (c < 0xC0) return 0;
+    if (c < 0xE0) {
+        if ((s[1] & 0xC0) != 0x80) return 0;
+        *cp = ((c & 0x1F) << 6) | (s[1] & 0x3F);
+        return 2;
+    }
+    if (c < 0xF0) {
+        if ((s[1] & 0xC0) != 0x80 || (s[2] & 0xC0) != 0x80) return 0;
+        *cp = ((c & 0x0F) << 12) | ((s[1] & 0x3F) << 6) | (s[2] & 0x3F);
+        return 3;
+    }
+    return 0;
+}
+
 void vGL_putString(int x0, int y0, const char *s, int fg, int bg, int fontSize) {
     int font_w;
     int font_h;
-    int len = strlen(s);
     int x = 0, y = 0;
 
     if (fontSize <= 16) {
         switch (fontSize) {
-        case 8:
-            font_w = 5;
-            break;
-        case 12:
-            font_w = 6;
-            break;
-        case 14:
-            font_w = 7;
-            break;
-        case 16:
-            font_w = 8;
-            break;
-        default:
-            font_w = 8;
-            break;
+        case 8:  font_w = 5; break;
+        case 12: font_w = 6; break;
+        case 14: font_w = 7; break;
+        case 16: font_w = 8; break;
+        default: font_w = 8; break;
         }
 
         font_h = fontSize;
         while (*s) {
-            vGL_putChar((x0 * STRING_X_SCALE) + x, (y0 * STRING_Y_SCALE) + y, *s, fg, bg, fontSize);
-            s++;
-            x += font_w;
+            unsigned int cp;
+            int adv = utf8_decode(s, &cp);
+            if (adv <= 0) { s++; continue; }
+            if (cp < 0x80) {
+                vGL_putChar((x0 * STRING_X_SCALE) + x, (y0 * STRING_Y_SCALE) + y,
+                            (char)cp, fg, bg, fontSize);
+                x += font_w;
+            } else {
+                const char *ascii = utf8_to_ascii(cp);
+                if (ascii) {
+                    for (const char *p = ascii; *p; p++) {
+                        vGL_putChar((x0 * STRING_X_SCALE) + x, (y0 * STRING_Y_SCALE) + y,
+                                    *p, fg, bg, fontSize);
+                        x += font_w;
+                        if (x > VIR_LCD_PIX_W) break;
+                    }
+                }
+            }
+            s += adv;
             if (x > VIR_LCD_PIX_W) { break;
                 x = 0;
                 y += font_h;
-                if (y > VIR_LCD_PIX_H) {
-                    break;
-                }
+                if (y > VIR_LCD_PIX_H) { break; }
             }
         }
     }
-    
+
     ImmediateRefrush = true;
 }
 
