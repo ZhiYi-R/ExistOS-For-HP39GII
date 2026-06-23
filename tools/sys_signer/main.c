@@ -26,36 +26,26 @@ static size_t syssym_num;
 
 uint32_t calc_sys_sym_hash() {
     uint32_t hash = 0x5a5a1234;
-    int fr;
     uint32_t addr;
     char type;
     char s[1024];
 
-    int i = 0;
+    size_t i = 0;
 
-    fr = sscanf((const char *)&buf_syself[i], "%08X %c %s", &addr, &type, s);
-    while (fr == 3)
-    {
-        if ((type >= 'A') && type <= 'Z')
-        {
-            //printf("adr:%08x, type:%c, sym:%s\n", addr, type, s);
+    while (i < sz_syself) {
+        int fr = sscanf((const char *)&buf_syself[i], "%08X %c %1023s", &addr, &type, s);
+        if ((fr == 3) && (type >= 'A') && (type <= 'Z')) {
             hash ^= addr;
             hash ^= hash << 16;
         }
-        i++;
-        if (buf_syself[i] == 0)
-        {
+
+        while ((i < sz_syself) && (buf_syself[i] != '\n') && (buf_syself[i] != '\0')) {
+            i++;
+        }
+        if ((i >= sz_syself) || (buf_syself[i] == '\0')) {
             break;
         }
-        while ((buf_syself[i] != '\n'))
-        {
-            i++;
-            if (buf_syself[i] == 0)
-            {
-                break;
-            }
-        }
-        fr = sscanf((const char *)&buf_syself[i], "%08X %c %s", &addr, &type, s);
+        i++;
     }
     return hash;
     /*
@@ -76,8 +66,14 @@ int main(int argc, char **argv) {
     if (argc != 3) {
         Usage();
     }
-    strcpy(path_syself, argv[1]);
-    strcpy(path_sysbin, argv[2]);
+    if (snprintf(path_syself, sizeof(path_syself), "%s", argv[1]) >= sizeof(path_syself)) {
+        fprintf(stderr, "syself path is too long\n");
+        exit(-1);
+    }
+    if (snprintf(path_sysbin, sizeof(path_sysbin), "%s", argv[2]) >= sizeof(path_sysbin)) {
+        fprintf(stderr, "sysbin path is too long\n");
+        exit(-1);
+    }
 
     f_syself = fopen(path_syself, "rb");
     if (!f_syself) {
@@ -99,7 +95,7 @@ int main(int argc, char **argv) {
     sz_sysbin = 4 * 32;
     fseek(f_sysbin, 0, SEEK_SET);
 
-    buf_syself = malloc(sz_syself);
+    buf_syself = malloc(sz_syself + 1);
     if (!buf_syself) {
         fprintf(stderr, "Failed to alloc memory 1\n");
         exit(-1);
@@ -111,8 +107,15 @@ int main(int argc, char **argv) {
         exit(-1);
     }
 
-    fread(buf_sysbin, 1, sz_sysbin, f_sysbin);
-    fread(buf_syself, 1, sz_syself, f_syself);
+    if (fread(buf_sysbin, 1, sz_sysbin, f_sysbin) != sz_sysbin) {
+        fprintf(stderr, "Failed to read sysbin\n");
+        exit(-1);
+    }
+    if (fread(buf_syself, 1, sz_syself, f_syself) != sz_syself) {
+        fprintf(stderr, "Failed to read syself\n");
+        exit(-1);
+    }
+    buf_syself[sz_syself] = '\0';
 
     if (
         (((uint32_t *)buf_sysbin)[0] != 0xEF5AE0EF) || ((uint32_t *)buf_sysbin)[1] != 0xFECDAFDE) {

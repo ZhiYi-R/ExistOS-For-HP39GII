@@ -56,6 +56,10 @@ bool UIForceRefresh = false;
 
 bool isMsgBoxShow = false;
 
+static const size_t SUFFIX_CAPACITY = 64;
+static const size_t PATH_NOW_CAPACITY = 2048;
+static const size_t DIR_ITEM_NAME_CAPACITY = 255;
+
 static int curPage = 0;
 static int page3Subpage = 0;
 static int appPage_select = 0;
@@ -543,7 +547,7 @@ void keyMsg(uint32_t key, int state) {
 
             } else {
 
-                suffix = (TCHAR *)calloc(64, sizeof(TCHAR));
+                suffix = (TCHAR *)calloc(SUFFIX_CAPACITY, sizeof(TCHAR));
                 filesCount = (unsigned long *)malloc(sizeof(unsigned long));
                 pageNow = (unsigned int *)malloc(sizeof(unsigned int));
                 pageAll = (unsigned int *)malloc(sizeof(unsigned int));
@@ -551,7 +555,7 @@ void keyMsg(uint32_t key, int state) {
 
                 pathList = (struct strNode *)malloc(sizeof(struct strNode)); // head node.
                 pathList->str = (TCHAR *)calloc(2, sizeof(TCHAR));
-                pathNow = (TCHAR *)calloc(2048, sizeof(TCHAR));
+                pathNow = (TCHAR *)calloc(PATH_NOW_CAPACITY, sizeof(TCHAR));
                 pathList->next = nullptr;
                 pathList->prev = nullptr;
                 pathList_firstNode = pathList; // record head node.
@@ -572,7 +576,7 @@ void keyMsg(uint32_t key, int state) {
                         dirItemNames = (TCHAR **)calloc(*filesCount, sizeof(TCHAR *));
                         dirItemInfos = (bool *)calloc(*filesCount, sizeof(bool));
                         for (int i = 0; i < *filesCount; i++) {
-                            dirItemNames[i] = (TCHAR *)calloc(255, sizeof(TCHAR));
+                            dirItemNames[i] = (TCHAR *)calloc(DIR_ITEM_NAME_CAPACITY, sizeof(TCHAR));
                         }
 
                         refreshFileNames(pathNow, dirItemNames, dirItemInfos, filesCount);
@@ -711,7 +715,7 @@ void keyMsg(uint32_t key, int state) {
 
                         pathList = pathList->next; // switch to next node.
 
-                        pathList->str = (TCHAR *)calloc(strlen(dirItemNames[(*pageNow - 1) * 5 + *selectedItem - 1]) + 1, sizeof(TCHAR)); // new str.
+                        pathList->str = (TCHAR *)calloc(strlen(dirItemNames[(*pageNow - 1) * 5 + *selectedItem - 1]) + 2, sizeof(TCHAR)); // new str.
 
                         strcpy(pathList->str, dirItemNames[(*pageNow - 1) * 5 + *selectedItem - 1]);
                         strcat(pathList->str, "/");
@@ -1056,7 +1060,7 @@ void refreshDir() {
             dirItemNames = (TCHAR **)calloc(*filesCount, sizeof(TCHAR *));
             dirItemInfos = (bool *)calloc(*filesCount, sizeof(bool));
             for (int i = 0; i < *filesCount; i++) {
-                dirItemNames[i] = (TCHAR *)calloc(255, sizeof(TCHAR));
+                dirItemNames[i] = (TCHAR *)calloc(DIR_ITEM_NAME_CAPACITY, sizeof(TCHAR));
             }
 
             refreshFileNames(pathNow, dirItemNames, dirItemInfos, filesCount);
@@ -1065,7 +1069,7 @@ void refreshDir() {
 }
 
 void getWholePath(TCHAR *ans) {
-    memset(ans, 0, 512);
+    memset(ans, 0, PATH_NOW_CAPACITY);
     struct strNode *nodeNow = pathList_firstNode;
 
     for (;;) {

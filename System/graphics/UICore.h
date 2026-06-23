@@ -219,11 +219,17 @@ public:
         char buffer[256];
 
         va_start(aptr, format);
-        ret = vsprintf(buffer, format, aptr);
+        ret = vsnprintf(buffer, sizeof(buffer), format, aptr);
         va_end(aptr);
+        if (ret < 0) {
+            buffer[0] = '\0';
+            return ret;
+        }
+        buffer[sizeof(buffer) - 1] = '\0';
 
         for (int i = 0, x = x0; (i < sizeof(buffer)) && (buffer[i]); i++) {
-            if (buffer[i] < 0x80) {
+            unsigned char ch = (unsigned char)buffer[i];
+            if (ch < 0x80) {
                 draw_char_ascii(x, y0, buffer[i], fontSize, fg, bg);
                 x += fontSize == 16 ? 8 : 6;
                 if (x > disp_w) {
@@ -423,8 +429,11 @@ public:
         this->disp = disp;
         memset(this->funcKey, 0, sizeof(this->funcKey));
         if (title) {
-            this->title = (char *)pvPortMalloc(strlen(title));
-            strcpy(this->title, title);
+            size_t title_len = strlen(title) + 1;
+            this->title = (char *)pvPortMalloc(title_len);
+            if (this->title) {
+                memcpy(this->title, title, title_len);
+            }
             this->content_x0 = x0 + 1;
             this->content_y0 = y0 + WIN_DEFAULT_FONTSIZE - 3;
             this->content_width = w - 1;
@@ -441,7 +450,9 @@ public:
 
     void refreshTitle() {
         disp->draw_box(x0 + 1, y0, x0 + width, y0 + WIN_DEFAULT_FONTSIZE - 3, WIN_DEFAULT_BORDER_COLOR, WIN_DEFAULT_TITLE_BG_COLOR);
-        disp->draw_printf(x0 + 1, y0, WIN_DEFAULT_FONTSIZE, WIN_DEFAULT_TITLE_FONT_COLOR, WIN_DEFAULT_TITLE_BG_COLOR, this->title);
+        if (this->title) {
+            disp->draw_printf(x0 + 1, y0, WIN_DEFAULT_FONTSIZE, WIN_DEFAULT_TITLE_FONT_COLOR, WIN_DEFAULT_TITLE_BG_COLOR, "%s", this->title);
+        }
         // disp->draw_line(x0, WIN_DEFAULT_FONTSIZE, x0 + width, WIN_DEFAULT_FONTSIZE, WIN_DEFAULT_BORDER_COLOR);
     }
 
@@ -590,7 +601,12 @@ public:
     }
 
     void setText(const char *_text) {
-        strcpy(this->text, _text);
+        size_t text_len = strlen(_text) + 1;
+        char *new_text = (char *)realloc(this->text, text_len);
+        if (new_text) {
+            this->text = new_text;
+            memcpy(this->text, _text, text_len);
+        }
         this->text_x0 = this->x0 + (this->width - (strlen(this->text) * 8)) / 2;
         this->text_y0 = this->y0 + this->height / 2;
     }
