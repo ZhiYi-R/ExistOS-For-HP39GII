@@ -72,13 +72,18 @@ target_compile_options(tjpgd PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle
 
 #-mthumb
 target_compile_options(sys.elf PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -marm
--Os -pipe 
+-Os -pipe
 -DHP39
+# suppress KhiCAS headers C++20 deprecated warnings (C++ only)
+-Wno-deprecated-declarations
+$<$<COMPILE_LANGUAGE:CXX>:-Wno-register>
+$<$<COMPILE_LANGUAGE:CXX>:-Wno-template-id-cdtor>
+$<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>
 #-ffunction-sections -fno-strict-aliasing -fomit-frame-pointer
 #-fcommon -fno-strict-aliasing -fomit-frame-pointer
 #-fpermissive  -fdata-sections
-#-fno-exceptions 
-) 
+#-fno-exceptions
+)
 
 #set_property(TARGET lvgl PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 #set_property(TARGET gb PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)

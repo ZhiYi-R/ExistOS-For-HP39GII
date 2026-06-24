@@ -176,10 +176,14 @@ void tud_msc_inquiry_cb(uint8_t lun, uint8_t vendor_id[8], uint8_t product_id[16
     const char vid[] = "ExistOS USB";
     const char pid[] = "Mass Storage";
     const char rev[] = "1.0";
+    size_t len = 0;
 
-    memcpy(vendor_id, vid, strlen(vid));
-    memcpy(product_id, pid, strlen(pid));
-    memcpy(product_rev, rev, strlen(rev));
+    len = strlen(vid);
+    memcpy(vendor_id, vid, len < 8 ? len : 8);
+    len = strlen(pid);
+    memcpy(product_id, pid, len < 16 ? len : 16);
+    len = strlen(rev);
+    memcpy(product_rev, rev, len < 4 ? len : 4);
 }
 
 // Invoked when received Test Unit Ready command.

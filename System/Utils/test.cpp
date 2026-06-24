@@ -16,6 +16,8 @@
 
 #include "sys_llapi.h"
 
+extern "C" uint32_t getCurStackAdr(void);
+
 using namespace giac;
 // using namespace std;  // Commented out to avoid conflict
 
@@ -321,7 +323,6 @@ extern bool khicasRunning;
 		}
 		 
 	#endif
-		uint32_t getCurStackAdr();
 		printf("KhiCAS STACK ADDR:%08x\n", getCurStackAdr() );
 
 		kcas_main(0,0);
