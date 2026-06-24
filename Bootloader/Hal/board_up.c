@@ -12,7 +12,7 @@
 #include "keyboard_up.h"
 #include "rtc_up.h"
 
-#include "../debug.h"
+#include "debug.h"
 
 bool driverWaitTrueF(bool (*f)(), TickType_t timeout)
 {

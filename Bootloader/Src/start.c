@@ -20,7 +20,7 @@
 #include "rtc_up.h"
 #include "vmMgr.h"
 
-#include "../debug.h"
+#include "debug.h"
 
 #include "stmp37xxNandConf.h"
 #include "stmp_NandControlBlock.h"

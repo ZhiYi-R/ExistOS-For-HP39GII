@@ -1,7 +1,7 @@
 
 
 #include "interrupt_up.h"
-#include "../debug.h"
+#include "debug.h"
 #include "timer_up.h"
 
 #include "hw_irq.h"

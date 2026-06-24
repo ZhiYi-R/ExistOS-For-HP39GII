@@ -6,7 +6,7 @@
 #include "regslcdif.h"
 #include "regspinctrl.h"
 
-#include "../debug.h"
+#include "debug.h"
 
 #include "board_up.h"
 #include "hw_irq.h"

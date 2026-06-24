@@ -4,7 +4,7 @@
 
 #include "hw_irq.h"
 #include "regslradc.h"
-#include "../debug.h"
+#include "debug.h"
 
 #include "interrupt_up.h"
 

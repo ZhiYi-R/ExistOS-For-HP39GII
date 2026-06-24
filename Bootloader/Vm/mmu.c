@@ -8,7 +8,7 @@
 #include "mmu.h"
 #include <stdbool.h>
 
-#include "../debug.h"  
+#include "debug.h"  
 
 
 

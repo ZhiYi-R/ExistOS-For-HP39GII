@@ -1,5 +1,5 @@
 #include "FTL_up.h"
-#include "../debug.h"
+#include "debug.h"
 #include "mtd_up.h"
 
 static mtdInfo_t *pMtdinfo;

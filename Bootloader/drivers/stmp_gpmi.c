@@ -10,7 +10,7 @@
 
 #include "hw_irq.h"
 
-#include "../debug.h"
+#include "debug.h"
 
 #include "board_up.h"
 

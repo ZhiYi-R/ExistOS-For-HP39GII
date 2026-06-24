@@ -6,7 +6,7 @@
 #include "display_up.h"
 #include "mtd_up.h"
 
-#include "../debug.h"
+#include "debug.h"
 
 #include "llapi.h"
 #include "llapi_code.h"

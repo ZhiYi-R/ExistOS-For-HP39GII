@@ -5,7 +5,7 @@
 
 #include "mtd_up.h"
 #include "nand.h"
-#include "../debug.h"
+#include "debug.h"
 
 static QueueHandle_t MTD_Operates_Queue;
 //static EventGroupHandle_t MTDLockEventGroup;

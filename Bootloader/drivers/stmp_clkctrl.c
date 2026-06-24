@@ -5,7 +5,7 @@
 
 #include "regspower.h"
 
-#include "../debug.h"
+#include "debug.h"
 
 #include "SystemConfig.h"
 

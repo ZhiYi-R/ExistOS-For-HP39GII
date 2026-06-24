@@ -8,7 +8,7 @@
 #include "regsclkctrl.h"
 #include "regstimrot.h"
 
-#include "../debug.h"
+#include "debug.h"
 
 static uint32_t timer0ReloadVal;
 static uint32_t timer1ReloadVal;

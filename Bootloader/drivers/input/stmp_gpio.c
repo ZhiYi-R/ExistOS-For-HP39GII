@@ -3,7 +3,7 @@
 
 #include "regspinctrl.h"
 
-#include "../debug.h"
+#include "debug.h"
 
 uint8_t key_matrix[5][11] = {0};
 uint8_t key_matrix_last[5][11] = {0};

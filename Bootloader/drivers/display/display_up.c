@@ -6,7 +6,7 @@
 #include "semphr.h"
 #include "task.h"
 
-#include "../debug.h"
+#include "debug.h"
 #include "display_up.h"
 #include "font_ascii.h"
 

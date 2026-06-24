@@ -13,7 +13,7 @@
 #include "llapi.h"
 #include "llapi_code.h"
 
-#include "../debug.h"
+#include "debug.h"
 
 #include "FTL_up.h"
 #include "mmu.h"

@@ -14,7 +14,7 @@
 #include "mtd_up.h"
 #include "FTL_up.h"
 
-#include "../debug.h"
+#include "debug.h"
 
 
 static uint32_t _randSeed = 1;

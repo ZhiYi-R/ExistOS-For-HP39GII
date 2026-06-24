@@ -5,7 +5,7 @@
 #include "hw_irq.h"
 #include "regsrtc.h"
 
-#include "../debug.h"
+#include "debug.h"
 
 bool g_chargeEnable = false;
 

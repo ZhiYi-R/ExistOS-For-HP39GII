@@ -4,7 +4,7 @@
 #include "hw_irq.h"
 #include "regsicoll.h"
 #include <stdint.h>
-#include "../debug.h"
+#include "debug.h"
 
 void portIRQCtrlInit()
 {

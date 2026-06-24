@@ -5,7 +5,7 @@
 #include "vmMgr.h"
 #include "mapList.h"
 
-#include "../debug.h"
+#include "debug.h"
 
 /*
 uint32_t mapList_AddFileMap(FIL *file, uint32_t perm, uint32_t VMemStartAddr, uint32_t FileStartAddr, uint32_t memSize)
