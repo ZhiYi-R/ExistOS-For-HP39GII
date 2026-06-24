@@ -554,14 +554,14 @@ static void vGL_consoleTask(void *arg)
 int vGL_Initialize() {
   if (!screen_1bpp)
     screen_1bpp=pvPortMalloc(VIR_LCD_PIX_H * VIR_LCD_PIX_W/8);
-  if (!screen_1bpp) 
+  if (!screen_1bpp)
     return -1;
   memset(screen_1bpp, COLOR_WHITE, VIR_LCD_PIX_H * VIR_LCD_PIX_W / 8);
 
   if (!virtual_screen)
     virtual_screen = pvPortMalloc(VIR_LCD_PIX_H * VIR_LCD_PIX_W);
   if (!virtual_screen) {
-    vPortFree(screen_1bpp);
+    /* screen_1bpp is a hardcoded address (0x02000000), not heap-allocated here */
     printf("Failed to alloca virtual screen memory!\n");
     return -1;
   }
@@ -573,7 +573,6 @@ int vGL_Initialize() {
   if (!scale_vir_screen) {
     printf("Failed to alloca virtual scale screen memory!\n");
     vPortFree(virtual_screen);
-    vPortFree(screen_1bpp);
     virtual_screen=0;
     return -1;
   }
@@ -587,6 +586,25 @@ int vGL_Initialize() {
     //vGL_FlushVScreen();
 
     return 0;
+}
+
+void vGL_Release() {
+  if ((uint32_t)screen_1bpp && (uint32_t)screen_1bpp != 0x02000000) {
+    vPortFree(screen_1bpp);
+  }
+  screen_1bpp = (char *)0x02000000;
+
+  if (virtual_screen) {
+    vPortFree(virtual_screen);
+    virtual_screen = 0;
+  }
+
+#if SCALE_ENABLE
+  if (scale_vir_screen) {
+    vPortFree(scale_vir_screen);
+    scale_vir_screen = 0;
+  }
+#endif
 }
 
 extern volatile bool interrupted ;
@@ -612,26 +630,28 @@ bool vGL_getkey(int *keyid)
     uint32_t keys, key, kpress;
     static uint32_t last_key;
     static uint32_t last_press;
+    static bool initialized = false;
+
+    if (!initialized) {
         keys = ll_vm_check_key();
-        key = keys & 0xFFFF;
-        kpress = keys >> 16;
+        last_key = keys & 0xFFFF;
+        last_press = keys >> 16;
+        initialized = true;
+    }
+
+    keys = ll_vm_check_key();
+    key = keys & 0xFFFF;
+    kpress = keys >> 16;
     last_key = key;
     last_press = kpress;
     do{
+        vTaskDelay(1);
         keys = ll_vm_check_key();
         key = keys & 0xFFFF;
         kpress = keys >> 16;
 
     }while((last_key == key) && (last_press == kpress));
 
-
-/*
-    if((last_key == key) && (last_press == kpress))
-    {
-        *keyid = -1;
-        return false;
-    }*/
-    
     last_key = key;
     last_press = kpress;
 

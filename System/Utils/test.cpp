@@ -327,6 +327,7 @@ extern bool khicasRunning;
 
 		kcas_main(0,0);
 
+	vGL_Release();
         /*
         context ct;
         contextptr=&ct;

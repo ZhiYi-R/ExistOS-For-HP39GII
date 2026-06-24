@@ -6,6 +6,7 @@
 #include <string>
 
 #include "SysConf.h"
+#include "kcasporing_gl.h"
 
 #if FS_TYPE == FS_FATFS
     #include "ff.h"
@@ -367,6 +368,7 @@ int GetKey(int *key) {
                     keyStatus = 0;
                     vTaskDelay(pdMS_TO_TICKS(1000));
 
+                    vGL_Release();
                     //lv_obj_invalidate(lv_scr_act());
                     SystemUIResume();
 
@@ -554,7 +556,9 @@ void Bfile_NameToStr_ncpy(unsigned char *dest, const unsigned short *source , in
 
 extern "C" bool file_exists(const char * filename);
 bool file_exists(const char * filename){
-  unsigned short dest[strlen(filename)+1]={0};
+  size_t dest_len = strlen(MAIN_DIR "/") + strlen(filename) + 1;
+  unsigned short dest[dest_len];
+  memset(dest, 0, sizeof(dest));
   Bfile_StrToName_ncpy(dest,(const unsigned char *)filename,strlen(filename));
   FIL handle;
   FRESULT fr = f_open(&handle, (char *)dest,(FA_OPEN_EXISTING | FA_READ | FA_WRITE));
@@ -939,7 +943,7 @@ void *memory_load(char *address) {
     {
         mem = (char *)pvPortMalloc(fSize);
         fr = f_read(f, mem, fSize, &br);
-        if(!fr)
+        if(fr)
         {
             vPortFree(mem);
             vPortFree(f);
@@ -948,6 +952,7 @@ void *memory_load(char *address) {
         vPortFree(f);
         return mem;
     }
+    vPortFree(f);
     return NULL;
 #else
     lfs *fs = (lfs *)GetFsObj();
@@ -965,14 +970,16 @@ void *memory_load(char *address) {
     {
         mem = (char *)pvPortMalloc(fSize);
         fr = lfs_file_read(fs, &file, mem, fSize);
-        if(!fr)
+        if(fr < 0)
         {
             vPortFree(mem);
+            lfs_file_close(fs, &file);
             return NULL;
         }
         lfs_file_close(fs, &file);
         return mem;
     }
+    lfs_file_close(fs, &file);
     return NULL;
 
 #endif

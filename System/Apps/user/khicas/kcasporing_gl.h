@@ -11,7 +11,8 @@ extern "C" {
 #endif
   extern int khicas_1bpp;
 
-int vGL_Initialize() ;
+int vGL_Initialize();
+void vGL_Release();
 
 void vGL_putString(int x0, int y0, const char *s, int fg, int bg, int fontSize);
 void vGL_putChar(int x0, int y0, char ch, int fg, int bg, int fontSize);
