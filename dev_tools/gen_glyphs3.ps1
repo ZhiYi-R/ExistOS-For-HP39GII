@@ -12,7 +12,7 @@ $sizes = @(
 
 $useFont = "Noto Sans SC"
 $renderHeight = 48  # render at this pixel height, then scale down
-$outDir = "D:\Projects\ExistOS-For-HP39GII\glyphs3"
+$outDir = Join-Path $PSScriptRoot "glyphs3"
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
 foreach ($sz in $sizes) {
