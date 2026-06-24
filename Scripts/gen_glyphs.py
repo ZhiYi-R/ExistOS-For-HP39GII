@@ -22,9 +22,6 @@ Or from inside ``dev_tools/``::
 
 from __future__ import annotations
 
-import argparse
-import os
-import platform
 import sys
 from pathlib import Path
 
@@ -127,124 +124,84 @@ def render_glyph(
     label: str,
     font: ImageFont.FreeTypeFont,
     out_dir: Path,
-    render_height: int,
-    margin: int,
-    threshold_bbox: int,
-    threshold_extract: int,
-    stroke_width: int,
 ) -> str:
-    """Render one glyph and return the formatted C-array line."""
+    """Render one glyph at native 16 px then centre-crop to target height."""
     char = chr(code)
 
-    # Render large onto a white canvas with generous margins, matching the
-    # original PowerShell script's layout.
-    big_w = render_height + margin * 2
-    big_h = render_height + margin * 2
-    big_img = Image.new("L", (big_w, big_h), 255)
-    draw = ImageDraw.Draw(big_img)
-    kwargs: dict[str, object] = {"font": font, "fill": 0}
-    if stroke_width:
-        kwargs["stroke_width"] = stroke_width
-        kwargs["stroke_fill"] = 0
-    draw.text((margin, 0), char, **kwargs)
+    native = Image.new("L", (16, 16), 255)
+    draw = ImageDraw.Draw(native)
+    draw.text((0, -1), char, font=font, fill=0)
 
-    # Crop to the actual glyph bounds.
-    left, top, right, bottom = find_bounding_box(big_img, threshold_bbox)
-    if left > right:
-        left, top, right, bottom = 0, 0, target_w - 1, target_h - 1
-    gh = bottom - top + 1
-    gw = right - left + 1
-    cropped = big_img.crop((left, top, right + 1, bottom + 1))
+    # Find content rows
+    TH = 128
+    pixels = native.load()
+    top, bottom = 16, 0
+    for y in range(16):
+        for x in range(16):
+            if pixels[x, y] < TH:
+                if y < top:
+                    top = y
+                if y > bottom:
+                    bottom = y
+                    break
 
-    # Scale preserving aspect ratio, fitting inside target_w x target_h.
-    scale = min(target_w / gw, target_h / gh)
-    dst_w = max(1, int(gw * scale))
-    dst_h = max(1, int(gh * scale))
-    scaled = cropped.resize((dst_w, dst_h), Image.Resampling.LANCZOS)
+    if top > bottom:  # empty
+        n = target_h
+        return f"    /* {name:<6} */ {','.join(['0x00'] * n)},"
 
-    # Paste centered onto the final target image.
-    tar_img = Image.new("L", (target_w, target_h), 255)
-    off_x = (target_w - dst_w) // 2
-    off_y = (target_h - dst_h) // 2
-    tar_img.paste(scaled, (off_x, off_y))
+    content_h = bottom - top + 1
+    avail = target_h
 
-    # Save debug image.
+    if avail >= content_h:
+        pad = avail - content_h
+        crop_top = max(0, top - pad // 2)
+    else:
+        excess = content_h - avail
+        crop_top = top + excess // 2
+
+    crop_bottom = crop_top + avail
+    if crop_top < 0:
+        crop_top, crop_bottom = 0, avail
+    if crop_bottom > 16:
+        crop_bottom, crop_top = 16, 16 - avail
+
+    crop = native.crop((0, crop_top, target_w, crop_bottom))
+
+    # Extract bytes
+    cp = crop.load()
+    bytes_: list[int] = []
+    for y in range(crop.height):
+        b = 0
+        for x in range(min(target_w, crop.width)):
+            if cp[x, y] < TH:
+                b |= 0x80 >> x
+        bytes_.append(b)
+
+    # Debug image
     out_dir.mkdir(parents=True, exist_ok=True)
-    tar_img.save(out_dir / f"{name}_{label}.png")
+    # Centre on target canvas for debug
+    debug = Image.new("L", (target_w, target_h), 255)
+    ox = 0
+    oy = (target_h - crop.height) // 2
+    debug.paste(crop, (ox, oy))
+    debug.save(out_dir / f"{name}_{label}.png")
 
-    # Extract bytes and format the C-array line.
-    bytes_ = extract_bytes(tar_img, target_w, target_h, threshold_extract)
     hex_parts = ",".join(f"0x{b:02X}" for b in bytes_)
     return f"    /* {name:<6} */ {hex_parts},"
 
 
-def main(argv: list[str] | None = None) -> int:
+def main() -> int:
     """Entry point."""
-    parser = argparse.ArgumentParser(
-        description="Generate math-symbol glyph bitmaps for ExistOS.",
-    )
-    parser.add_argument(
-        "--render-height",
-        type=int,
-        default=48,
-        help="Pixel height at which to render before scaling down (default: 48).",
-    )
-    parser.add_argument(
-        "--margin",
-        type=int,
-        default=12,
-        help="Margin around the large render canvas (default: 12).",
-    )
-    parser.add_argument(
-        "--threshold-bbox",
-        type=int,
-        default=128,
-        help="Brightness threshold for bounding-box detection (default: 128).",
-    )
-    parser.add_argument(
-        "--threshold-extract",
-        type=int,
-        default=160,
-        help="Brightness threshold for final byte extraction (default: 160).",
-    )
-    parser.add_argument(
-        "--stroke-width",
-        type=int,
-        default=1,
-        help="Optional stroke width in pixels to thicken glyphs (default: 1). "
-             "Set to 0 to match the original PowerShell script's unstroked rendering.",
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=Path,
-        default=None,
-        help="Directory for debug PNGs (default: dev_tools/glyphs3).",
-    )
-    args = parser.parse_args(argv)
-
     script_dir = Path(__file__).resolve().parent
-    out_dir = args.output_dir or script_dir / "glyphs3"
+    out_dir = script_dir / "glyphs3"
 
     font_path = find_font_path()
-    font = ImageFont.truetype(str(font_path), args.render_height)
+    font = ImageFont.truetype(str(font_path), 16)
 
     for target_h, target_w, label in SIZES:
         print(f"// --- {label} ---")
         for code, name in zip(GLYPH_CODES, GLYPH_NAMES):
-            line = render_glyph(
-                code,
-                name,
-                target_h,
-                target_w,
-                label,
-                font,
-                out_dir,
-                render_height=args.render_height,
-                margin=args.margin,
-                threshold_bbox=args.threshold_bbox,
-                threshold_extract=args.threshold_extract,
-                stroke_width=args.stroke_width,
-            )
+            line = render_glyph(code, name, target_h, target_w, label, font, out_dir)
             print(line)
 
     print(f"Done: {out_dir}")
