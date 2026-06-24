@@ -1,8 +1,11 @@
 """Generate ASCII bitmap glyphs from unifont for ExistOS UI.
 
-Strategy: render at Unifont's native 16 px, then take the bottommost
-``target_h`` rows.  This keeps the typographic baseline consistent
-across all characters and preserves descenders (g, j, p, q, y, etc.).
+Strategy: render at Unifont's native 16 px, detect content bounding box,
+and either centre-crop or bottom-align depending on whether the content
+fits the target height.
+
+- If content_height ≤ target_height → centre-crop (even padding).
+- If content_height > target_height → bottom-align (preserve descenders).
 
 For the 8x16 size the full 16 px render is used verbatim.
 
@@ -35,6 +38,21 @@ NATIVE = 16
 THRESHOLD = 128
 
 
+def find_content_bbox(img: Image.Image) -> tuple[int, int]:
+    """Return (top, bottom) row of the first/last dark pixel."""
+    pixels = img.load()
+    top, bottom = NATIVE, 0
+    for y in range(NATIVE):
+        for x in range(NATIVE):
+            if pixels[x, y] < THRESHOLD:
+                if y < top:
+                    top = y
+                if y > bottom:
+                    bottom = y
+                    break  # once we find bottom for this row, move on
+    return top, bottom
+
+
 def extract_bytes(img: Image.Image, width: int) -> list[int]:
     """Extract one byte per row (MSB-left)."""
     pixels = img.load()
@@ -49,27 +67,42 @@ def extract_bytes(img: Image.Image, width: int) -> list[int]:
 
 
 def render_char(char: str, target_h: int, target_w: int) -> list[int]:
-    """Render one char, preserving the typographic baseline.
+    """Render one char with smart cropping.
 
-    For the primary 8x16 size the full 16 px native render is used
-    verbatim.  For smaller sizes the bottom ``target_h`` rows of the
-    16 px render are kept, ensuring that descenders are not clipped.
+    1. Native 16 px render.
+    2. Find content bounding box (top, bottom rows).
+    3. If content_height ≤ target_h: centre-crop.
+    4. If content_height > target_h: bottom-align (keep descender).
     """
     font = ImageFont.truetype(str(FONT_PATH), NATIVE)
-
-    # Native 16 px render
     native = Image.new("L", (NATIVE, NATIVE), 255)
     draw = ImageDraw.Draw(native)
     draw.text((0, -1), char, font=font, fill=0)
 
+    # 8x16 — verbatim full render
     if target_h == NATIVE:
-        # 8x16 — verbatim
         return extract_bytes(native, target_w)
 
-    # Smaller sizes: keep the bottommost target_h rows.
-    crop_top = NATIVE - target_h
-    crop = native.crop((0, crop_top, target_w, NATIVE))
-    return extract_bytes(crop, target_w)
+    top, bottom = find_content_bbox(native)
+    if top > bottom:  # blank glyph
+        return [0] * target_h
+
+    content_h = bottom - top + 1
+
+    if content_h <= target_h:
+        # Centre-crop: evenly pad above and below content
+        pad = target_h - content_h
+        crop_top = max(0, top - pad // 2)
+        # If that would go out of bounds, shift down
+        if crop_top + target_h > NATIVE:
+            crop_top = NATIVE - target_h
+        crop = native.crop((0, crop_top, target_w, crop_top + target_h))
+        return extract_bytes(crop, target_w)
+    else:
+        # Bottom-align: keep the bottommost target_h rows (preserve descender)
+        crop_top = NATIVE - target_h
+        crop = native.crop((0, crop_top, target_w, NATIVE))
+        return extract_bytes(crop, target_w)
 
 
 def format_c_array(label: str, glyphs: dict[int, list[int]],
