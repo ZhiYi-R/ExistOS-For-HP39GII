@@ -1,3 +1,8 @@
+/**
+ * @file System/Apps/user/khicas/khicas_ico.c
+ * @brief KhiCAS application icon bitmap
+ */
+
 const unsigned char gImage_khicas_ico[2304] = { /* 0X08,0X08,0X30,0X00,0X30,0X00, */
 0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,
 0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,

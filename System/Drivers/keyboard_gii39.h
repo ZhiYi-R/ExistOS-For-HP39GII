@@ -1,3 +1,8 @@
+/**
+ * @file System/Drivers/keyboard_gii39.h
+ * @brief HP 39GII keyboard matrix definitions
+ */
+
 #ifndef __KEYBOARD_GII39_H__
 #define __KEYBOARD_GII39_H__
 

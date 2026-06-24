@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Vm/minilzo.h
+ * @brief MiniLZO compression implementation
+ */
+
 /* minilzo.h -- mini subset of the LZO real-time data compression library
 
    This file is part of the LZO real-time data compression library.
@@ -25,7 +30,7 @@
    http://www.oberhumer.com/opensource/lzo/
  */
 
-/*
+/**
  * NOTE:
  *   the full LZO package can be found at
  *   http://www.oberhumer.com/opensource/lzo/
@@ -68,7 +73,7 @@ extern "C" {
 //
 ************************************************************************/
 
-/* Memory required for the wrkmem parameter.
+/** Memory required for the wrkmem parameter.
  * When the required size is 0, you can also pass a NULL pointer.
  */
 

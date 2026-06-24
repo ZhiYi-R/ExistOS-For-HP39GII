@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/Hardware/registers/regsclkctrl.h
+ * @brief regsclkctrl module
+ */
+
 /*
  * Copyright 2009 Freescale Semiconductor, Inc. All Rights Reserved.
  */

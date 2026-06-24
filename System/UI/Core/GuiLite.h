@@ -1,3 +1,8 @@
+/**
+ * @file System/UI/Core/GuiLite.h
+ * @brief Embedded GUI widget library
+ */
+
 #pragma once
 #define GUILITE_ON
 #define REAL_TIME_TASK_CYCLE_MS		50

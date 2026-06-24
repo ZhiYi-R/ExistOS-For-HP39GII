@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/emu48_kb_39g.h
+ * @brief emu48_kb_39g module
+ */
+
 
 #pragma once
 

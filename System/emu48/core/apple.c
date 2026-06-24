@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/core/apple.c
+ * @brief apple module
+ */
+
 /*
  *   apple.c
  *

@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Src/stub.c
+ * @brief Newlib stubs for bootloader
+ */
+
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -199,7 +204,7 @@ int _gettimeofday_r(struct _reent *pReent, struct timeval *__tp, void *__tzp) {
     return -1;
 }
 
-/*
+/**
  * write "len" of char from "ptr" to file id "fd"
  * Return number of char written.
  *

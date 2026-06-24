@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/FTL_up.c
+ * @brief FTL_up module
+ */
+
 #include "FTL_up.h"
 #include "debug.h"
 #include "mtd_up.h"

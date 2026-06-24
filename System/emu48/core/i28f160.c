@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/core/i28f160.c
+ * @brief i28f160 module
+ */
+
 /*
  *   i28f160.c
  *

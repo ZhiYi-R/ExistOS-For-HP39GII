@@ -1,4 +1,8 @@
-/* @LICENSE(UNSW_OZPLB) */
+/**
+ * @file tools/sys_signer/libelf/elf32.c
+ * @brief @LICENSE(UNSW_OZPLB) */
+ */
+
 
 /*
  * Australian Public Licence B (OZPLB)
@@ -83,7 +87,7 @@
 #include <inttypes.h>
 #include <string.h>
 
-/* ELF header functions */
+/** ELF header functions */
 int elf32_checkFile(elf_t *elf)
 {
     if (elf->elfSize < sizeof(Elf32_Ehdr)) {

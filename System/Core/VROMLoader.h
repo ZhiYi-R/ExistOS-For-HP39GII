@@ -1,3 +1,8 @@
+/**
+ * @file System/Core/VROMLoader.h
+ * @brief Virtual ROM file-backed memory loader
+ */
+
 #pragma once 
 
 #include <stdint.h>

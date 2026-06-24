@@ -1,3 +1,8 @@
+/**
+ * @file System/Apps/user/khicas/kcasporing_gl.h
+ * @brief KhiCAS graphics rendering layer
+ */
+
 #pragma once 
 
 

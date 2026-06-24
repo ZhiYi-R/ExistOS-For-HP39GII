@@ -273,7 +273,7 @@ struct cmd_entry_t
     process_arg_t fn;
 };
 
-/* Callbacks */
+/** Callbacks */
 
 static void usage(void);
 

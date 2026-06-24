@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Src/vectors.c
+ * @brief Exception vector table
+ */
+
 
 #include "FreeRTOS.h"
 #include "queue.h"

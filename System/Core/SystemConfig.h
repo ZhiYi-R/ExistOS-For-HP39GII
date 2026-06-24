@@ -1,3 +1,8 @@
+/**
+ * @file System/Core/SystemConfig.h
+ * @brief System configuration management
+ */
+
 #pragma once
 
 #include <stdint.h>

@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/Hardware/registers/regsemi.h
+ * @brief regsemi module
+ */
+
 /*
  * Copyright 2009 Freescale Semiconductor, Inc. All Rights Reserved.
  */

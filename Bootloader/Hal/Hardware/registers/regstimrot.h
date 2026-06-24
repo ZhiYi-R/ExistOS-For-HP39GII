@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/Hardware/registers/regstimrot.h
+ * @brief regstimrot module
+ */
+
 /*
  * Copyright 2009 Freescale Semiconductor, Inc. All Rights Reserved.
  */

@@ -67,7 +67,7 @@ struct dev_info_t g_dev_info[] =
     {0x066f, 0x3600, 4096, RECOVERY_DEVICE}, /* STMP36xx */
 };
 
-/* Command Block Descriptor (CDB) */
+/** Command Block Descriptor (CDB) */
 struct hid_cdb_t
 {
     uint8_t command;
@@ -78,7 +78,7 @@ struct hid_cdb_t
 // command
 #define BLTC_DOWNLOAD_FW    2
 
-/* Command Block Wrapper (CBW) */
+/** Command Block Wrapper (CBW) */
 struct hid_cbw_t
 {
     uint32_t signature; // BLTC or PITC
@@ -89,7 +89,7 @@ struct hid_cbw_t
     struct hid_cdb_t cdb;
 } __attribute__((packed));
 
-/* HID Command Report */
+/** HID Command Report */
 struct hid_cmd_report_t
 {
     uint8_t report_id;
@@ -107,7 +107,7 @@ struct hid_cmd_report_t
 #define CBW_DIR_IN  0x80
 #define CBW_DIR_OUT 0x00
 
-/* Command Status Wrapper (CSW) */
+/** Command Status Wrapper (CSW) */
 struct hid_csw_t
 {
     uint32_t signature; // BLTS or PITS
@@ -123,7 +123,7 @@ struct hid_csw_t
 #define CSW_FAILED      0x01
 #define CSW_PHASE_ERROR 0x02
 
-/* HID Status Report */
+/** HID Status Report */
 struct hid_status_report_t
 {
     uint8_t report_id;
@@ -583,7 +583,7 @@ int main(int argc, char **argv)
         printf("Cannot open device\n");
         return 1;
     }
-    /* get protocol */
+    /** get protocol */
     enum dev_type_t dev_type = PROBE_DEVICE;
     int xfer_size = di.xfer_size;
     if(db_idx >= 0)

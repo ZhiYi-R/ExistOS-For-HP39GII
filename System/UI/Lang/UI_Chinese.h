@@ -1,3 +1,8 @@
+/**
+ * @file System/UI/Lang/UI_Chinese.h
+ * @brief Chinese language strings
+ */
+
 // Coding: UTF-8
 
 #pragma once

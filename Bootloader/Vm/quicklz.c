@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Vm/quicklz.c
+ * @brief QuickLZ compression implementation
+ */
+
 // Fast data compression library
 // Copyright (C) 2006-2011 Lasse Mikkel Reinhold
 // lar@quicklz.com

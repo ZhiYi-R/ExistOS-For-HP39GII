@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/drivers/stmp_lradc.c
+ * @brief LRADC driver
+ */
+
 
 #include "stdint.h"
 #include "stdbool.h"

@@ -1,3 +1,8 @@
+/**
+ * @file System/Utils/sys_llapi.h
+ * @brief Low-level hardware API (SWI-based syscalls)
+ */
+
 #ifndef __SYS_LLAPI_H__
 #define __SYS_LLAPI_H__
 

@@ -252,7 +252,7 @@ static const char *sb1_datatype_name(int cmd)
     }
 }
 
-/* Quick and dirty way to check a key is valid.
+/** Quick and dirty way to check a key is valid.
  * We don't do any form of format checking because we are trying to bruteforce
  * the key anyway. Assume buffer is of size SECTOR_SIZE */
 bool sb1_is_key_valid_fast(void *buffer, union xorcrypt_key_t _key[2])
@@ -429,7 +429,7 @@ struct sb1_file_t *sb1_read_memory(void *_buf, size_t filesize, void *u,
             fatal(SB1_FORMAT_ERROR, "Image size is not a multiple of sector size\n");
     }
 
-    /* find key */
+    /** find key */
     union xorcrypt_key_t key[2];
     memset(key, 0, sizeof(key));
     bool valid_key = false;
@@ -518,7 +518,7 @@ struct sb1_file_t *sb1_read_memory(void *_buf, size_t filesize, void *u,
         printf(RED, " %#x ", SB1_CMD_BOOT(cmd->cmd));
         printf(GREEN, "(%s)\n", sb1_cmd_name(SB1_CMD_BOOT(cmd->cmd)));
 
-        /* copy command */
+        /** copy command */
         struct sb1_inst_t inst;
         memset(&inst, 0, sizeof(inst));
         inst.cmd = SB1_CMD_BOOT(cmd->cmd);

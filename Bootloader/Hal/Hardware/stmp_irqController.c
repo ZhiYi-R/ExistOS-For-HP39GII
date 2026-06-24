@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/Hardware/stmp_irqController.c
+ * @brief Interrupt controller driver
+ */
+
 
 #include "interrupt_up.h"
 #include "regs.h"
@@ -30,7 +35,7 @@ void portIRQCtrlInit()
 
 }
 
-/*
+/**
 bool portIRQDecode(IRQNumber* IRQNum, IRQTypes *IRQType, IRQInfo *IRQInfo)
 {
     *IRQNum = BF_RD(ICOLL_VECTOR, IRQVECTOR) / 4;

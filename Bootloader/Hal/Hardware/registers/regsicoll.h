@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/Hardware/registers/regsicoll.h
+ * @brief regsicoll module
+ */
+
 /*
  * Copyright 2009 Freescale Semiconductor, Inc. All Rights Reserved.
  */

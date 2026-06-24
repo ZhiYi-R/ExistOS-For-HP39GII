@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Src/debug.h
+ * @brief Bootloader debug output
+ */
+
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
@@ -21,7 +26,7 @@ void dbg_printf(char *fmt, ...);
 #define MTD_INFO_READ(...)  
 #define MTD_INFO_WRITE(...) 
 #define MTD_INFO_ERASE(...) 
-/*
+/**
 #define MTD_INFO_READ(...)  do{printf(__VA_ARGS__);}while(0)
 #define MTD_INFO_WRITE(...) do{printf(__VA_ARGS__);}while(0)
 #define MTD_INFO_ERASE(...) do{printf(__VA_ARGS__);}while(0)

@@ -1,3 +1,8 @@
+/**
+ * @file System/Core/SystemConfig.c
+ * @brief System configuration management
+ */
+
 #include "SystemConfig.h"
 #include "UI_Config.h"
 #include "ff.h"

@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/FTL_up.h
+ * @brief FTL_up module
+ */
+
 #ifndef __FTL_UP_H__
 #define __FTL_UP_H__
 

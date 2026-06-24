@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/drivers/stmp_clkctrl.c
+ * @brief Clock control driver
+ */
+
 #include "board_up.h"
 #include "clkctrl_up.h"
 #include "regsclkctrl.h"

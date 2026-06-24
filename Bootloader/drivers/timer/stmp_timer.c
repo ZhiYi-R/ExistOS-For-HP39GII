@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/drivers/timer/stmp_timer.c
+ * @brief Timer driver
+ */
+
 
 
 #include "hw_irq.h"

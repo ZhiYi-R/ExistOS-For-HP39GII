@@ -32,7 +32,7 @@ extern "C" {
 
 typedef uint8_t byte;
 
-/* crypto.cpp */
+/** crypto.cpp */
 enum crypto_method_t
 {
     CRYPTO_NONE, /* disable */
@@ -46,7 +46,7 @@ union xorcrypt_key_t
     uint32_t k[16];
 };
 
-/* all-in-one function */
+/** all-in-one function */
 struct crypto_key_t
 {
     enum crypto_method_t method;
@@ -61,12 +61,12 @@ struct crypto_key_t
 #define CRYPTO_ERROR_BADSETUP   -1
 #define CRYPTO_ERROR_INVALID_OP -2
 
-/* parameter can be:
+/** parameter can be:
  * - CRYPTO_KEY: array of 16-bytes (the key)
  * return 0 on success, <0 on error */
 int crypto_setup(struct crypto_key_t *key);
 
-/* return 0 on success, <0 on error */
+/** return 0 on success, <0 on error */
 int crypto_apply(
     byte *in_data, /* Input data */
     byte *out_data, /* Output data (or NULL) */
@@ -75,11 +75,11 @@ int crypto_apply(
     byte (*out_cbc_mac)[16], /* CBC-MAC of the result (or NULL) */
     bool encrypt);
 
-/* crc.c */
+/** crc.c */
 uint32_t crc(byte *data, int size);
 uint32_t crc_continue(uint32_t previous_crc, byte *data, int size);
 
-/* sha1.c */
+/** sha1.c */
 struct sha_1_params_t
 {
     byte hash[20]; /* final hash */

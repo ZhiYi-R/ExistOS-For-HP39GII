@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Include/stmp37xxNandConf.h
+ * @brief stmp37xxNandConf module
+ */
+
 #ifndef __STMP37XX_NAND_CONF__
 #define __STMP37XX_NAND_CONF__
 

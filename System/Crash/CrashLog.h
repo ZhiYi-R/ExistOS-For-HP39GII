@@ -1,3 +1,8 @@
+/**
+ * @file System/Crash/CrashLog.h
+ * @brief Crash logging subsystem
+ */
+
 #pragma once
 
 #include <stdint.h>

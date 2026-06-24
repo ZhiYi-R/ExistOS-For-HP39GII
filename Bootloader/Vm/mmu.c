@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Vm/mmu.c
+ * @brief MMU setup and page table management
+ */
+
 
 #include "FreeRTOS.h"
 #include "task.h"

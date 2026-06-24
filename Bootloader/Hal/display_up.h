@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/display_up.h
+ * @brief display_up module
+ */
+
 #ifndef __DISPLAY_UP_H__
 #define __DISPLAY_UP_H__
 

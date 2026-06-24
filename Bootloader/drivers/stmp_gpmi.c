@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/drivers/stmp_gpmi.c
+ * @brief GPMI NAND flash controller driver
+ */
+
 #include "mtd_up.h"
 #include "interrupt_up.h"
 

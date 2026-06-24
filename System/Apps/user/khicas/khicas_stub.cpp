@@ -1,3 +1,8 @@
+/**
+ * @file System/Apps/user/khicas/khicas_stub.cpp
+ * @brief KhiCAS hardware adaptation layer
+ */
+
 
 #include "sys_llapi.h"
 
@@ -54,7 +59,7 @@ int rshift = 0;
 
 void (*XcasExitCb)(void) = NULL;
 
-/*
+/**
 void dConsolePut(const char * S){
   //if (!dconsole_mode)
   //  return;

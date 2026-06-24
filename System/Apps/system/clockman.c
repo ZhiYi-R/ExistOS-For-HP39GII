@@ -1,3 +1,8 @@
+/**
+ * @file System/Apps/system/clockman.c
+ * @brief Clock manager application
+ */
+
 
 
 static lv_group_t *g;

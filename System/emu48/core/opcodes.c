@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/core/opcodes.c
+ * @brief opcodes module
+ */
+
 /*
  *   opcodes.c
  *

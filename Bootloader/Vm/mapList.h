@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Vm/mapList.h
+ * @brief Memory map list management
+ */
+
 
 #ifndef __MAPLIST_H__
 #define __MAPLIST_H__

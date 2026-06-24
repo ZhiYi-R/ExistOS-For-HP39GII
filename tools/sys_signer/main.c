@@ -1,3 +1,8 @@
+/**
+ * @file tools/sys_signer/main.c
+ * @brief Entry point and initialization
+ */
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

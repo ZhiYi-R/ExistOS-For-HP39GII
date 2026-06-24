@@ -1,4 +1,8 @@
-/* @LICENSE(UNSW_OZPLB) */
+/**
+ * @file tools/sys_signer/libelf/elf.c
+ * @brief @LICENSE(UNSW_OZPLB) */
+ */
+
 
 /*
  * Australian Public Licence B (OZPLB)
@@ -84,7 +88,7 @@
 #include <string.h>
 #include <stdio.h>
 
-/* ELF header functions */
+/** ELF header functions */
 int elf_newFile(void *file, size_t size, elf_t *res)
 {
     return elf_newFile_maybe_unsafe(file, size, true, true, res);
@@ -132,7 +136,7 @@ int elf_check_magic(char *file)
     return 0;
 }
 
-/*
+/**
  * Checks that elfFile points to a valid elf file. Returns 0 if the elf
  * file is valid, < 0 if invalid.
  */
@@ -231,7 +235,7 @@ const char *elf_getSectionStringTable(elf_t *elf)
 }
 
 
-/* Section header functions */
+/** Section header functions */
 void *elf_getSection(elf_t *elf, size_t i)
 {
     if (i == 0 || i >= elf_getNumSections(elf)) {
@@ -372,7 +376,7 @@ size_t elf_getSectionEntrySize(elf_t *elfFile, size_t i)
 }
 
 
-/* Program headers function */
+/** Program headers function */
 void *elf_getProgramSegment(elf_t *elf, size_t ph)
 {
     size_t offset = elf_getProgramHeaderOffset(elf, ph);
@@ -459,7 +463,7 @@ size_t elf_getProgramHeaderAlign(elf_t *elfFile, size_t ph)
 }
 
 
-/* Utility functions */
+/** Utility functions */
 int elf_getMemoryBounds(elf_t *elfFile, elf_addr_type_t addr_type, uintptr_t *min, uintptr_t *max)
 {
     uintptr_t mem_min = UINTPTR_MAX;

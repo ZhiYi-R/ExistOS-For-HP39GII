@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/emu48_serial.c
+ * @brief Emu48 serial I/O
+ */
+
 
 
 

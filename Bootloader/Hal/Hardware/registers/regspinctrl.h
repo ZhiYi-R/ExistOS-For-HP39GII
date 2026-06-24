@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/Hardware/registers/regspinctrl.h
+ * @brief regspinctrl module
+ */
+
 /*
  * Copyright 2009 Freescale Semiconductor, Inc. All Rights Reserved.
  */
@@ -5525,7 +5530,7 @@ typedef union
 
 #define BP_PINCTRL_DOE0_DOE      0
 #define BM_PINCTRL_DOE0_DOE      0x3FFFFFFF
-/*
+/**
 #ifndef __LANGUAGE_ASM__
 #define BF_PINCTRL_DOE0_DOE(v)   ((reg32_t) v)
 #else

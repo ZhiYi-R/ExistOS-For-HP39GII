@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/keyboard_up.h
+ * @brief keyboard_up module
+ */
+
 #ifndef __KEYBOARD_UP_H__
 #define __KEYBOARD_UP_H__
 
@@ -99,7 +104,7 @@ void portKeyScan(void);
 bool portIsKeyDown(Keys_t key);
 Keys_t portGetChangedKey(void);
 
-/*
+/**
 Keys_t kb_waitAnyKeyPress();
 void kb_waitKeyPress(Keys_t key);
 bool kb_isKeyPress(Keys_t key);

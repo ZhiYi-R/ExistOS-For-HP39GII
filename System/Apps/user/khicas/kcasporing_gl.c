@@ -1,3 +1,8 @@
+/**
+ * @file System/Apps/user/khicas/kcasporing_gl.c
+ * @brief KhiCAS graphics rendering layer
+ */
+
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -212,7 +217,7 @@ draw_glyph:
 
 
 
-/* Extended glyph table: 14 math symbols stored for 4 font sizes.
+/** Extended glyph table: 14 math symbols stored for 4 font sizes.
    Codes: 0x80=pi, 0x81=sqrt, 0x82=integral, 0x83=infinity,
           0x84=<=, 0x85=>=, 0x86=!=, 0x87=arrow,
           0x88=alpha, 0x89=beta, 0x8A=theta, 0x8B=Sigma, 0x8C=times, 0x8D=divide */

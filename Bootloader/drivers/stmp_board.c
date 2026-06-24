@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/drivers/stmp_board.c
+ * @brief Board initialization driver
+ */
+
 #include "board_up.h"
 #include "regsapbh.h"
 #include "regsapbx.h"

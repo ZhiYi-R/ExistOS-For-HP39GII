@@ -312,10 +312,10 @@ enum sb_error_t sb_write_file(struct sb_file_t *sb, const char *filename, void *
     /* generate random real key */
     generate_random_data(real_key.u.key, 16);
 
-    /* global SHA-1 */
+    /** global SHA-1 */
     struct sha_1_params_t file_sha1;
     sha_1_init(&file_sha1);
-    /* produce and write header */
+    /** produce and write header */
     struct sb_header_t sb_hdr;
     produce_sb_header(sb, &sb_hdr);
     /* allocate image */
@@ -402,7 +402,7 @@ enum sb_error_t sb_write_file(struct sb_file_t *sb, const char *filename, void *
     /* produce sections data */
     for(int i = 0; i< sb_hdr.nr_sections; i++)
     {
-        /* produce tag command */
+        /** produce tag command */
         struct sb_instruction_tag_t tag_cmd;
         produce_section_tag_cmd(&sb->sections[i], &tag_cmd, (i + 1) == sb_hdr.nr_sections);
         if(g_nr_keys > 0)
@@ -860,7 +860,7 @@ struct sb_file_t *sb_read_memory(void *_buf, size_t filesize, unsigned flags, vo
     printf(GREEN, "  First boot section ID = ");
     printf(YELLOW, "0x%08x\n", sb_header->first_boot_sec_id);
 
-    /* encryption cbc-mac */
+    /** encryption cbc-mac */
     struct crypto_key_t real_key;
     real_key.method = CRYPTO_KEY;
     bool valid_key = false; /* false until a matching key was found */

@@ -1,4 +1,9 @@
-/*
+/**
+ * @file System/emu48/core/ops.h
+ * @brief ops module
+ */
+
+/**
  *   ops.h
  *
  *   This file is part of Emu48

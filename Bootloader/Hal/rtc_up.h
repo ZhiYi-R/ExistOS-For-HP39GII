@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/rtc_up.h
+ * @brief rtc_up module
+ */
+
 #pragma once
 #include <stdint.h>
 void rtc_init();

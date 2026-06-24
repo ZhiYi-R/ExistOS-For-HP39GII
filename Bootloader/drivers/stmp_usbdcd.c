@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/drivers/stmp_usbdcd.c
+ * @brief USB DCD driver
+ */
+
 /* 
  * The MIT License (MIT)
  *
@@ -327,7 +332,7 @@ static void bus_reset(uint8_t rhport) {
 
 
 /*------------------------------------------------------------------*/
-/* Device API
+/** Device API
  *------------------------------------------------------------------*/
 
 void usb_phy_clkctrl_enable(bool enable) {

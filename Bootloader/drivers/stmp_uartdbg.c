@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/drivers/stmp_uartdbg.c
+ * @brief UART debug driver
+ */
+
 #include "regs.h"
 #include "regsuartdbg.h"
 

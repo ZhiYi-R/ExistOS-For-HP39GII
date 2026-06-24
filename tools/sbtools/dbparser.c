@@ -149,7 +149,7 @@ static void parse_string(struct context_t *ctx, struct lexem_t *lexem)
     locate_lexem(lexem, ctx);
     /* skip " */
     advance(ctx, 1);
-    /* compute length */
+    /** compute length */
     struct context_t cpy_ctx = *ctx;
     int length = 0;
     __parse_string(&cpy_ctx, (void *)&length, __parse_string_count);
@@ -690,7 +690,7 @@ struct cmd_file_t *db_parse_file(const char *file)
         if(lexem.type != LEX_LPAREN)
             parse_error(lexem, "'(' expected after 'section'\n");
         next(true);
-        /* can be any number */
+        /** can be any number */
         struct cmd_section_t *sec = db_add_section(cmd_file, parse_intexpr(&lctx, cmd_file->constant_list), false);
         /* options ? */
         if(lexem.type == LEX_SEMICOLON)

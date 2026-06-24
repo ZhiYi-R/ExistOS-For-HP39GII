@@ -1,3 +1,8 @@
+/**
+ * @file System/Utils/debug.h
+ * @brief Bootloader debug output
+ */
+
 #pragma once
 
 #include <stdio.h>

@@ -1,3 +1,8 @@
+/**
+ * @file System/UI/Lang/UI_English.h
+ * @brief English language strings
+ */
+
 // Coding: UTF-8
 
 #pragma once

@@ -28,7 +28,7 @@
 
 #define SECTOR_SIZE      512
 
-/* All fields are in big-endian BCD */
+/** All fields are in big-endian BCD */
 struct sb1_version_t
 {
     uint16_t major;
@@ -146,13 +146,13 @@ enum sb1_error_t sb1_write_file(struct sb1_file_t *sb, const char *filename);
 
 struct sb1_file_t *sb1_read_file(const char *filename, void *u,
     generic_printf_t printf, enum sb1_error_t *err);
-/* use size_t(-1) to use maximum size */
+/** use size_t(-1) to use maximum size */
 struct sb1_file_t *sb1_read_file_ex(const char *filename, size_t offset, size_t size,
     void *u, generic_printf_t printf, enum sb1_error_t *err);
 struct sb1_file_t *sb1_read_memory(void *buffer, size_t size, void *u,
     generic_printf_t printf, enum sb1_error_t *err);
 
-/* do as little checks as possible, make sure the image is valid (advance use only).
+/** do as little checks as possible, make sure the image is valid (advance use only).
  * Buffer should be of size SECTOR_SIZE at least. */
 bool sb1_is_key_valid_fast(void *buffer, union xorcrypt_key_t key[2]);
 bool sb1_brute_force(const char *filename, void *u, generic_printf_t printf,

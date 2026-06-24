@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Src/start.c
+ * @brief Bootloader startup and initialization
+ */
+
 
 #include <stdio.h>
 
@@ -834,7 +839,7 @@ int __attribute__((target("thumb"))) capt_ON_Key(int ck, int cp) {
 
     return 0;
 }
-/*
+/**
 void get_cpu_info() {
     register uint32_t val;
     __asm volatile("mrc p15,0,%0,c0,c0,0"

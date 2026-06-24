@@ -1,3 +1,8 @@
+/**
+ * @file System/Crash/CrashLog.c
+ * @brief Crash logging subsystem
+ */
+
 #include "CrashLog.h"
 #include "SystemFs.h"
 #include "debug.h"

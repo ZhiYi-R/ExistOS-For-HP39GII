@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/emu48ico.c
+ * @brief emu48ico module
+ */
+
 #if defined(LV_LVGL_H_INCLUDE_SIMPLE)
 #include "lvgl.h"
 #else

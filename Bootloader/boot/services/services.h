@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/boot/services/services.h
+ * @brief services module
+ */
+
 #ifndef SERVICES_H
 #define SERVICES_H
 

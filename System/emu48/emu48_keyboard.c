@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/emu48_keyboard.c
+ * @brief Emu48 keyboard mapping
+ */
+
 
 
 #include "pch.h"

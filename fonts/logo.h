@@ -1,3 +1,8 @@
+/**
+ * @file fonts/logo.h
+ * @brief logo module
+ */
+
 const unsigned char logo[1250] = {
 0XFF,0XFF,0XFE,0XFC,0XFA,0XF7,0XF5,0XF4,0XF4,0XF4,0XF4,0XF4,0XF4,0XF4,0XF4,0XF4,
 0XF5,0XF6,0XF8,0XFB,0XFD,0XFF,0XFF,0XFF,0XFF,0XFF,0XFE,0XFE,0XFD,0XFD,0XFE,0XFE,

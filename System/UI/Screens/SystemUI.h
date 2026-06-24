@@ -1,3 +1,8 @@
+/**
+ * @file System/UI/Screens/SystemUI.h
+ * @brief System UI task management and suspend/resume
+ */
+
 #pragma once
 //#include "lvgl.h"
 

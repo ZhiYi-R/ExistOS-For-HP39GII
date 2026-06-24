@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Src/utilities.c
+ * @brief Bootloader utility functions
+ */
+
 
 
 #include <stdio.h>

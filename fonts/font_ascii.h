@@ -1,3 +1,8 @@
+/**
+ * @file fonts/font_ascii.h
+ * @brief font_ascii module
+ */
+
 unsigned char Ascii1608[] =              // ASCII
 {
 	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,  // - -

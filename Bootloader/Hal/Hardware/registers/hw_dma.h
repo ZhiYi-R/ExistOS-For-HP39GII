@@ -1,8 +1,13 @@
+/**
+ * @file Bootloader/Hal/Hardware/registers/hw_dma.h
+ * @brief hw_dma module
+ */
+
 /*
  * Copyright 2009 Freescale Semiconductor, Inc. All Rights Reserved.
  */
 
-/*
+/**
  * The code contained herein is licensed under the GNU General Public
  * License. You may obtain a copy of the GNU General Public License
  * Version 2 or later at the following locations:

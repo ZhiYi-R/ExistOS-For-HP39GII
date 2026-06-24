@@ -1,3 +1,8 @@
+/**
+ * @file System/UI/Screens/SystemUI.c
+ * @brief System UI task management and suspend/resume
+ */
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include <stdbool.h>

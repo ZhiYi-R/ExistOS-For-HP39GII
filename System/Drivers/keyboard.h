@@ -1,3 +1,8 @@
+/**
+ * @file System/Drivers/keyboard.h
+ * @brief Keyboard matrix definitions
+ */
+
 #ifndef __KEYBOARD_H__
 #define __KEYBOARD_H__
 

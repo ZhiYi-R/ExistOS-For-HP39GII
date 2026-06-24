@@ -49,7 +49,7 @@ struct cmd_source_t
     char *filename;
     // </union>
     struct cmd_source_t *next;
-    /* for later use */
+    /** for later use */
     enum cmd_source_type_t type;
     bool loaded;
     struct elf_params_t elf;
@@ -83,7 +83,7 @@ struct cmd_option_t
     /* <union> */
         uint32_t val;
         char *str;
-    /* </union> */
+    /** </union> */
     struct cmd_option_t *next;
 };
 
@@ -115,7 +115,7 @@ bool db_parse_sb_version(struct sb_version_t *ver, const char *str);
 bool db_generate_sb_version(struct sb_version_t *ver, char *str, int size);
 void db_generate_default_sb_version(struct sb_version_t *ver);
 struct cmd_file_t *db_parse_file(const char *file);
-/* NOTE: db_add_{str_opt,int_opt,source,extern_source} add at the beginning of the list */
+/** NOTE: db_add_{str_opt,int_opt,source,extern_source} add at the beginning of the list */
 void db_add_str_opt(struct cmd_option_t **opt, const char *name, const char *str);
 void db_add_int_opt(struct cmd_option_t **opt, const char *name, uint32_t value);
 void db_add_source(struct cmd_file_t *cmd_file, const char *identifier, const char *filename);
@@ -129,7 +129,7 @@ bool db_generate_file(struct cmd_file_t *file, const char *filename, void *user,
 void db_free_option_list(struct cmd_option_t *opt_list);
 void db_free(struct cmd_file_t *file);
 
-/* standard implementation: user is unused*/
+/** standard implementation: user is unused*/
 void db_std_printf(void *user, bool error, color_t c, const char *fmt, ...);
 
 #endif /* __DBPARSER__ */

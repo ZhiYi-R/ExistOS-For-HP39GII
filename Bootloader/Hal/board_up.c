@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/board_up.c
+ * @brief board_up module
+ */
+
 
 #include "FreeRTOS.h"
 #include "task.h"

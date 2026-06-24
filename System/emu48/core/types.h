@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/core/types.h
+ * @brief types module
+ */
+
 /*
  *   types.h
  *

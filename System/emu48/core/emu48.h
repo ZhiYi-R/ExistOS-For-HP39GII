@@ -1,4 +1,9 @@
-/*
+/**
+ * @file System/emu48/core/emu48.h
+ * @brief emu48 module
+ */
+
+/**
  *   emu48.h
  *
  *   This file is part of Emu48

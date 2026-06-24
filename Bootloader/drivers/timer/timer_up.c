@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/drivers/timer/timer_up.c
+ * @brief timer_up module
+ */
+
 #include "FreeRTOS.h"
 #include "task.h"
 

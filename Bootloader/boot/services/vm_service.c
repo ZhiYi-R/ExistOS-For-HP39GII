@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/boot/services/vm_service.c
+ * @brief vm_service module
+ */
+
 #include "services.h"
 #include "vmMgr.h"
 

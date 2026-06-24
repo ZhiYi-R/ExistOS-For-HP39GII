@@ -278,7 +278,7 @@ void elf_add_fill_section(struct elf_params_t *params,
     sec->pattern = pattern;
 }
 
-/* sort by increasing type and then increasing address */
+/** sort by increasing type and then increasing address */
 static int elf_simplify_compare(const void *a, const void *b)
 {
     const struct elf_section_t *sa = a;
@@ -301,7 +301,7 @@ void elf_simplify(struct elf_params_t *params)
         cur_sec = cur_sec->next;
     }
 
-    /* put all sections in an array and free list */
+    /** put all sections in an array and free list */
     struct elf_section_t *sections = malloc(sizeof(struct elf_section_t) * nr_sections);
     cur_sec = params->first_section;
     for(int i = 0; i < nr_sections; i++)
@@ -355,7 +355,7 @@ void elf_simplify(struct elf_params_t *params)
         cur_sec = &sections[i];
     }
 
-    /* put back on a list and free array */
+    /** put back on a list and free array */
     struct elf_section_t **prev_ptr = &params->first_section;
     struct elf_section_t *prev_sec = NULL;
     for(int i = 0; i < nr_sections; i++)
@@ -375,7 +375,7 @@ void elf_simplify(struct elf_params_t *params)
     free(sections);
 }
 
-/* sort by increasing address */
+/** sort by increasing address */
 static int elf_addr_compare(const void *a, const void *b)
 {
     const struct elf_section_t *sa = a;
@@ -396,7 +396,7 @@ void elf_sort_by_address(struct elf_params_t *params)
         cur_sec = cur_sec->next;
     }
 
-    /* put all sections in an array and free list */
+    /** put all sections in an array and free list */
     struct elf_section_t *sections = malloc(sizeof(struct elf_section_t) * nr_sections);
     cur_sec = params->first_section;
     for(int i = 0; i < nr_sections; i++)
@@ -410,7 +410,7 @@ void elf_sort_by_address(struct elf_params_t *params)
     /* sort them by type and increasing addresses */
     qsort(sections, nr_sections, sizeof(struct elf_section_t), &elf_addr_compare);
 
-    /* put back on a list and free array */
+    /** put back on a list and free array */
     struct elf_section_t **prev_ptr = &params->first_section;
     struct elf_section_t *prev_sec = NULL;
     for(int i = 0; i < nr_sections; i++)

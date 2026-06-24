@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/mtd_up.h
+ * @brief mtd_up module
+ */
+
 #ifndef __MTD_UP_H__
 #define __MTD_UP_H__
 

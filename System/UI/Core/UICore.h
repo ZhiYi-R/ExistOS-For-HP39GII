@@ -1,3 +1,8 @@
+/**
+ * @file System/UI/Core/UICore.h
+ * @brief UI core display, window, and console implementation
+ */
+
 #pragma once
 
 #include "UI_Config.h"
@@ -482,7 +487,7 @@ public:
         refreshFuncKeyBar();
     }
 
-    /*
+    /**
         virtual int winSelfKeyMessage(uint32_t key, int state) {
             return 0;
         }

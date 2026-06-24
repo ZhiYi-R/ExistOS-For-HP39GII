@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/emu48_display.c
+ * @brief Emu48 display driver
+ */
+
 
 #include "pch.h"
 #include "emu48.h"

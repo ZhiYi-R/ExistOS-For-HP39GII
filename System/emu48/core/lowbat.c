@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/core/lowbat.c
+ * @brief lowbat module
+ */
+
 /*
  *   lowbat.c
  *

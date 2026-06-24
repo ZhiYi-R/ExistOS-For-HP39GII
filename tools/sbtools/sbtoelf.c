@@ -19,7 +19,7 @@
  *
  ****************************************************************************/
 
-/*
+/**
  * .sb file parser and chunk extractor
  *
  * Based on amsinfo, which is

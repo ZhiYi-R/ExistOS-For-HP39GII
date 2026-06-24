@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/resource.h
+ * @brief resource module
+ */
+
 //{{NO_DEPENDENCIES}}
 // Microsoft Developer Studio generated include file.
 // Used by EMU48.RC

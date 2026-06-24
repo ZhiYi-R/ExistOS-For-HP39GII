@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/emu48_file.c
+ * @brief Emu48 file I/O
+ */
+
 
 #include "FreeRTOS.h"
 #include "task.h"

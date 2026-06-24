@@ -79,7 +79,7 @@ int convxdigit(char digit, byte *val)
         return 1;
 }
 
-/* helper function to augment an array, free old array */
+/** helper function to augment an array, free old array */
 void *augment_array(void *arr, size_t elem_sz, size_t cnt, void *aug, size_t aug_cnt)
 {
     void *p = xmalloc(elem_sz * (cnt + aug_cnt));

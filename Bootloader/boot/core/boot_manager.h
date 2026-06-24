@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/boot/core/boot_manager.h
+ * @brief Boot manager core
+ */
+
 #ifndef _BOOT_MANAGER_H_
 #define _BOOT_MANAGER_H_
 

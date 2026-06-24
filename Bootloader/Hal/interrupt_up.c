@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/interrupt_up.c
+ * @brief interrupt_up module
+ */
+
 
 
 #include "interrupt_up.h"
@@ -17,7 +22,7 @@ IRQNumber CurrentIRQNumber;
 
 //IRQList IRQLists[MAX_IRQ_NUM];
 
-/*
+/**
 void up_register_ISR(IRQNumber ISRNum, IRQTypes IRQType, IRQCallback cb)
 {
     IRQLists[ISRNum].IRQType = IRQType;

@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/board_up.h
+ * @brief board_up module
+ */
+
 #ifndef __BOARD_UP_H__
 #define __BOARD_UP_H__
 

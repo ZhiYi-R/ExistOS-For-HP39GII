@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Src/stmp37xxNandConf.c
+ * @brief stmp37xxNandConf module
+ */
+
 
 #include "stmp37xxNandConf.h"
 

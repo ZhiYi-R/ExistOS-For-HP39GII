@@ -1,8 +1,13 @@
+/**
+ * @file Bootloader/Hal/Hardware/registers/regsuartapp.h
+ * @brief regsuartapp module
+ */
+
 /*
  * Copyright 2009 Freescale Semiconductor, Inc. All Rights Reserved.
  */
 
-/*
+/**
  * The code contained herein is licensed under the GNU General Public
  * License. You may obtain a copy of the GNU General Public License
  * Version 2 or later at the following locations:
@@ -48,7 +53,7 @@
 #define REGS_UARTAPP_BASE(x) ( x == 1 ? REGS_UARTAPP1_BASE : x == 2 ? REGS_UARTAPP2_BASE : 0xffff0000)
 //#endif
 
-/*
+/**
  * HW_UARTAPP_CTRL0 - UART Receive DMA Control Register
  */
 #ifndef __LANGUAGE_ASM__
@@ -68,7 +73,7 @@ typedef union
 } hw_uartapp_ctrl0_t;
 #endif
 
-/*
+/**
  * constants & macros for entire multi-block HW_UARTAPP_CTRL0 register
  */
 #define HW_UARTAPP_CTRL0_ADDR(x)      (REGS_UARTAPP_BASE(x) + 0x0)
@@ -165,7 +170,7 @@ typedef union
 
 
 
-/*
+/**
  * HW_UARTAPP_CTRL1 - UART Transmit DMA Control Register
  */
 #ifndef __LANGUAGE_ASM__
@@ -182,7 +187,7 @@ typedef union
 } hw_uartapp_ctrl1_t;
 #endif
 
-/*
+/**
  * constants & macros for entire multi-block HW_UARTAPP_CTRL1 register
  */
 #define HW_UARTAPP_CTRL1_ADDR(x)      (REGS_UARTAPP_BASE(x) + 0x10)
@@ -225,7 +230,7 @@ typedef union
 
 
 
-/*
+/**
  * HW_UARTAPP_CTRL2 - UART Control Register
  */
 #ifndef __LANGUAGE_ASM__
@@ -264,7 +269,7 @@ typedef union
 } hw_uartapp_ctrl2_t;
 #endif
 
-/*
+/**
  * constants & macros for entire multi-block HW_UARTAPP_CTRL2 register
  */
 #define HW_UARTAPP_CTRL2_ADDR(x)      (REGS_UARTAPP_BASE(x) + 0x20)
@@ -539,7 +544,7 @@ typedef union
 
 
 
-/*
+/**
  * HW_UARTAPP_LINECTRL - UART Line Control Register
  */
 #ifndef __LANGUAGE_ASM__
@@ -562,7 +567,7 @@ typedef union
 } hw_uartapp_linectrl_t;
 #endif
 
-/*
+/**
  * constants & macros for entire multi-block HW_UARTAPP_LINECTRL register
  */
 #define HW_UARTAPP_LINECTRL_ADDR(x)      (REGS_UARTAPP_BASE(x) + 0x30)
@@ -679,7 +684,7 @@ typedef union
 
 
 
-/*
+/**
  * HW_UARTAPP_LINECTRL2 - UART Line Control 2 Register
  */
 #ifndef __LANGUAGE_ASM__
@@ -702,7 +707,7 @@ typedef union
 } hw_uartapp_linectrl2_t;
 #endif
 
-/*
+/**
  * constants & macros for entire multi-block HW_UARTAPP_LINECTRL2 register
  */
 #define HW_UARTAPP_LINECTRL2_ADDR(x)      (REGS_UARTAPP_BASE(x) + 0x40)
@@ -809,7 +814,7 @@ typedef union
 
 
 
-/*
+/**
  * HW_UARTAPP_INTR - UART Interrupt Register
  */
 #ifndef __LANGUAGE_ASM__
@@ -846,7 +851,7 @@ typedef union
 } hw_uartapp_intr_t;
 #endif
 
-/*
+/**
  * constants & macros for entire multi-block HW_UARTAPP_INTR register
  */
 #define HW_UARTAPP_INTR_ADDR(x)      (REGS_UARTAPP_BASE(x) + 0x50)
@@ -1089,7 +1094,7 @@ typedef union
 
 
 
-/*
+/**
  * HW_UARTAPP_DATA - UART Data Register
  */
 #ifndef __LANGUAGE_ASM__
@@ -1103,7 +1108,7 @@ typedef union
 } hw_uartapp_data_t;
 #endif
 
-/*
+/**
  * constants & macros for entire multi-block HW_UARTAPP_DATA register
  */
 #define HW_UARTAPP_DATA_ADDR(x)      (REGS_UARTAPP_BASE(x) + 0x60)
@@ -1137,7 +1142,7 @@ typedef union
 
 
 
-/*
+/**
  * HW_UARTAPP_STAT - UART Status Register
  */
 #ifndef __LANGUAGE_ASM__
@@ -1164,7 +1169,7 @@ typedef union
 } hw_uartapp_stat_t;
 #endif
 
-/*
+/**
  * constants & macros for entire multi-block HW_UARTAPP_STAT register
  */
 #define HW_UARTAPP_STAT_ADDR(x)      (REGS_UARTAPP_BASE(x) + 0x70)
@@ -1294,7 +1299,7 @@ typedef union
 #define BF_UARTAPP_STAT_RXCOUNT(v)   (((v) << 0) & BM_UARTAPP_STAT_RXCOUNT)
 
 
-/*
+/**
  * HW_UARTAPP_DEBUG - UART Debug Register
  */
 #ifndef __LANGUAGE_ASM__
@@ -1316,7 +1321,7 @@ typedef union
 } hw_uartapp_debug_t;
 #endif
 
-/*
+/**
  * constants & macros for entire multi-block HW_UARTAPP_DEBUG register
  */
 #define HW_UARTAPP_DEBUG_ADDR(x)      (REGS_UARTAPP_BASE(x) + 0x80)
@@ -1384,7 +1389,7 @@ typedef union
 #define BF_UARTAPP_DEBUG_RXDMARQ(v)   (((v) << 0) & BM_UARTAPP_DEBUG_RXDMARQ)
 
 
-/*
+/**
  * HW_UARTAPP_VERSION - UART Version Register
  */
 #ifndef __LANGUAGE_ASM__
@@ -1400,7 +1405,7 @@ typedef union
 } hw_uartapp_version_t;
 #endif
 
-/*
+/**
  * constants & macros for entire multi-block HW_UARTAPP_VERSION register
  */
 #define HW_UARTAPP_VERSION_ADDR(x)      (REGS_UARTAPP_BASE(x) + 0x90)
@@ -1438,7 +1443,7 @@ typedef union
 #define BF_UARTAPP_VERSION_STEP(v)   (((v) << 0) & BM_UARTAPP_VERSION_STEP)
 
 
-/*
+/**
  * HW_UARTAPP_AUTOBAUD - UART AutoBaud Register
  */
 #ifndef __LANGUAGE_ASM__
@@ -1459,7 +1464,7 @@ typedef union
 } hw_uartapp_autobaud_t;
 #endif
 
-/*
+/**
  * constants & macros for entire multi-block HW_UARTAPP_AUTOBAUD register
  */
 #define HW_UARTAPP_AUTOBAUD_ADDR(x)      (REGS_UARTAPP_BASE(x) + 0xa0)

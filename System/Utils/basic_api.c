@@ -1,3 +1,8 @@
+/**
+ * @file System/Utils/basic_api.c
+ * @brief Basic VRAM and key API for applications
+ */
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>

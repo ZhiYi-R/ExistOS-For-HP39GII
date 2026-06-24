@@ -166,7 +166,7 @@ static struct sb_file_t *apply_cmd_file(struct cmd_file_t *cmd_file)
 
     if(g_debug)
         printf("Applying command file...\n");
-    /* count sections */
+    /** count sections */
     struct cmd_section_t *csec = cmd_file->section_list;
     while(csec)
     {
@@ -216,7 +216,7 @@ static struct sb_file_t *apply_cmd_file(struct cmd_file_t *cmd_file)
         else
         {
             sec->is_data = false;
-            /* count instructions and loads things */
+            /** count instructions and loads things */
             struct cmd_inst_t *cinst = csec->inst_list;
             while(cinst)
             {

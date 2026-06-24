@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/drivers/display/stmp_lcdif.c
+ * @brief LCDIF display controller driver
+ */
+
 #include "board_up.h"
 #include "display_up.h"
 

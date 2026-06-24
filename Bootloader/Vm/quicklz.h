@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Vm/quicklz.h
+ * @brief QuickLZ compression implementation
+ */
+
 #ifndef QLZ_HEADER
 #define QLZ_HEADER
 

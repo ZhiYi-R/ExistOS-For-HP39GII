@@ -1,3 +1,8 @@
+/**
+ * @file System/UI/Core/UICore.cpp
+ * @brief UI core display, window, and console implementation
+ */
+
 
 // -*- coding: GBK -*-
 

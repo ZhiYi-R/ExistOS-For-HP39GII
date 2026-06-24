@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/boot/services/display_service.c
+ * @brief display_service module
+ */
+
 #include "services.h"
 #include "display_up.h"
 

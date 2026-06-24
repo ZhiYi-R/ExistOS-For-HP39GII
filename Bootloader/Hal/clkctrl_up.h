@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/clkctrl_up.h
+ * @brief clkctrl_up module
+ */
+
 #ifndef __CLKCTRL_UP_H__
 #define __CLKCTRL_UP_H__
 

@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Vm/vmMgr.h
+ * @brief Virtual memory manager
+ */
+
 #ifndef __VMMGR_H__
 #define __VMMGR_H__
 

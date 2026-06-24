@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/core/mops.c
+ * @brief mops module
+ */
+
 /*
  *   mops.c
  *

@@ -1,4 +1,9 @@
-/*
+/**
+ * @file Bootloader/Vm/tlsf/tlsf.h
+ * @brief TLSF heap allocator
+ */
+
+/**
  * Two Levels Segregate Fit memory allocator (TLSF)
  * Version 2.4.6
  *

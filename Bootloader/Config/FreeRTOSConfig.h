@@ -1,4 +1,9 @@
-/*
+/**
+ * @file Bootloader/Config/FreeRTOSConfig.h
+ * @brief FreeRTOS kernel configuration
+ */
+
+/**
  * FreeRTOS Kernel V10.3.1
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
@@ -103,7 +108,7 @@ void vAssertCalled(char *file, int line);
 
 #define configPRINTF( X )  printf( X )
 
-/* Set the following definitions to 1 to include the API function, or zero
+/** Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
 
 #define INCLUDE_vTaskPrioritySet                1
@@ -125,7 +130,7 @@ to exclude the API function. */
 #define INCLUDE_xTaskResumeFromISR              1
 
 
-/* This demo makes use of one or more example stats formatting functions.  These
+/** This demo makes use of one or more example stats formatting functions.  These
 format the raw data provided by the uxTaskGetSystemState() function in to human
 readable ASCII form.  See the notes in the implementation of vTaskList() within 
 FreeRTOS/Source/tasks.c for limitations. */

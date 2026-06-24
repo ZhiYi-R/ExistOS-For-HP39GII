@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Src/msc_disk.c
+ * @brief USB mass storage disk implementation
+ */
+
 /*
  * The MIT License (MIT)
  *
@@ -206,7 +211,7 @@ extern uint32_t g_MSC_Configuration;
 
 void tud_msc_capacity_cb(uint8_t lun, uint32_t *block_count, uint16_t *block_size) {
     (void)lun;
-    /*
+    /**
         mtdInfo_t *info = MTD_getDeviceInfo();
         *block_count = info->Blocks * info->PagesPerBlock;
         *block_size  = info->PageSize_B;

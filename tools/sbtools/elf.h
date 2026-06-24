@@ -47,7 +47,7 @@ struct elf_section_t
     /* <union> */
     void *section; /* data */
     uint32_t pattern; /* fill pattern */
-    /* </union> */
+    /** </union> */
     struct elf_section_t *next;
     /* Internal to elf_write_file */
     uint32_t offset;
@@ -92,7 +92,7 @@ struct elf_params_t
 };
 
 typedef bool (*elf_read_fn_t)(void *user, uint32_t addr, void *buf, size_t count);
-/* write function manages it's own error state */
+/** write function manages it's own error state */
 typedef void (*elf_write_fn_t)(void *user, uint32_t addr, const void *buf, size_t count);
 
 void elf_init(struct elf_params_t *params);
@@ -113,7 +113,7 @@ void elf_release(struct elf_params_t *params);
 
 bool elf_guess(elf_read_fn_t read, void *user);
 
-/* standard implementation of read/write/printf functions
+/** standard implementation of read/write/printf functions
  * with user being a FILE* pointer */
 void elf_std_write(void *user, uint32_t addr, const void *buf, size_t count);
 bool elf_std_read(void *user, uint32_t addr, void *buf, size_t count);

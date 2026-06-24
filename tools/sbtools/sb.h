@@ -28,7 +28,7 @@
 
 #define BLOCK_SIZE      16
 
-/* All fields are in big-endian BCD */
+/** All fields are in big-endian BCD */
 struct sb_version_t
 {
     uint16_t major;
@@ -242,7 +242,7 @@ enum sb_error_t sb_write_file(struct sb_file_t *sb, const char *filename, void *
     generic_printf_t printf);
 struct sb_file_t *sb_read_file(const char *filename, unsigned flags, void *u,
     generic_printf_t printf, enum sb_error_t *err);
-/* use size_t(-1) to use maximum size */
+/** use size_t(-1) to use maximum size */
 struct sb_file_t *sb_read_file_ex(const char *filename, size_t offset, size_t size,
     unsigned flags, void *u, generic_printf_t printf, enum sb_error_t *err);
 struct sb_file_t *sb_read_memory(void *buffer, size_t size, unsigned flags, void *u,

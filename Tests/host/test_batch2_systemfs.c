@@ -1,3 +1,8 @@
+/**
+ * @file Tests/host/test_batch2_systemfs.c
+ * @brief test_batch2_systemfs module
+ */
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>

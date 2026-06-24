@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/boot/core/boot_manager.c
+ * @brief Boot manager core
+ */
+
 #include "SystemConfig.h"
 #include "debug.h"
 

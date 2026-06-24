@@ -1,3 +1,8 @@
+/**
+ * @file Tests/host/test_batch2_vromloader.c
+ * @brief test_batch2_vromloader module
+ */
+
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>

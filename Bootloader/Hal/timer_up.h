@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/timer_up.h
+ * @brief timer_up module
+ */
+
 #ifndef __TIMER_H__
 #define __TIMER_H__
 

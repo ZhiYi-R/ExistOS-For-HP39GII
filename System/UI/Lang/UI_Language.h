@@ -1,3 +1,8 @@
+/**
+ * @file System/UI/Lang/UI_Language.h
+ * @brief UI language selection
+ */
+
 #pragma once
 #include "UI_Chinese.h"
 #include "UI_English.h"

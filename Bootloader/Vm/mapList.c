@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Vm/mapList.c
+ * @brief Memory map list management
+ */
+
 
 
 #include "FreeRTOS.h"

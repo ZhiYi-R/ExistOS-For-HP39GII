@@ -1,3 +1,8 @@
+/**
+ * @file System/Utils/sym_def.c
+ * @brief Symbol definitions for system image
+ */
+
 
 #define SYMDEF(x) asm volatile("b " #x);
 

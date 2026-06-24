@@ -1,3 +1,8 @@
+/**
+ * @file Include/llapi_code.h
+ * @brief llapi_code module
+ */
+
 #ifndef __LLAPI_CODE_H__
 #define __LLAPI_CODE_H__
 

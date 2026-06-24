@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/drivers/stmp_power.c
+ * @brief Power management driver
+ */
+
 #include "board_up.h"
 #include "regspower.h"
 #include "regslradc.h"

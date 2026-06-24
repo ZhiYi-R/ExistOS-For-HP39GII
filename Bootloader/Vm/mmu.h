@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Vm/mmu.h
+ * @brief MMU setup and page table management
+ */
+
 
 #ifndef __MMU_H__
 #define __MMU_H__

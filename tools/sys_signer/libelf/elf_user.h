@@ -1,3 +1,8 @@
+/**
+ * @file tools/sys_signer/libelf/elf_user.h
+ * @brief elf_user module
+ */
+
 /* @LICENSE(UNSW_OZPLB) */
 
 /*

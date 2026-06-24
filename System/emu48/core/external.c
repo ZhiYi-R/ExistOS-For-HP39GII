@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/core/external.c
+ * @brief external module
+ */
+
 /*
  *   external.c
  *

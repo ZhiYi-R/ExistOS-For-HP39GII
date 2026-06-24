@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/drivers/display/display_up.c
+ * @brief display_up module
+ */
+
 
 
 #include "FreeRTOS.h"
@@ -254,7 +259,7 @@ void DisplayCircle(uint32_t x0, uint32_t y0, uint32_t r, uint8_t c, bool isFill)
     xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
 }
 */
-/*
+/**
 bool DisplayOperatesFin() {
     uint32_t len = uxQueueGetQueueNumber((QueueHandle_t)&DisplayOpaQueue);
     // printf("Qlen:%d\n",len);
@@ -294,7 +299,7 @@ static void innerDispVLine(uint32_t y0, uint32_t y1, uint32_t x, uint8_t c) {
     vPortFree(buf);
 }
 
-/*
+/**
 static void innerDispPoint(uint32_t x0, uint32_t y0, uint8_t c) {
     uint8_t *buf = pvPortMalloc(3);
     memset(buf, c, 3);
@@ -306,7 +311,7 @@ static void innerDispPoint(uint32_t x0, uint32_t y0, uint8_t c) {
 void Display_InterfaceInit() {
     portDispInterfaceInit();
 }
-/*
+/**
 volatile static bool led_refresh = false;
 
 void vTaskDispLedRefresh() {

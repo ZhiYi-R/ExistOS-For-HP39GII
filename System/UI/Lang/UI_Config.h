@@ -1,3 +1,8 @@
+/**
+ * @file System/UI/Lang/UI_Config.h
+ * @brief UI configuration constants and key codes
+ */
+
 #pragma once
 
 #include "keyboard_gii39.h"

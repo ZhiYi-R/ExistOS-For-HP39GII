@@ -1,4 +1,9 @@
-/*
+/**
+ * @file Bootloader/Config/tusb_config.h
+ * @brief TinyUSB stack configuration
+ */
+
+/**
  * The MIT License (MIT)
  *
  * Copyright (c) 2019 Ha Thach (tinyusb.org)
@@ -74,7 +79,7 @@
   #define CFG_TUSB_DEBUG           0
 #endif
 
-/* USB DMA on some MCUs can only access a specific SRAM region with restriction on alignment.
+/** USB DMA on some MCUs can only access a specific SRAM region with restriction on alignment.
  * Tinyusb use follows macros to declare transferring memory so that they can be put
  * into those specific section.
  * e.g

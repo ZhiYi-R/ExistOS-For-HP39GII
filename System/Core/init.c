@@ -1,3 +1,8 @@
+/**
+ * @file System/Core/init.c
+ * @brief System initialization and boot
+ */
+
 
 #include "SysConf.h"
 #include "timestamp.h"

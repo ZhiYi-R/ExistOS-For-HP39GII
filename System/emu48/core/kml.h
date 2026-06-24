@@ -1,4 +1,9 @@
-/*
+/**
+ * @file System/emu48/core/kml.h
+ * @brief kml module
+ */
+
+/**
  *   kml.h
  *
  *   This file is part of Emu48

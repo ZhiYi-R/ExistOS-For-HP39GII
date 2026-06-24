@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/emu48_porting.c
+ * @brief Emu48 platform porting layer
+ */
+
 #include "pch.h"
 #include "emu48.h"
 #include "io.h"

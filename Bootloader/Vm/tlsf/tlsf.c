@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Vm/tlsf/tlsf.c
+ * @brief TLSF heap allocator
+ */
+
 /* 
  * Two Levels Segregate Fit memory allocator (TLSF)
  * Version 2.4.6
@@ -189,18 +194,18 @@ typedef struct free_ptr_struct {
 } free_ptr_t;
 
 typedef struct bhdr_struct {
-    /* This pointer is just valid if the first bit of size is set */
+    /** This pointer is just valid if the first bit of size is set */
     struct bhdr_struct *prev_hdr;
     /* The size is stored in bytes */
     size_t size;                /* bit 0 indicates whether the block is used and */
-    /* bit 1 allows to know whether the previous block is free */
+    /** bit 1 allows to know whether the previous block is free */
     union {
         struct free_ptr_struct free_ptr;
         u8_t buffer[1];         /*sizeof(struct free_ptr_struct)]; */
     } ptr;
 } bhdr_t;
 
-/* This structure is embedded at the beginning of each area, giving us
+/** This structure is embedded at the beginning of each area, giving us
  * enough information to cope with a set of areas */
 
 typedef struct area_info_struct {
@@ -516,7 +521,7 @@ size_t add_new_area(void *area, size_t area_size, void *mem_pool)
     b0 = GET_NEXT_BLOCK(ib0->ptr.buffer, ib0->size & BLOCK_SIZE);
     lb0 = GET_NEXT_BLOCK(b0->ptr.buffer, b0->size & BLOCK_SIZE);
 
-    /* Before inserting the new area, we have to merge this area with the
+    /** Before inserting the new area, we have to merge this area with the
        already existing ones */
 
     while (ptr) {
@@ -544,7 +549,7 @@ size_t add_new_area(void *area, size_t area_size, void *mem_pool)
             continue;
         }
 
-        /* Merging the new area with the previous physically contigous
+        /** Merging the new area with the previous physically contigous
            one */
         if ((unsigned long) lb1->ptr.buffer == (unsigned long) ib0) {
             if (tlsf->area_head == ptr) {

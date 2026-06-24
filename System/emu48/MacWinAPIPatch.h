@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/MacWinAPIPatch.h
+ * @brief MacWinAPIPatch module
+ */
+
 #ifndef _MAC_WINAPIPATCH_H_
 #define _MAC_WINAPIPATCH_H_
 /*
@@ -163,7 +168,7 @@ extern void EnumFontFamilies(void *, void *, FONTENUMPROC, void *userdata);
 */
 extern BOOL SetCurrentDirectory(LPCTSTR);	// returns NO if fails
 extern int CreateFile(LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPVOID lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, LPVOID hTemplateFile);
-/*
+/**
 extern int ReadFile(int fd, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead, LPVOID lpOverlapped);
 // WriteFile() writes to a temp file, then swaps that with the real file
 extern OSErr WriteFile(FSPtr &, void *buf, SInt64 size, void *, void *);

@@ -81,7 +81,7 @@ enum rsrc_error_t rsrc_write_file(struct rsrc_file_t *rsrc, const char *filename
 typedef void (*rsrc_color_printf)(void *u, bool err, color_t c, const char *f, ...);
 struct rsrc_file_t *rsrc_read_file(const char *filename, void *u,
     rsrc_color_printf printf, enum rsrc_error_t *err);
-/* use size_t(-1) to use maximum size */
+/** use size_t(-1) to use maximum size */
 struct rsrc_file_t *rsrc_read_file_ex(const char *filename, size_t offset, size_t size, void *u,
     rsrc_color_printf printf, enum rsrc_error_t *err);
 struct rsrc_file_t *rsrc_read_memory(void *buffer, size_t size, void *u,

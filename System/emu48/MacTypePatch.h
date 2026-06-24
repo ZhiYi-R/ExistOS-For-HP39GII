@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/MacTypePatch.h
+ * @brief MacTypePatch module
+ */
+
 #ifndef MAC_TYPE_PATCH_H
 #define MAC_TYPE_PATCH_H
 
@@ -144,7 +149,7 @@ struct COMMTIMEOUTS
 {
 	DWORD a,b,c,d,e;
 };
-/*
+/**
 struct OVERLAPPED
 {
 	HANDLE hEvent;

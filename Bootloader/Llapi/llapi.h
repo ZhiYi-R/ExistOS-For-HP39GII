@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Llapi/llapi.h
+ * @brief Low-level API SWI handler implementation
+ */
+
 #ifndef __LLAPI_H__
 #define __LLAPI_H__
 

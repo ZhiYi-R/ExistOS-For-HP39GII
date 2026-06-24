@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/interrupt_up.h
+ * @brief interrupt_up module
+ */
+
 #ifndef __INTERRUPT_UP_H__
 #define __INTERRUPT_UP_H__
 

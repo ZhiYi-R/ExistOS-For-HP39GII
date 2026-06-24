@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Llapi/llapi.c
+ * @brief Low-level API SWI handler implementation
+ */
+
 
 #include "FreeRTOS.h"
 #include "queue.h"
@@ -148,7 +153,7 @@ void tickTimer(TimerHandle_t xTimer) {
         }
     }
 }
-/*
+/**
 void LLIO_ScanTask(void *pvParameters) {
     uint32_t val;
     LLIRQ_Info_t curIRQ;
@@ -345,7 +350,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
             case LL_SWI_RESTORE_CONTEXT: {
                 uint32_t *from_addr = (uint32_t *)currentCall.para0;
 
-                /*
+                /**
                                 uint32_t moved[17];
                                 moved[0] = from_addr[17];
                                 memcpy(&moved[1], &from_addr[0], 16 * 4);
@@ -447,7 +452,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
             case LL_SWI_DISPLAY_FLUSH:
 
             {
-                /*
+                /**
                 if (currentCall.para0 % 4 != 0) {
                     break;
                 }*/

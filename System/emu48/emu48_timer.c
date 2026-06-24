@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/emu48_timer.c
+ * @brief Emu48 timer services
+ */
+
 /*
  *   timer.c
  *

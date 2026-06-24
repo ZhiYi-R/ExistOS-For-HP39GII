@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/core/fetch.c
+ * @brief fetch module
+ */
+
 /*
  *   fetch.c
  *
@@ -766,7 +771,7 @@ VOID EvalOpcode(LPBYTE I)
 	DWORD   dwTemp, dwIndex = 0;
 	PJMPTAB pJmpTab = o_;
 
-/*
+/**
 	printf("jmpbase:%08x\n", pJmpTab);
 
 	printf("test dump:\n");

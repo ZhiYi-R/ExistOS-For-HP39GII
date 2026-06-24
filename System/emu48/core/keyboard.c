@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/core/keyboard.c
+ * @brief Keyboard matrix definitions
+ */
+
 /*
  *   keyboard.c
  *

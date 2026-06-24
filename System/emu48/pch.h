@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/pch.h
+ * @brief pch module
+ */
+
 #ifndef _EMU48_PCH_H_
 #define _EMU48_PCH_H_
 /*

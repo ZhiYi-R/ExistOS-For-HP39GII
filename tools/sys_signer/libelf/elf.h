@@ -1,4 +1,9 @@
-/* This file defines standard ELF types, structures, and macros.
+/**
+ * @file tools/sys_signer/libelf/elf.h
+ * @brief elf module
+ */
+
+/** This file defines standard ELF types, structures, and macros.
    Copyright (C) 1995-2021 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -23,35 +28,35 @@
 
 #include <stdint.h>
 
-/* Type for a 16-bit quantity.  */
+/** Type for a 16-bit quantity.  */
 typedef uint16_t Elf32_Half;
 typedef uint16_t Elf64_Half;
 
-/* Types for signed and unsigned 32-bit quantities.  */
+/** Types for signed and unsigned 32-bit quantities.  */
 typedef uint32_t Elf32_Word;
 typedef	int32_t  Elf32_Sword;
 typedef uint32_t Elf64_Word;
 typedef	int32_t  Elf64_Sword;
 
-/* Types for signed and unsigned 64-bit quantities.  */
+/** Types for signed and unsigned 64-bit quantities.  */
 typedef uint64_t Elf32_Xword;
 typedef	int64_t  Elf32_Sxword;
 typedef uint64_t Elf64_Xword;
 typedef	int64_t  Elf64_Sxword;
 
-/* Type of addresses.  */
+/** Type of addresses.  */
 typedef uint32_t Elf32_Addr;
 typedef uint64_t Elf64_Addr;
 
-/* Type of file offsets.  */
+/** Type of file offsets.  */
 typedef uint32_t Elf32_Off;
 typedef uint64_t Elf64_Off;
 
-/* Type for section indices, which are 16-bit quantities.  */
+/** Type for section indices, which are 16-bit quantities.  */
 typedef uint16_t Elf32_Section;
 typedef uint16_t Elf64_Section;
 
-/* Type for version symbol information.  */
+/** Type for version symbol information.  */
 typedef Elf32_Half Elf32_Versym;
 typedef Elf64_Half Elf64_Versym;
 
@@ -96,7 +101,7 @@ typedef struct
   Elf64_Half	e_shstrndx;		/* Section header string table index */
 } Elf64_Ehdr;
 
-/* Fields in the e_ident array.  The EI_* macros are indices into the
+/** Fields in the e_ident array.  The EI_* macros are indices into the
    array.  The macros under each EI_* macro are the values the byte
    may have.  */
 
@@ -364,7 +369,7 @@ typedef struct
 
 #define EM_ARC_A5	EM_ARC_COMPACT
 
-/* If it is necessary to assign new unofficial EM_* values, please
+/** If it is necessary to assign new unofficial EM_* values, please
    pick large random numbers (0x8523, 0xa7f2, etc.) to minimize the
    chances of collision with official or non-GNU unofficial values.  */
 
@@ -376,7 +381,7 @@ typedef struct
 #define EV_CURRENT	1		/* Current version */
 #define EV_NUM		2
 
-/* Section header.  */
+/** Section header.  */
 
 typedef struct
 {
@@ -484,7 +489,7 @@ typedef struct
 #define SHF_EXCLUDE	     (1U << 31)	/* Section is excluded unless
 					   referenced or allocated (Solaris).*/
 
-/* Section compression header.  Used when SHF_COMPRESSED is set.  */
+/** Section compression header.  Used when SHF_COMPRESSED is set.  */
 
 typedef struct
 {
@@ -511,7 +516,7 @@ typedef struct
 /* Section group handling.  */
 #define GRP_COMDAT	0x1		/* Mark group as COMDAT.  */
 
-/* Symbol table entry.  */
+/** Symbol table entry.  */
 
 typedef struct
 {
@@ -533,7 +538,7 @@ typedef struct
   Elf64_Xword	st_size;		/* Symbol size */
 } Elf64_Sym;
 
-/* The syminfo section if available contains additional information about
+/** The syminfo section if available contains additional information about
    every dynamic symbol.  */
 
 typedef struct
@@ -605,7 +610,7 @@ typedef struct
 #define STT_HIPROC	15		/* End of processor-specific */
 
 
-/* Symbol table indices are found in the hash buckets and chain table
+/** Symbol table indices are found in the hash buckets and chain table
    of a symbol hash table section.  This special index value indicates
    the end of a chain, meaning no further symbols are found in that bucket.  */
 
@@ -626,7 +631,7 @@ typedef struct
 #define STV_PROTECTED	3		/* Not preemptible, not exported */
 
 
-/* Relocation table entry without addend (in section of type SHT_REL).  */
+/** Relocation table entry without addend (in section of type SHT_REL).  */
 
 typedef struct
 {
@@ -637,7 +642,7 @@ typedef struct
 /* I have seen two different definitions of the Elf64_Rel and
    Elf64_Rela structures, so we'll leave them out until Novell (or
    whoever) gets their act together.  */
-/* The following, at least, is used on Sparc v9, MIPS, and Alpha.  */
+/** The following, at least, is used on Sparc v9, MIPS, and Alpha.  */
 
 typedef struct
 {
@@ -645,7 +650,7 @@ typedef struct
   Elf64_Xword	r_info;			/* Relocation type and symbol index */
 } Elf64_Rel;
 
-/* Relocation table entry with addend (in section of type SHT_RELA).  */
+/** Relocation table entry with addend (in section of type SHT_RELA).  */
 
 typedef struct
 {
@@ -671,7 +676,7 @@ typedef struct
 #define ELF64_R_TYPE(i)			((i) & 0xffffffff)
 #define ELF64_R_INFO(sym,type)		((((Elf64_Xword) (sym)) << 32) + (type))
 
-/* Program segment header.  */
+/** Program segment header.  */
 
 typedef struct
 {
@@ -697,7 +702,7 @@ typedef struct
   Elf64_Xword	p_align;		/* Segment alignment */
 } Elf64_Phdr;
 
-/* Special value for e_phnum.  This indicates that the real number of
+/** Special value for e_phnum.  This indicates that the real number of
    program headers is too large to fit into e_phnum.  Instead the real
    value is in the field sh_info of section 0.  */
 
@@ -823,7 +828,7 @@ typedef struct
 #define NT_VERSION	1		/* Contains a version string.  */
 
 
-/* Dynamic section entry.  */
+/** Dynamic section entry.  */
 
 typedef struct
 {
@@ -889,7 +894,7 @@ typedef struct
 #define DT_HIPROC	0x7fffffff	/* End of processor-specific */
 #define	DT_PROCNUM	DT_MIPS_NUM	/* Most used by any processor */
 
-/* DT_* entries which fall between DT_VALRNGHI & DT_VALRNGLO use the
+/** DT_* entries which fall between DT_VALRNGHI & DT_VALRNGLO use the
    Dyn.d_un.d_val field of the Elf*_Dyn structure.  This follows Sun's
    approach.  */
 #define DT_VALRNGLO	0x6ffffd00
@@ -909,7 +914,7 @@ typedef struct
 #define DT_VALTAGIDX(tag)	(DT_VALRNGHI - (tag))	/* Reverse order! */
 #define DT_VALNUM 12
 
-/* DT_* entries which fall between DT_ADDRRNGHI & DT_ADDRRNGLO use the
+/** DT_* entries which fall between DT_ADDRRNGHI & DT_ADDRRNGLO use the
    Dyn.d_un.d_ptr field of the Elf*_Dyn structure.
 
    If any adjustment is made to the ELF object after it has been
@@ -930,7 +935,7 @@ typedef struct
 #define DT_ADDRTAGIDX(tag)	(DT_ADDRRNGHI - (tag))	/* Reverse order! */
 #define DT_ADDRNUM 11
 
-/* The versioning entry types.  The next are defined as part of the
+/** The versioning entry types.  The next are defined as part of the
    GNU extension.  */
 #define DT_VERSYM	0x6ffffff0
 
@@ -948,7 +953,7 @@ typedef struct
 #define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order! */
 #define DT_VERSIONTAGNUM 16
 
-/* Sun added these machine-independent extensions in the "processor-specific"
+/** Sun added these machine-independent extensions in the "processor-specific"
    range.  Be compatible.  */
 #define DT_AUXILIARY    0x7ffffffd      /* Shared object to load before self */
 #define DT_FILTER       0x7fffffff      /* Shared object to get values from */
@@ -962,7 +967,7 @@ typedef struct
 #define DF_BIND_NOW	0x00000008	/* No lazy binding for this object */
 #define DF_STATIC_TLS	0x00000010	/* Module uses the static TLS model */
 
-/* State flags selectable in the `d_un.d_val' element of the DT_FLAGS_1
+/** State flags selectable in the `d_un.d_val' element of the DT_FLAGS_1
    entry in the dynamic section.  */
 #define DF_1_NOW	0x00000001	/* Set RTLD_NOW for this object.  */
 #define DF_1_GLOBAL	0x00000002	/* Set RTLD_GLOBAL for this object.  */
@@ -1005,7 +1010,7 @@ typedef struct
 #define DF_P1_GROUPPERM	0x00000002	/* Symbols from next object are not
 					   generally available.  */
 
-/* Version definition sections.  */
+/** Version definition sections.  */
 
 typedef struct
 {
@@ -1047,7 +1052,7 @@ typedef struct
 #define	VER_NDX_LORESERVE	0xff00	/* Beginning of reserved entries.  */
 #define	VER_NDX_ELIMINATE	0xff01	/* Symbol is to be eliminated.  */
 
-/* Auxiliary version information.  */
+/** Auxiliary version information.  */
 
 typedef struct
 {
@@ -1064,7 +1069,7 @@ typedef struct
 } Elf64_Verdaux;
 
 
-/* Version dependency section.  */
+/** Version dependency section.  */
 
 typedef struct
 {
@@ -1094,7 +1099,7 @@ typedef struct
 #define VER_NEED_CURRENT 1		/* Current version */
 #define VER_NEED_NUM	 2		/* Given version number */
 
-/* Auxiliary needed version information.  */
+/** Auxiliary needed version information.  */
 
 typedef struct
 {
@@ -1123,7 +1128,7 @@ typedef struct
 
 /* Auxiliary vector.  */
 
-/* This vector is normally only used by the program interpreter.  The
+/** This vector is normally only used by the program interpreter.  The
    usual definition in an ABI supplement uses the name auxv_t.  The
    vector is not usually defined in a standard <elf.h> file, but it
    can't hurt.  We rename it to avoid conflicts.  The sizes of these
@@ -1178,7 +1183,7 @@ typedef struct
 #define AT_HWCAP	16		/* Machine-dependent hints about
 					   processor capabilities.  */
 
-/* This entry gives some information about the FPU initialization
+/** This entry gives some information about the FPU initialization
    performed by the kernel.  */
 #define AT_FPUCW	18		/* Used FPU control word.  */
 
@@ -1187,7 +1192,7 @@ typedef struct
 #define AT_ICACHEBSIZE	20		/* Instruction cache block size.  */
 #define AT_UCACHEBSIZE	21		/* Unified cache block size.  */
 
-/* A special ignored value for PPC, used by the kernel to control the
+/** A special ignored value for PPC, used by the kernel to control the
    interpretation of the AUXV. Must be > 16.  */
 #define AT_IGNOREPPC	22		/* Entry should be ignored.  */
 
@@ -1202,19 +1207,19 @@ typedef struct
 
 #define AT_EXECFN	31		/* Filename of executable.  */
 
-/* Pointer to the global system page used for system calls and other
+/** Pointer to the global system page used for system calls and other
    nice things.  */
 #define AT_SYSINFO	32
 #define AT_SYSINFO_EHDR	33
 
-/* Shapes of the caches.  Bits 0-3 contains associativity; bits 4-7 contains
+/** Shapes of the caches.  Bits 0-3 contains associativity; bits 4-7 contains
    log2 of line size; mask those to get cache size.  */
 #define AT_L1I_CACHESHAPE	34
 #define AT_L1D_CACHESHAPE	35
 #define AT_L2_CACHESHAPE	36
 #define AT_L3_CACHESHAPE	37
 
-/* Shapes of the caches, with more room to describe them.
+/** Shapes of the caches, with more room to describe them.
    *GEOMETRY are comprised of cache line size in bytes in the bottom 16 bits
    and the cache associativity in the next 16 bits.  */
 #define AT_L1I_CACHESIZE	40
@@ -1229,7 +1234,7 @@ typedef struct
 #define AT_MINSIGSTKSZ		51 /* Stack needed for signal delivery
 				      (AArch64).  */
 
-/* Note section contents.  Each entry in the note section begins with
+/** Note section contents.  Each entry in the note section begins with
    a header of a fixed form.  */
 
 typedef struct
@@ -1263,7 +1268,7 @@ typedef struct
 
 /* Defined note types for GNU systems.  */
 
-/* ABI information.  The descriptor consists of words:
+/** ABI information.  The descriptor consists of words:
    word 0: OS descriptor
    word 1: major version of the ABI
    word 2: minor version of the ABI
@@ -1272,14 +1277,14 @@ typedef struct
 #define NT_GNU_ABI_TAG	1
 #define ELF_NOTE_ABI	NT_GNU_ABI_TAG /* Old name.  */
 
-/* Known OSes.  These values can appear in word 0 of an
+/** Known OSes.  These values can appear in word 0 of an
    NT_GNU_ABI_TAG note section entry.  */
 #define ELF_NOTE_OS_LINUX	0
 #define ELF_NOTE_OS_GNU		1
 #define ELF_NOTE_OS_SOLARIS2	2
 #define ELF_NOTE_OS_FREEBSD	3
 
-/* Synthetic hwcap information.  The descriptor begins with two words:
+/** Synthetic hwcap information.  The descriptor begins with two words:
    word 0: number of entries
    word 1: bitmask of enabled entries
    Then follow variable-length entries, one byte followed by a
@@ -1287,7 +1292,7 @@ typedef struct
    number to test if enabled, (1U << bit) & bitmask.  */
 #define NT_GNU_HWCAP	2
 
-/* Build ID bits as generated by ld --build-id.
+/** Build ID bits as generated by ld --build-id.
    The descriptor consists of any nonzero number of bytes.  */
 #define NT_GNU_BUILD_ID	3
 
@@ -1322,37 +1327,37 @@ typedef struct
 #define GNU_PROPERTY_AARCH64_FEATURE_1_BTI	(1U << 0)
 #define GNU_PROPERTY_AARCH64_FEATURE_1_PAC	(1U << 1)
 
-/* The x86 instruction sets indicated by the corresponding bits are
+/** The x86 instruction sets indicated by the corresponding bits are
    used in program.  Their support in the hardware is optional.  */
 #define GNU_PROPERTY_X86_ISA_1_USED		0xc0010002
-/* The x86 instruction sets indicated by the corresponding bits are
+/** The x86 instruction sets indicated by the corresponding bits are
    used in program and they must be supported by the hardware.   */
 #define GNU_PROPERTY_X86_ISA_1_NEEDED		0xc0008002
 /* X86 processor-specific features used in program.  */
 #define GNU_PROPERTY_X86_FEATURE_1_AND		0xc0000002
 
-/* GNU_PROPERTY_X86_ISA_1_BASELINE: CMOV, CX8 (cmpxchg8b), FPU (fld),
+/** GNU_PROPERTY_X86_ISA_1_BASELINE: CMOV, CX8 (cmpxchg8b), FPU (fld),
    MMX, OSFXSR (fxsave), SCE (syscall), SSE and SSE2.  */
 #define GNU_PROPERTY_X86_ISA_1_BASELINE		(1U << 0)
-/* GNU_PROPERTY_X86_ISA_1_V2: GNU_PROPERTY_X86_ISA_1_BASELINE,
+/** GNU_PROPERTY_X86_ISA_1_V2: GNU_PROPERTY_X86_ISA_1_BASELINE,
    CMPXCHG16B (cmpxchg16b), LAHF-SAHF (lahf), POPCNT (popcnt), SSE3,
    SSSE3, SSE4.1 and SSE4.2.  */
 #define GNU_PROPERTY_X86_ISA_1_V2		(1U << 1)
-/* GNU_PROPERTY_X86_ISA_1_V3: GNU_PROPERTY_X86_ISA_1_V2, AVX, AVX2, BMI1,
+/** GNU_PROPERTY_X86_ISA_1_V3: GNU_PROPERTY_X86_ISA_1_V2, AVX, AVX2, BMI1,
    BMI2, F16C, FMA, LZCNT, MOVBE, XSAVE.  */
 #define GNU_PROPERTY_X86_ISA_1_V3		(1U << 2)
-/* GNU_PROPERTY_X86_ISA_1_V4: GNU_PROPERTY_X86_ISA_1_V3, AVX512F,
+/** GNU_PROPERTY_X86_ISA_1_V4: GNU_PROPERTY_X86_ISA_1_V3, AVX512F,
    AVX512BW, AVX512CD, AVX512DQ and AVX512VL.  */
 #define GNU_PROPERTY_X86_ISA_1_V4		(1U << 3)
 
-/* This indicates that all executable sections are compatible with
+/** This indicates that all executable sections are compatible with
    IBT.  */
 #define GNU_PROPERTY_X86_FEATURE_1_IBT		(1U << 0)
-/* This indicates that all executable sections are compatible with
+/** This indicates that all executable sections are compatible with
    SHSTK.  */
 #define GNU_PROPERTY_X86_FEATURE_1_SHSTK	(1U << 1)
 
-/* Move records.  */
+/** Move records.  */
 typedef struct
 {
   Elf32_Xword m_value;		/* Symbol value.  */
@@ -1741,7 +1746,7 @@ typedef struct
 /* MIPS specific values for `st_info'.  */
 #define STB_MIPS_SPLIT_COMMON		13
 
-/* Entries found in sections of type SHT_MIPS_GPTAB.  */
+/** Entries found in sections of type SHT_MIPS_GPTAB.  */
 
 typedef union
 {
@@ -1757,7 +1762,7 @@ typedef union
     } gt_entry;				/* Subsequent entries in section.  */
 } Elf32_gptab;
 
-/* Entry found in sections of type SHT_MIPS_REGINFO.  */
+/** Entry found in sections of type SHT_MIPS_REGINFO.  */
 
 typedef struct
 {
@@ -1766,7 +1771,7 @@ typedef struct
   Elf32_Sword ri_gp_value;		/* $gp register value.  */
 } Elf32_RegInfo;
 
-/* Entries found in sections of type SHT_MIPS_OPTIONS.  */
+/** Entries found in sections of type SHT_MIPS_OPTIONS.  */
 
 typedef struct
 {
@@ -1817,7 +1822,7 @@ typedef struct
 #define OPAD_POSTFIX	0x2
 #define OPAD_SYMBOL	0x4
 
-/* Entry found in `.options' section.  */
+/** Entry found in `.options' section.  */
 
 typedef struct
 {
@@ -1954,11 +1959,11 @@ typedef struct
 #define DT_MIPS_AUX_DYNAMIC  0x70000031 /* Address of aux .dynamic.  */
 /* The address of .got.plt in an executable using the new non-PIC ABI.  */
 #define DT_MIPS_PLTGOT	     0x70000032
-/* The base of the PLT in an executable using the new non-PIC ABI if that
+/** The base of the PLT in an executable using the new non-PIC ABI if that
    PLT is writable.  For a non-writable PLT, this is omitted or has a zero
    value.  */
 #define DT_MIPS_RWPLT        0x70000034
-/* An alternative description of the classic MIPS RLD_MAP that is usable
+/** An alternative description of the classic MIPS RLD_MAP that is usable
    in a PIE as it stores a relative offset from the address of the tag
    rather than an absolute address.  */
 #define DT_MIPS_RLD_MAP_REL  0x70000035
@@ -1985,7 +1990,7 @@ typedef struct
 #define RHF_NO_UNRES_UNDEF	   (1 << 13)
 #define RHF_RLD_ORDER_SAFE	   (1 << 14)
 
-/* Entries found in sections of type SHT_MIPS_LIBLIST.  */
+/** Entries found in sections of type SHT_MIPS_LIBLIST.  */
 
 typedef struct
 {
@@ -2016,7 +2021,7 @@ typedef struct
 #define LL_DELAY_LOAD	  (1 << 4)
 #define LL_DELTA	  (1 << 5)
 
-/* Entries found in sections of type SHT_MIPS_CONFLICT.  */
+/** Entries found in sections of type SHT_MIPS_CONFLICT.  */
 
 typedef Elf32_Addr Elf32_Conflict;
 
@@ -2459,7 +2464,7 @@ enum
 #define R_PPC_TLSGD		95 /* none	(sym+add)@tlsgd */
 #define R_PPC_TLSLD		96 /* none	(sym+add)@tlsld */
 
-/* The remaining relocs are from the Embedded ELF ABI, and are not
+/** The remaining relocs are from the Embedded ELF ABI, and are not
    in the SVR4 ELF ABI.  */
 #define R_PPC_EMB_NADDR32	101
 #define R_PPC_EMB_NADDR16	102
@@ -2495,7 +2500,7 @@ enum
 #define R_PPC_REL16_HI		251	/* half16   (sym+add-.)@h */
 #define R_PPC_REL16_HA		252	/* half16   (sym+add-.)@ha */
 
-/* This is a phony reloc to handle any old fashioned TOC16 references
+/** This is a phony reloc to handle any old fashioned TOC16 references
    that may still be in object files.  */
 #define R_PPC_TOC16		255
 
@@ -2638,7 +2643,7 @@ enum
 #define R_PPC64_REL16_HI	251	/* half16   (sym+add-.)@h */
 #define R_PPC64_REL16_HA	252	/* half16   (sym+add-.)@ha */
 
-/* e_flags bits specifying ABI.
+/** e_flags bits specifying ABI.
    1 for original function descriptor using ABI,
    2 for revised ABI without function descriptors,
    0 for unspecified or not using any features affected by the differences.  */

@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/core/engine.c
+ * @brief engine module
+ */
+
 /*
  *   engine.c
  *

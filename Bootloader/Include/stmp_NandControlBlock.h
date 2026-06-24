@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Include/stmp_NandControlBlock.h
+ * @brief stmp_NandControlBlock module
+ */
+
 #ifndef __STMP_NAND_CONTROL_BLOCK__
 #define __STMP_NAND_CONTROL_BLOCK__
 

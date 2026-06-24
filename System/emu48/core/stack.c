@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/core/stack.c
+ * @brief stack module
+ */
+
 /*
  *   stack.c
  *

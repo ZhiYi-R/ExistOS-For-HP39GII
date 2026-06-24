@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/drivers/stmp_audioout.c
+ * @brief Audio output driver
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

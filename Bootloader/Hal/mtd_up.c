@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/mtd_up.c
+ * @brief mtd_up module
+ */
+
 #include "SystemConfig.h"
 #include "FreeRTOS.h"
 
@@ -258,7 +263,7 @@ void MTD_Task()
 
     }
 }
-/*
+/**
 static EventBits_t MTD_getLock()
 {
     uint32_t bit;
@@ -491,7 +496,7 @@ int MTD_ReadPhyPageMeta(uint32_t page, uint32_t len, uint8_t *buffer)
     return retVal;
 }
 
-/*
+/**
 int MTD_WritePhyPageMeta(uint32_t page, uint32_t len, uint8_t *buffer)
 {
     MTD_Operates newOpa;

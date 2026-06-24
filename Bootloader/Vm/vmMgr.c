@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Vm/vmMgr.c
+ * @brief Virtual memory manager
+ */
+
 
 
 #include "SystemConfig.h"
@@ -220,7 +225,7 @@ inline static bool vmMgr_CheckAddrValid(uint32_t addr) {
 
 static uint32_t zram_free, zram_used, zram_total;
 
-/*
+/**
 static void zram_tlsf_walker(void* ptr, size_t size, int used, void* user)
 {
     if(!used)

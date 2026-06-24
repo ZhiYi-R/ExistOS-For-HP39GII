@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/emu48_keyboard.h
+ * @brief Emu48 keyboard mapping
+ */
+
 #pragma once
 
 

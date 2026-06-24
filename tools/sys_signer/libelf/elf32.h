@@ -1,6 +1,10 @@
-/* @LICENSE(UNSW_OZPLB) */
+/**
+ * @file tools/sys_signer/libelf/elf32.h
+ * @brief @LICENSE(UNSW_OZPLB) */
+ */
 
-/*
+
+/**
  * Australian Public Licence B (OZPLB)
  *
  * Version 1-0
@@ -83,7 +87,7 @@
 #include <stdint.h>
 #include "elf_user.h"
 
-/* ELF header functions */
+/** ELF header functions */
 int elf32_checkFile(elf_t *elf);
 
 int elf32_checkProgramHeaderTable(elf_t *elf);

@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Config/SystemConfig.h
+ * @brief System configuration management
+ */
+
 
 #include "FreeRTOSConfig.h"
 
@@ -108,7 +113,7 @@
 #define VM_SYS_ROM_SEG          (VM_SYS_ROM_BASE >> 20)
 #define VM_SYS_ROM_NUM_SEG      (VM_SYS_ROM_SIZE / SEG_SIZE)
 
-/*
+/**
 #define VM_SYS_RAM_BASE         (0x02000000)
 #define VM_SYS_RAM_SIZE         (1048576 * 6)
 #define VM_SYS_RAM_SEG          (VM_ROM_BASE >> 20)

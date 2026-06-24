@@ -1,3 +1,8 @@
+/**
+ * @file System/emu48/core/settings.c
+ * @brief settings module
+ */
+
 /*
  *   settings.c
  *

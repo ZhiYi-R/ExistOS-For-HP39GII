@@ -1,3 +1,8 @@
+/**
+ * @file System/Utils/newlib_stub.c
+ * @brief Newlib C library stubs
+ */
+
 
 
 
@@ -96,7 +101,7 @@ uint32_t getHeapAllocateSize() {
     return info.uordblks;
 }
 
-/*
+/**
 size_t xPortGetFreeHeapSize( void )
 {
         return HEAP_END - (uint32_t)heap;

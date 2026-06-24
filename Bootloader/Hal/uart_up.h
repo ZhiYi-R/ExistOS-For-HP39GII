@@ -1,3 +1,8 @@
+/**
+ * @file Bootloader/Hal/uart_up.h
+ * @brief uart_up module
+ */
+
 #ifndef __UART_UP_H__
 #define __UART_UP_H__
 

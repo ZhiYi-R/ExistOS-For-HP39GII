@@ -1,3 +1,8 @@
+/**
+ * @file System/Core/main.c
+ * @brief Entry point and initialization
+ */
+
 
 
 #include <stdint.h>

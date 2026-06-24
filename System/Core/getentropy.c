@@ -1,3 +1,8 @@
+/**
+ * @file System/Core/getentropy.c
+ * @brief Entropy source for random number generation
+ */
+
 #include <errno.h>
 #include <unistd.h>
 int _getentropy(void *buffer, size_t length) {

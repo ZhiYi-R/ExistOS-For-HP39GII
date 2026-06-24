@@ -1,4 +1,9 @@
-/* lzoconf.h -- configuration of the LZO data compression library
+/**
+ * @file Bootloader/Vm/lzoconf.h
+ * @brief LZO compression configuration
+ */
+
+/** lzoconf.h -- configuration of the LZO data compression library
 
    This file is part of the LZO real-time data compression library.
 
@@ -235,7 +240,7 @@ LZO_COMPILE_TIME_ASSERT_HEADER(sizeof(char *)   == sizeof(lzo_bytep))
 #  define LZO_PRIVATE(r)        static r  __LZO_CDECL
 #endif
 
-/* function types */
+/** function types */
 typedef int
 (__LZO_CDECL *lzo_compress_t)   ( const lzo_bytep src, lzo_uint  src_len,
                                         lzo_bytep dst, lzo_uintp dst_len,
@@ -264,20 +269,20 @@ typedef int
                                      const lzo_bytep dict, lzo_uint dict_len );
 
 
-/* Callback interface. Currently only the progress indicator ("nprogress")
+/** Callback interface. Currently only the progress indicator ("nprogress")
  * is used, but this may change in a future release. */
 
 struct lzo_callback_t;
 typedef struct lzo_callback_t lzo_callback_t;
 #define lzo_callback_p lzo_callback_t __LZO_MMODEL *
 
-/* malloc & free function types */
+/** malloc & free function types */
 typedef lzo_voidp (__LZO_CDECL *lzo_alloc_func_t)
     (lzo_callback_p self, lzo_uint items, lzo_uint size);
 typedef void      (__LZO_CDECL *lzo_free_func_t)
     (lzo_callback_p self, lzo_voidp ptr);
 
-/* a progress indicator callback function */
+/** a progress indicator callback function */
 typedef void (__LZO_CDECL *lzo_progress_func_t)
     (lzo_callback_p, lzo_uint, lzo_uint, int);
 
@@ -303,7 +308,7 @@ struct lzo_callback_t
 // error codes and prototypes
 ************************************************************************/
 
-/* Error codes for the compression/decompression functions. Negative
+/** Error codes for the compression/decompression functions. Negative
  * values are errors, positive values will be used for special but
  * normal events.
  */
@@ -327,7 +332,7 @@ struct lzo_callback_t
 #  define lzo_sizeof_dict_t     ((unsigned)sizeof(lzo_bytep))
 #endif
 
-/* lzo_init() should be the first function you call.
+/** lzo_init() should be the first function you call.
  * Check the return code !
  *
  * lzo_init() is a macro to allow checking that the library and the
@@ -401,7 +406,7 @@ LZO_EXTERN(unsigned) __lzo_align_gap(const lzo_voidp p, lzo_uint size);
 #define LZO_INT64_MAX           LZO_INT64_C(9223372036854775807)
 #define LZO_UINT64_MAX          LZO_UINT64_C(18446744073709551615)
 #endif
-/* deprecated types */
+/** deprecated types */
 typedef union { lzo_bytep a; lzo_uint b; } __lzo_pu_u;
 typedef union { lzo_bytep a; lzo_uint32_t b; } __lzo_pu32_u;
 /* deprecated defines */
