@@ -18,5 +18,5 @@ chmod +x ./tools/sbtools/elftosb
 
 cmake .
 make
-cp $TMP/ExistOS/OSLoader/OSLoader.sb $out/
+cp $TMP/ExistOS/Bootloader/OSLoader.sb $out/
 cp $TMP/ExistOS/System/ExistOS.sys $out/

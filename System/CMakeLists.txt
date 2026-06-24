@@ -1,51 +1,51 @@
 
 
 include_directories(./)
-include_directories(./core)
-include_directories(./drivers)
-include_directories(./graphics)
-include_directories(./utils)
-include_directories(./kernel/scheduler/freertos/core)
-include_directories(./kernel/scheduler/freertos/port)
-include_directories(./third_party/freertos/include)
+include_directories(./Core)
+include_directories(./Drivers)
+include_directories(./UI)
+include_directories(./UI/Core)
+include_directories(./UI/Screens)
+include_directories(./UI/Fonts)
+include_directories(./UI/Lang)
+include_directories(./Utils)
+include_directories(./Fs)
 
-include_directories(./filesystem)
-include_directories(./filesystem/fatfs)
-#include_directories(./filesystem/littlefs) 
+include_directories(${CMAKE_SOURCE_DIR}/External/FreeRTOS/System/core)
+include_directories(${CMAKE_SOURCE_DIR}/External/FreeRTOS/System/port)
+include_directories(${CMAKE_SOURCE_DIR}/External/FreeRTOS/System/include)
 
-
-
-#include_directories(./KLib/lvgl)
-
-#include_directories(${CMAKE_SOURCE_DIR}/Libs/src/micropython-master/)
-#include_directories(${CMAKE_SOURCE_DIR}/Libs/src/micropython-master/ports/eoslib)
-#include_directories(${CMAKE_SOURCE_DIR}/Libs/src/micropython-master/ports/eoslib/build)
-include_directories(${CMAKE_SOURCE_DIR}/Libs/src/libtommath-0.39/)
-include_directories(${CMAKE_SOURCE_DIR}/Libs/src/khicas/)
-include_directories(./applications/user/khicas)
-include_directories(${CMAKE_SOURCE_DIR}/Libs/src/gmp/include/)
+include_directories(${CMAKE_SOURCE_DIR}/External/FatFs)
+include_directories(${CMAKE_SOURCE_DIR}/External/LibTomMath/libtommath-0.39/)
+include_directories(${CMAKE_SOURCE_DIR}/External/KhiCAS/khicas/)
+include_directories(./Apps/user/khicas)
+include_directories(${CMAKE_SOURCE_DIR}/External/GMP/include/)
 
 
-aux_source_directory(./core                                          SYS_SRCS)
-aux_source_directory(./drivers                                       SYS_SRCS)
-aux_source_directory(./graphics                                      SYS_SRCS)
-aux_source_directory(./utils                                         SYS_SRCS)
-aux_source_directory(./kernel/scheduler/freertos/core                SYS_SRCS)
-aux_source_directory(./kernel/scheduler/freertos/port                SYS_SRCS)
-aux_source_directory(./kernel/scheduler/freertos/memory              SYS_SRCS)
-aux_source_directory(./filesystem                                    SYS_SRCS)
-aux_source_directory(./filesystem/fatfs                              SYS_SRCS)
+aux_source_directory(./Core                                          SYS_SRCS)
+aux_source_directory(./Drivers                                       SYS_SRCS)
+aux_source_directory(./UI                                            SYS_SRCS)
+aux_source_directory(./UI/Core                                       SYS_SRCS)
+aux_source_directory(./UI/Screens                                    SYS_SRCS)
+aux_source_directory(./UI/Fonts                                      SYS_SRCS)
+aux_source_directory(./UI/Lang                                       SYS_SRCS)
+aux_source_directory(./Utils                                         SYS_SRCS)
+aux_source_directory(${CMAKE_SOURCE_DIR}/External/FreeRTOS/System/core                SYS_SRCS)
+aux_source_directory(${CMAKE_SOURCE_DIR}/External/FreeRTOS/System/port                SYS_SRCS)
+aux_source_directory(${CMAKE_SOURCE_DIR}/External/FreeRTOS/System/memory              SYS_SRCS)
+aux_source_directory(./Fs                                           SYS_SRCS)
+aux_source_directory(${CMAKE_SOURCE_DIR}/External/FatFs                              SYS_SRCS)
 #aux_source_directory(./filesystem/littlefs                          SYS_SRCS)
-aux_source_directory(./crash                                         SYS_SRCS)
+aux_source_directory(./Crash                                         SYS_SRCS)
 
 # 添加getentropy.c文件到编译源文件
-list(APPEND SYS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/core/getentropy.c)
+list(APPEND SYS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Core/getentropy.c)
 
 #add_subdirectory(gb)
 #add_subdirectory(KLib)
-add_subdirectory(KLib/tjpgdec)
+add_subdirectory(${CMAKE_SOURCE_DIR}/External/TJpgDec tjpgd)
 #add_subdirectory(emu48)
-add_subdirectory(applications/user/khicas)
+add_subdirectory(Apps/user/khicas)
 
 add_executable(sys.elf ${SYS_SRCS})
 
@@ -88,13 +88,12 @@ tjpgd
 #gb 
 #emu48
 #lvgl
-${CMAKE_SOURCE_DIR}/Libs/libkcasgui.libcpp
-#${CMAKE_SOURCE_DIR}/Libs/libmpy.libc
-${CMAKE_SOURCE_DIR}/Libs/libcas.libcpp
-#${CMAKE_SOURCE_DIR}/Libs/libgiac1.4.9.libcpp
-#${CMAKE_SOURCE_DIR}/Libs/libgiac1.2.0.libcpp
-${CMAKE_SOURCE_DIR}/Libs/libtommath.libcpp
-${CMAKE_SOURCE_DIR}/Libs/libgmp.libcpp   
+${CMAKE_SOURCE_DIR}/External/KhiCAS/libkcasgui.libcpp
+#${CMAKE_SOURCE_DIR}/External/MicroPython/libmpy.libc
+${CMAKE_SOURCE_DIR}/External/KhiCAS/libcas.libcpp
+#${CMAKE_SOURCE_DIR}/External/KhiCAS/libgiac.libcpp
+${CMAKE_SOURCE_DIR}/External/LibTomMath/libtommath.libcpp
+${CMAKE_SOURCE_DIR}/External/GMP/libgmp.libcpp
 khicas_lib
 )
 
