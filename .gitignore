@@ -83,6 +83,21 @@ sys_signer
 # nix outputs
 result
 
+# Backup & editor temp files
+*.bak
+*~
+
+# Version control metadata
+CVS/
+
+# Compressed archives (should be extracted, not tracked)
+*.zip
+*.7z
+
+# Build generated files
+genhdr/
+UI_build_stamp.h
+
 # Claude Code
 .claude/
 claude.md
