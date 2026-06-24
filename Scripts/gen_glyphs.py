@@ -125,65 +125,52 @@ def render_glyph(
     font: ImageFont.FreeTypeFont,
     out_dir: Path,
 ) -> str:
-    """Render one glyph at native 16 px then centre-crop to target height."""
+    """Render one glyph at native 16 px, keep bottommost ``target_h`` rows."""
     char = chr(code)
 
     native = Image.new("L", (16, 16), 255)
     draw = ImageDraw.Draw(native)
     draw.text((0, -1), char, font=font, fill=0)
 
-    # Find content rows
     TH = 128
-    pixels = native.load()
-    top, bottom = 16, 0
-    for y in range(16):
-        for x in range(16):
-            if pixels[x, y] < TH:
-                if y < top:
-                    top = y
-                if y > bottom:
-                    bottom = y
-                    break
 
-    if top > bottom:  # empty
-        n = target_h
-        return f"    /* {name:<6} */ {','.join(['0x00'] * n)},"
-
-    content_h = bottom - top + 1
-    avail = target_h
-
-    if avail >= content_h:
-        pad = avail - content_h
-        crop_top = max(0, top - pad // 2)
+    if target_h >= 16:
+        # 8x16 — full render
+        cp = native.load()
+        bytes_: list[int] = []
+        for y in range(16):
+            b = 0
+            for x in range(min(target_w, 16)):
+                if cp[x, y] < TH:
+                    b |= 0x80 >> x
+            bytes_.append(b)
     else:
-        excess = content_h - avail
-        crop_top = top + excess // 2
-
-    crop_bottom = crop_top + avail
-    if crop_top < 0:
-        crop_top, crop_bottom = 0, avail
-    if crop_bottom > 16:
-        crop_bottom, crop_top = 16, 16 - avail
-
-    crop = native.crop((0, crop_top, target_w, crop_bottom))
-
-    # Extract bytes
-    cp = crop.load()
-    bytes_: list[int] = []
-    for y in range(crop.height):
-        b = 0
-        for x in range(min(target_w, crop.width)):
-            if cp[x, y] < TH:
-                b |= 0x80 >> x
-        bytes_.append(b)
+        # Smaller sizes: bottommost target_h rows
+        crop_top = 16 - target_h
+        crop = native.crop((0, crop_top, target_w, 16))
+        cp = crop.load()
+        bytes_: list[int] = []
+        for y in range(crop.height):
+            b = 0
+            for x in range(min(target_w, crop.width)):
+                if cp[x, y] < TH:
+                    b |= 0x80 >> x
+            bytes_.append(b)
 
     # Debug image
     out_dir.mkdir(parents=True, exist_ok=True)
-    # Centre on target canvas for debug
     debug = Image.new("L", (target_w, target_h), 255)
     ox = 0
-    oy = (target_h - crop.height) // 2
-    debug.paste(crop, (ox, oy))
+    debug.paste(
+        Image.new("L", (target_w, target_h), 255).crop((0, 0, target_w, target_h)),
+        (ox, 0),
+    )
+    # Rebuild debug from bytes
+    debug = Image.new("L", (target_w, target_h), 255)
+    for y in range(target_h):
+        for x in range(target_w):
+            if bytes_[y] & (0x80 >> x):
+                debug.putpixel((x, y), 0)
     debug.save(out_dir / f"{name}_{label}.png")
 
     hex_parts = ",".join(f"0x{b:02X}" for b in bytes_)

@@ -1,9 +1,8 @@
 """Generate ASCII bitmap glyphs from unifont for ExistOS UI.
 
-Strategy: render at Unifont's native 16 px, then centre-crop to the
-target height.  This preserves crisp pixel edges because there is no
-interpolation — we simply keep (or trim) whole pixel rows from the
-native bitmap.
+Strategy: render at Unifont's native 16 px, then take the bottommost
+``target_h`` rows.  This keeps the typographic baseline consistent
+across all characters and preserves descenders (g, j, p, q, y, etc.).
 
 For the 8x16 size the full 16 px render is used verbatim.
 
@@ -36,24 +35,6 @@ NATIVE = 16
 THRESHOLD = 128
 
 
-def find_content_rows(
-    img: Image.Image, threshold: int
-) -> tuple[int, int]:
-    """Return (first_row, last_row) containing dark pixels."""
-    pixels = img.load()
-    w, h = img.size
-    top, bottom = h, 0
-    for y in range(h):
-        for x in range(w):
-            if pixels[x, y] < threshold:
-                if y < top:
-                    top = y
-                if y > bottom:
-                    bottom = y
-                    break  # no need to scan rest of this row once found
-    return top, bottom
-
-
 def extract_bytes(img: Image.Image, width: int) -> list[int]:
     """Extract one byte per row (MSB-left)."""
     pixels = img.load()
@@ -68,7 +49,12 @@ def extract_bytes(img: Image.Image, width: int) -> list[int]:
 
 
 def render_char(char: str, target_h: int, target_w: int) -> list[int]:
-    """Render one char by centre-cropping a 16 px native render."""
+    """Render one char, preserving the typographic baseline.
+
+    For the primary 8x16 size the full 16 px native render is used
+    verbatim.  For smaller sizes the bottom ``target_h`` rows of the
+    16 px render are kept, ensuring that descenders are not clipped.
+    """
     font = ImageFont.truetype(str(FONT_PATH), NATIVE)
 
     # Native 16 px render
@@ -77,36 +63,12 @@ def render_char(char: str, target_h: int, target_w: int) -> list[int]:
     draw.text((0, -1), char, font=font, fill=0)
 
     if target_h == NATIVE:
-        # 8x16 — use the full render verbatim
+        # 8x16 — verbatim
         return extract_bytes(native, target_w)
 
-    # Smaller sizes: centre-crop to target_h rows.
-    top, bottom = find_content_rows(native, THRESHOLD)
-    if top > bottom:          # blank glyph (space)
-        return [0] * target_h
-
-    content_h = bottom - top + 1
-    avail = target_h
-
-    if avail >= content_h:
-        # Pad evenly above and below.
-        pad = avail - content_h
-        crop_top = max(0, top - pad // 2)
-    else:
-        # Content taller than target — lose top/bottom equally.
-        excess = content_h - avail
-        crop_top = top + excess // 2
-
-    crop_bottom = crop_top + avail
-    # Clamp to valid range
-    if crop_top < 0:
-        crop_top = 0
-        crop_bottom = avail
-    if crop_bottom > NATIVE:
-        crop_bottom = NATIVE
-        crop_top = NATIVE - avail
-
-    crop = native.crop((0, crop_top, target_w, crop_bottom))
+    # Smaller sizes: keep the bottommost target_h rows.
+    crop_top = NATIVE - target_h
+    crop = native.crop((0, crop_top, target_w, NATIVE))
     return extract_bytes(crop, target_w)
 
 
