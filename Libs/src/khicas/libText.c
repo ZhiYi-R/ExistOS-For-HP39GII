@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "LibText.h"
+#include "libText.h"
 
 // Thanks to Simon Lothar for this function
 typedef char*(*Txt_SC)(void);

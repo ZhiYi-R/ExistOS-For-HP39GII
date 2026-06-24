@@ -14,7 +14,7 @@
 #include "Input.h"
 #include "Editeur.h"
 #include "Equation.h"
-#include "History.h"
+#include "history.h"
 #include "Tableur.h"
 #include "Cfg.h"
 #include <giac/giac.h>

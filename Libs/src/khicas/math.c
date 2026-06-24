@@ -1,4 +1,4 @@
-#include "TeX.h"
+#include "tex.h"
 
 int TeX_isTeX(char* expr)
 {

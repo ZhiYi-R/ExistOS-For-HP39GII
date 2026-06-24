@@ -82,3 +82,7 @@ sysigner
 
 # nix outputs
 result
+
+# Claude Code
+.claude/
+claude.md
