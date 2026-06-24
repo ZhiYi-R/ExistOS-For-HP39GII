@@ -9,7 +9,7 @@ SET(CMAKE_EXE_LINKER_FLAGS "-static")
 set(CMAKE_BUILD_TYPE "MinSizeRel") 
 
 include_directories(./Config)
-include_directories(./Fonts)
+include_directories(${CMAKE_SOURCE_DIR}/fonts)
 include_directories(./Include)
 include_directories(./Src)
 include_directories(./drivers)
