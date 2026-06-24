@@ -193,7 +193,7 @@ void LLIO_NotifySerialTxAvailable() {
 }
 
 void LL_CheckIRQAndTrap() {
-    if ((vm_enable_irq == false) || vm_in_exception) {
+    if (((int)vm_enable_irq == false) || vm_in_exception) {
         return;
     }
     LLIRQ_Info_t curIRQ;
@@ -239,7 +239,7 @@ void LLIRQ_task(void *pvParameters) {
                 vTaskDelay(2);
             }while(
                 (g_vm_in_pagefault) ||
-                (vm_enable_irq == false) ||
+                ((int)vm_enable_irq == false) ||
                 vm_in_exception /*||
                 (eTaskStateGet(vm_sys) != eReady)*/
             );
@@ -328,7 +328,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
                 break;
             }
             case LL_SWI_ENABLE_IRQ:
-                vm_enable_irq = currentCall.para0;
+                vm_enable_irq = (currentCall.para0 != 0u);
                 LLAPI_INFO("enable IRQ:%d\n", vm_enable_irq);
                 break;
 
@@ -362,7 +362,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
                 }
 
                 vm_load_context(from_addr, false);
-                vm_enable_irq = currentCall.para1;
+                vm_enable_irq = (currentCall.para1 != 0u);
                 vm_in_exception = false;
                 curExp = 0;
                 LLAPI_INFO("RESTORE_CONTEXT:%08x\n", from_addr);
@@ -380,7 +380,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
 
 
                 vm_load_context(from_addr, false);
-                vm_enable_irq = currentCall.para1;
+                vm_enable_irq = (currentCall.para1 != 0u);
                 LLAPI_INFO("SET_CONTEXT:%08x\n", from_addr);
                 break;
             }
@@ -428,7 +428,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
 
             case LL_SWI_SERIAL_RX_COUNT: {
                 *currentCall.pRet = tud_cdc_available();
-                INFO("get cnt:%ld\n", *currentCall.pRet);
+                INFO("get cnt:%u\n", *currentCall.pRet);
             } break;
 
             case LL_SWI_SERIAL_GETCH: {
@@ -436,11 +436,11 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
             } break;
 
             case LL_SWI_SET_KEY_REPORT: {
-                vm_key_input_enable = currentCall.para0;
+                vm_key_input_enable = (currentCall.para0 != 0u);
             } break;
 
             case LL_SWI_SET_SERIALPORT: {
-                vm_serial_enable = currentCall.para0;
+                vm_serial_enable = (currentCall.para0 != 0u);
             } break;
 
             case LL_SWI_DISPLAY_SET_INDICATION:
@@ -585,7 +585,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
 
             case LL_SWI_CHARGE_ENABLE: 
             {
-                portChargeEnable(currentCall.para0);
+                portChargeEnable(currentCall.para0 != 0u);
             }break;
 
             case LL_SWI_SLOW_DOWN_ENABLE:

@@ -627,10 +627,10 @@ bool elf_guess(elf_read_fn_t read, void *user)
     if(!read(user, 0, &ehdr, sizeof(ehdr)))
         return false;
     /* basic checks */
-    return ehdr.e_ident[EI_MAG0] == ELFMAG0 && ehdr.e_ident[EI_MAG1] == ELFMAG1 &&
+    return (ehdr.e_ident[EI_MAG0] == ELFMAG0 && ehdr.e_ident[EI_MAG1] == ELFMAG1 &&
             ehdr.e_ident[EI_MAG2] == ELFMAG2 && ehdr.e_ident[EI_MAG3] == ELFMAG3 &&
             ehdr.e_ehsize == sizeof(ehdr) && ehdr.e_phentsize == sizeof(Elf32_Phdr) &&
-            ehdr.e_shentsize == sizeof(Elf32_Shdr);
+            ehdr.e_shentsize == sizeof(Elf32_Shdr)) != 0;
 }
 
 bool elf_read_file(struct elf_params_t *params, elf_read_fn_t read,

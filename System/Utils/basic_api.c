@@ -53,10 +53,13 @@ void api_vram_clear(uint16_t color)
 void api_vram_put_char(int x0, int y0, char ch, int fg, int bg, int fontSize) 
 {
 	char *fbuff = (char *)svram;
-    int font_w;
-    int font_h;
-    const unsigned char *pCh;
-    unsigned int x = 0, y = 0, i = 0, j = 0;
+    int font_w = 0;
+    int font_h = 0;
+    const unsigned char *pCh = NULL;
+    unsigned int x = 0;
+    unsigned int y = 0;
+    unsigned int i = 0;
+    unsigned int j = 0;
 
     if ((ch < ' ') || (ch > '~' + 1)) {
         return;
@@ -104,10 +107,11 @@ void api_vram_put_char(int x0, int y0, char ch, int fg, int bg, int fontSize)
 
 void api_vram_put_string(int x0, int y0, char *s, int fg, int bg, int fontSize) 
 {
-    int font_w;
-    int font_h;
+    int font_w = 0;
+    int font_h = 0;
     int len = strlen(s);
-    int x = 0, y = 0;
+    int x = 0;
+    int y = 0;
 
     if (fontSize <= 16) {
         switch (fontSize) {
@@ -157,7 +161,8 @@ void api_vram_set_pixel(uint32_t x, uint32_t y, uint8_t c)
 
 void api_vram_draw_HLine(int y, int x1, int x2, unsigned short c)
 {
-	unsigned int _x1, _x2;
+	unsigned int _x1;
+	unsigned int _x2;
 	if((x1 & x2) >> 31 || x1 + x2 >= 256 || (unsigned)y > 127)
 	{
 		return;
@@ -179,7 +184,8 @@ void api_vram_draw_HLine(int y, int x1, int x2, unsigned short c)
 
 void api_vram_draw_VLine(int x, int y1, int y2, unsigned short c)
 {
-	unsigned int _y1, _y2;
+	unsigned int _y1;
+	unsigned int _y2;
 	if((y1 & y2) >> 31 || y1 + y2 >= 128 || (unsigned)x > 255)
 	{
 		return;
@@ -206,7 +212,7 @@ void api_vram_draw_line(int x1, int y1, int x2, int y2, unsigned short c)
 	int sx = (x1 < x2)?1:-1;
 	int sy = (y1 < y2)?1:-1;
 	int err = dx-dy;
-	int e2;
+	int e2 = 0;
 
 	while (!(x1 == x2 && y1 == y2))
 	{
@@ -227,7 +233,12 @@ void api_vram_draw_line(int x1, int y1, int x2, int y2, unsigned short c)
 
 void api_vram_fill_rect(int x, int y, int w, int h, unsigned short c)
 {
-	unsigned int _x = max(x, 0), _y = max(y, 0), _w = min(256 - _x, w - _x + x), _h = min(127 - _y, h - _y + y), i, j;
+	unsigned int _x = max(x, 0);
+	unsigned int _y = max(y, 0);
+	unsigned int _w = min(256 - _x, w - _x + x);
+	unsigned int _h = min(127 - _y, h - _y + y);
+	unsigned int i;
+	unsigned int j;
 	if(_x < 256 && _y < 127)
 	{
 		for(j = _y; j < _y + _h; j++)
@@ -241,7 +252,8 @@ int api_get_key(int check_key)
 {
     uint32_t keys = ll_vm_check_key();
     uint32_t keys2 = keys;
-    uint16_t key, press;
+    uint16_t key;
+    uint16_t press;
     key = keys & 0xFFFF;
     press = keys >> 16;
 

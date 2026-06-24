@@ -56,7 +56,7 @@ static int blkTestWrite(void *adr)
 
 static void *blkCheck(void *adr)
 {
-    uint8_t tst_val;
+    uint8_t tst_val = 0;
     testRandSetSeed((uint32_t)adr);
     for(int i = 0; i < ALLOCATE_BLOCK_SIZE; i++)
     {
@@ -64,7 +64,7 @@ static void *blkCheck(void *adr)
         if(((uint8_t *)adr)[i] != tst_val)
         {
             
-            printf("ERROR Detected at: %08x, %02x == %02x\n", &((uint8_t *)adr)[i], tst_val, ((uint8_t *)adr)[i] );
+            printf("ERROR Detected at: %8s, %02x == %02x\n", &((uint8_t *)adr)[i], tst_val, ((uint8_t *)adr)[i] );
             return &((uint8_t *)adr)[i];
         }
     }
@@ -101,7 +101,7 @@ void memtest(uint32_t testSize)
         blkTestWrite(addr[i]);
     }
 
-    void *fadr;
+    void *fadr = NULL;
     for(int i = 0 ; i < blks; i++)
     {
         fadr = blkCheck(addr[i]);

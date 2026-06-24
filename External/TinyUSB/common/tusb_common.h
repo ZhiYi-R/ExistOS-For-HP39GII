@@ -122,7 +122,7 @@ static inline uint32_t tu_abs(int32_t value) { return (uint32_t)((value < 0) ? (
 /// inclusive range checking
 static inline bool tu_within(uint32_t lower, uint32_t value, uint32_t upper)
 {
-  return (lower <= value) && (value <= upper);
+  return ((lower <= value) && (value <= upper)) != 0;
 }
 
 // log2 of a value is its MSB's position
@@ -141,7 +141,7 @@ static inline uint8_t tu_log2(uint32_t value)
 // Bit
 static inline uint32_t tu_bit_set  (uint32_t value, uint8_t pos) { return value | TU_BIT(pos);                  }
 static inline uint32_t tu_bit_clear(uint32_t value, uint8_t pos) { return value & (~TU_BIT(pos));               }
-static inline bool     tu_bit_test (uint32_t value, uint8_t pos) { return (value & TU_BIT(pos)) ? true : false; }
+static inline bool     tu_bit_test (uint32_t value, uint8_t pos) { return ((value & TU_BIT(pos)) ? true : false) != 0; }
 
 /*------------------------------------------------------------------*/
 /* Count number of arguments of __VA_ARGS__

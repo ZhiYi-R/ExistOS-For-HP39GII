@@ -19,7 +19,7 @@
 
 uint64_t nsToCycles(uint64_t nstime, uint64_t period, uint64_t min) 
 {
-    uint64_t k;
+    uint64_t k = 0;
     k = (nstime + period - 1) / period;
     return (k > min) ? k : min;
 }
@@ -55,7 +55,8 @@ void portBoardResetTick()
 
 void portDelayus(uint32_t us)
 {
-    uint32_t start, cur;
+    uint32_t start;
+    uint32_t cur;
     start = cur = HW_DIGCTL_MICROSECONDS_RD();
     while (cur < start + us) {
         cur = HW_DIGCTL_MICROSECONDS_RD();
@@ -64,7 +65,8 @@ void portDelayus(uint32_t us)
 
 void portDelayms(uint32_t ms)
 {
-    uint32_t start, cur;
+    uint32_t start;
+    uint32_t cur;
     start = cur = HW_RTC_MILLISECONDS_RD();
     while (cur < start + ms) {
         cur = HW_RTC_MILLISECONDS_RD();
@@ -280,7 +282,7 @@ uint32_t portGetBatteryMode()
 
 uint32_t portGetPWRSpeed()
 {
-    uint8_t val;
+    uint8_t val = 0;
     static uint8_t last_val;
 
     vTaskEnterCritical();

@@ -347,7 +347,7 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void *buff
             MTD_ReadPhyPage(lba, offset, bufsize, buffer);
             #endif
             }else{
-                printf("RD:lba=%ld, off:%ld, len:%ld\n",lba, offset, bufsize);
+                printf("RD:lba=%u, off:%u, len:%u\n",lba, offset, bufsize);
             }
 
         }
@@ -429,7 +429,7 @@ int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t *
             #endif
             
         }else{
-            printf("RD:lba=%ld, off:%ld, len:%ld\n",lba, offset, bufsize);
+            printf("RD:lba=%u, off:%u, len:%u\n",lba, offset, bufsize);
         }
         break;
 

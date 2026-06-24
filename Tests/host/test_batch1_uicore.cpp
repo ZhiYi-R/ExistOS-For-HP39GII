@@ -1,8 +1,3 @@
-/**
- * @file Tests/host/test_batch1_uicore.cpp
- * @brief test_batch1_uicore module
- */
-
 #include <cassert>
 #include <cstdarg>
 #include <cstdio>

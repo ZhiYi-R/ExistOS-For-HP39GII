@@ -72,7 +72,7 @@ uint32_t crash_log_get_stack_trace(uint8_t* buffer, uint32_t buffer_size) {
     }
     
     // 获取当前栈指针
-    uint32_t sp;
+    uint32_t sp = 0;
     __asm volatile ("mov %0, sp" : "=r" (sp));
     
     // 复制栈数据
@@ -146,7 +146,7 @@ bool crash_log_create_file(const crash_log_t* log) {
     }
     
     char filename[64];
-    snprintf(filename, sizeof(filename), "%s/%s%lu%s", 
+    snprintf(filename, sizeof(filename), "%s/%s%u%s", 
              CRASH_LOG_DIR, CRASH_LOG_FILE_PREFIX, log->timestamp, CRASH_LOG_FILE_EXTENSION);
     
 #if FS_TYPE == FS_FATFS
@@ -159,22 +159,22 @@ bool crash_log_create_file(const crash_log_t* log) {
     
     // 写入崩溃日志内容
     char buffer[512];
-    UINT bytes_written;
+    UINT bytes_written = 0;
     
     // 写入头部信息
     snprintf(buffer, sizeof(buffer), 
              "=== ExistOS Crash Log ===\n"
-             "Timestamp: %lu\n"
+             "Timestamp: %u\n"
              "Type: %d\n"
-             "PC: 0x%08lX\n"
-             "LR: 0x%08lX\n"
-             "SP: 0x%08lX\n"
-             "PSR: 0x%08lX\n"
+             "PC: 0x%08X\n"
+             "LR: 0x%08X\n"
+             "SP: 0x%08X\n"
+             "PSR: 0x%08X\n"
              "Task: %s\n"
              "File: %s\n"
              "Line: %d\n"
              "Description: %s\n"
-             "Stack Trace Size: %lu\n",
+             "Stack Trace Size: %u\n",
              log->timestamp, log->type, log->pc, log->lr, log->sp, log->psr,
              log->task_name, log->file, log->line, log->description, log->stack_trace_size);
     
@@ -185,7 +185,7 @@ bool crash_log_create_file(const crash_log_t* log) {
         f_write(&file, "Stack Trace:\n", 13, &bytes_written);
         
         for (uint32_t i = 0; i < log->stack_trace_size; i += 16) {
-            int line_len = snprintf(buffer, sizeof(buffer), "%08lX: ", (uint32_t)(log->sp + i));
+            int line_len = snprintf(buffer, sizeof(buffer), "%08X: ", (uint32_t)(log->sp + i));
             
             for (uint32_t j = 0; j < 16 && (i + j) < log->stack_trace_size; j++) {
                 line_len += snprintf(buffer + line_len, sizeof(buffer) - line_len, 
@@ -321,7 +321,10 @@ void crash_log_clear_all(void) {
 // 系统崩溃处理函数
 void crash_handler(crash_type_t type, const char* file, int line, const char* description, ...) {
     // 获取当前寄存器值
-    uint32_t pc, lr, sp, psr;
+    uint32_t pc;
+    uint32_t lr;
+    uint32_t sp;
+    uint32_t psr;
     
     __asm volatile ("mov %0, pc" : "=r" (pc));
     __asm volatile ("mov %0, lr" : "=r" (lr));
@@ -362,10 +365,10 @@ void crash_handler(crash_type_t type, const char* file, int line, const char* de
     printf("Description: %s\n", formatted_desc);
     printf("File: %s:%d\n", file ? file : "Unknown", line);
     printf("Task: %s\n", task_name);
-    printf("PC: 0x%08lX\n", pc);
-    printf("LR: 0x%08lX\n", lr);
-    printf("SP: 0x%08lX\n", sp);
-    printf("PSR: 0x%08lX\n", psr);
+    printf("PC: 0x%08X\n", pc);
+    printf("LR: 0x%08X\n", lr);
+    printf("SP: 0x%08X\n", sp);
+    printf("PSR: 0x%08X\n", psr);
     printf("===================\n\n");
     
     // 系统挂起

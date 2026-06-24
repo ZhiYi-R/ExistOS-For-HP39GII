@@ -127,7 +127,8 @@ bool parse_key(char **pstr, struct crypto_key_t *key)
     {
         for(int j = 0; j < 128; j++)
         {
-            byte a, b;
+            byte a;
+            byte b;
             if(convxdigit(str[2 * j], &a) || convxdigit(str[2 * j + 1], &b))
                 return false;
             key->u.xor_key[j / 64].key[j % 64] = (a << 4) | b;
@@ -143,7 +144,8 @@ bool parse_key(char **pstr, struct crypto_key_t *key)
             return false;
         for(int j = 0; j < 16; j++)
         {
-            byte a, b;
+            byte a;
+            byte b;
             if(convxdigit(str[2 * j], &a) || convxdigit(str[2 * j + 1], &b))
                 return false;
             key->u.key[j] = (a << 4) | b;
@@ -185,7 +187,7 @@ void misc_std_printf(void *user, const char *fmt, ...)
 
 bool add_keys_from_file(const char *key_file)
 {
-    int size;
+    int size = 0;
     FILE *fd = fopen(key_file, "r");
     if(fd == NULL)
     {
@@ -320,7 +322,7 @@ enum sb_version_guess_t guess_sb_version(const char *filename)
     if(memcmp(sig, "STMP", 4) != 0)
         ret(SB_VERSION_UNK);
     // check header size (v1)
-    uint32_t hdr_size;
+    uint32_t hdr_size = 0;
     if(fseek(f, 8, SEEK_SET))
         ret(SB_VERSION_UNK);
     if(fread(&hdr_size, 4, 1, f) != 1)

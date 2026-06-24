@@ -6,7 +6,7 @@
 #pragma once
 
 #include <stdio.h>
-#include "../crash/CrashLog.h"
+#include "../Crash/CrashLog.h"
 
 // 使用崩溃日志系统替换原有的PANIC宏
 #define PANIC(...) \

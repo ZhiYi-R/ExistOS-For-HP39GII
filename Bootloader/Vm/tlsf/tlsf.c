@@ -286,7 +286,7 @@ static const int table[] = {
 
 static __inline__ int ls_bit(int i)
 {
-    unsigned int a;
+    unsigned int a = 0;
     unsigned int x = i & -i;
 
     a = x <= 0xffff ? (x <= 0xff ? 0 : 8) : (x <= 0xffffff ? 16 : 24);
@@ -295,7 +295,7 @@ static __inline__ int ls_bit(int i)
 
 static __inline__ int ms_bit(int i)
 {
-    unsigned int a;
+    unsigned int a = 0;
     unsigned int x = (unsigned int) i;
 
     a = x <= 0xffff ? (x <= 0xff ? 0 : 8) : (x <= 0xffffff ? 16 : 24);
@@ -314,7 +314,7 @@ static __inline__ void clear_bit(int nr, u32_t * addr)
 
 static __inline__ void MAPPING_SEARCH(size_t * _r, int *_fl, int *_sl)
 {
-    int _t;
+    int _t = 0;
 
     if (*_r < SMALL_BLOCK) {
         *_fl = 0;
@@ -433,8 +433,10 @@ static __inline__ void *get_new_area(size_t * size)
 
 static __inline__ bhdr_t *process_area(void *area, size_t size)
 {
-    bhdr_t *b, *lb, *ib;
-    area_info_t *ai;
+    bhdr_t *b;
+    bhdr_t *lb;
+    bhdr_t *ib;
+    area_info_t *ai = NULL;
 
     ib = (bhdr_t *) area;
     ib->size =
@@ -462,8 +464,9 @@ static char *mp = NULL;         /* Default memory pool. */
 size_t init_memory_pool(size_t mem_pool_size, void *mem_pool)
 {
 /******************************************************************/
-    tlsf_t *tlsf;
-    bhdr_t *b, *ib;
+    tlsf_t *tlsf = NULL;
+    bhdr_t *b;
+    bhdr_t *ib;
 
     if (!mem_pool || !mem_pool_size || mem_pool_size < sizeof(tlsf_t) + BHDR_OVERHEAD * 8) {
         ERROR_MSG("init_memory_pool (): memory_pool invalid\n");
@@ -510,8 +513,16 @@ size_t add_new_area(void *area, size_t area_size, void *mem_pool)
 {
 /******************************************************************/
     tlsf_t *tlsf = (tlsf_t *) mem_pool;
-    area_info_t *ptr, *ptr_prev, *ai;
-    bhdr_t *ib0, *b0, *lb0, *ib1, *b1, *lb1, *next_b;
+    area_info_t *ptr;
+    area_info_t *ptr_prev;
+    area_info_t *ai;
+    bhdr_t *ib0;
+    bhdr_t *b0;
+    bhdr_t *lb0;
+    bhdr_t *ib1;
+    bhdr_t *b1;
+    bhdr_t *lb1;
+    bhdr_t *next_b;
 
     memset(area, 0, area_size);
     ptr = tlsf->area_head;
@@ -623,7 +634,7 @@ void destroy_memory_pool(void *mem_pool)
 void *tlsf_malloc(size_t size)
 {
 /******************************************************************/
-    void *ret;
+    void *ret = NULL;
 
 #if USE_MMAP || USE_SBRK
     if (!mp) {
@@ -665,7 +676,7 @@ void tlsf_free(void *ptr)
 void *tlsf_realloc(void *ptr, size_t size)
 {
 /******************************************************************/
-    void *ret;
+    void *ret = NULL;
 
 #if USE_MMAP || USE_SBRK
 	if (!mp) {
@@ -686,7 +697,7 @@ void *tlsf_realloc(void *ptr, size_t size)
 void *tlsf_calloc(size_t nelem, size_t elem_size)
 {
 /******************************************************************/
-    void *ret;
+    void *ret = NULL;
 
     TLSF_ACQUIRE_LOCK(&((tlsf_t *)mp)->lock);
 
@@ -702,9 +713,12 @@ void *malloc_ex(size_t size, void *mem_pool)
 {
 /******************************************************************/
     tlsf_t *tlsf = (tlsf_t *) mem_pool;
-    bhdr_t *b, *b2, *next_b;
-    int fl, sl;
-    size_t tmp_size;
+    bhdr_t *b;
+    bhdr_t *b2;
+    bhdr_t *next_b;
+    int fl;
+    int sl;
+    size_t tmp_size = 0;
 
     size = (size < MIN_BLOCK_SIZE) ? MIN_BLOCK_SIZE : ROUNDUP_SIZE(size);
 
@@ -764,8 +778,10 @@ void free_ex(void *ptr, void *mem_pool)
 {
 /******************************************************************/
     tlsf_t *tlsf = (tlsf_t *) mem_pool;
-    bhdr_t *b, *tmp_b;
-    int fl = 0, sl = 0;
+    bhdr_t *b;
+    bhdr_t *tmp_b;
+    int fl = 0;
+    int sl = 0;
 
     if (!ptr) {
         return;
@@ -803,11 +819,14 @@ void *realloc_ex(void *ptr, size_t new_size, void *mem_pool)
 {
 /******************************************************************/
     tlsf_t *tlsf = (tlsf_t *) mem_pool;
-    void *ptr_aux;
-    unsigned int cpsize;
-    bhdr_t *b, *tmp_b, *next_b;
-    int fl, sl;
-    size_t tmp_size;
+    void *ptr_aux = NULL;
+    unsigned int cpsize = 0;
+    bhdr_t *b;
+    bhdr_t *tmp_b;
+    bhdr_t *next_b;
+    int fl;
+    int sl;
+    size_t tmp_size = 0;
 
     if (!ptr) {
         if (new_size)
@@ -889,7 +908,7 @@ void *realloc_ex(void *ptr, size_t new_size, void *mem_pool)
 void *calloc_ex(size_t nelem, size_t elem_size, void *mem_pool)
 {
 /******************************************************************/
-    void *ptr;
+    void *ptr = NULL;
 
     if (nelem <= 0 || elem_size <= 0)
         return NULL;

@@ -16,7 +16,7 @@ static VROMMapInfo_t *vmmap_list;
 extern bool g_system_in_emulator;
 
 void VROMLoader_Initialize() {
-    printf("Running in Emulator:%d\n", g_system_in_emulator);
+    printf("Running in Emulator:%d\n", (int)g_system_in_emulator);
 
 }
 
@@ -43,7 +43,7 @@ int VROMLoaderCreateFileMap(FIL *f, uint32_t inFileStart, uint32_t memAddress, u
     if (VROMMapCheck(memAddress, mapSize)) {
         return -1;
     }
-    VROMMapInfo_t *map;
+    VROMMapInfo_t *map = NULL;
     if (vmmap_list == NULL) {
         vmmap_list = pvPortMalloc(sizeof(VROMMapInfo_t));
         if (!vmmap_list) {
@@ -72,7 +72,7 @@ int VROMLoaderCreateFileMap(FIL *f, uint32_t inFileStart, uint32_t memAddress, u
 
     if(g_system_in_emulator)
     {
-        UINT br;
+        UINT br = 0;
         f_lseek(f, inFileStart);
         f_read(f, (void *)memAddress, mapSize, &br);
         f_lseek(f, 0);
@@ -124,7 +124,7 @@ int VROMLoaderDeleteMap(uint32_t vaddr) {
 }
 
 int VROMIRQLoad(uint32_t vaddr) {
-    UINT br;
+    UINT br = 0;
     VROMMapInfo_t *map = findMappedMap(vaddr);
     if (map && (vaddr + MEM_PAGE_SIZE <= map->map_vm_addr + map->map_size)) {
         f_lseek(map->map_f, vaddr - map->map_vm_addr + map->map_file_start);

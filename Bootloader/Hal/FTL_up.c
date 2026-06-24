@@ -45,12 +45,12 @@ static int _log2(int x) // log2(x)
 
 uint32_t meta;
 int dhara_nand_is_bad(const struct dhara_nand *n, dhara_block_t b) {
-    uint32_t ret;
+    uint32_t ret = 0;
     ret = MTD_ReadPhyPageMeta((DATA_START_BLOCK + b) * pMtdinfo->PagesPerBlock, 4, (uint8_t *)&meta);
     // printf("TEST BAD\n");
     if ((ret == -1) || (meta == BAD_BLOCK)) {
 
-        printf("Found BAD Block:%lu\n", DATA_START_BLOCK + b);
+        printf("Found BAD Block:%u\n", DATA_START_BLOCK + b);
         return 1;
     }
     return 0;
@@ -78,7 +78,7 @@ void dhara_nand_mark_bad(const struct dhara_nand *n, dhara_block_t b) {
 
 int dhara_nand_erase(const struct dhara_nand *n, dhara_block_t b,
                      dhara_error_t *err) {
-    int ret;
+    int ret = 0;
     ret = MTD_ErasePhyBlock(DATA_START_BLOCK + b);
     // printf("ERASE ret %d, block:%d\n",ret,b);
     *err = DHARA_E_NONE;
@@ -92,7 +92,7 @@ int dhara_nand_erase(const struct dhara_nand *n, dhara_block_t b,
 int dhara_nand_prog(const struct dhara_nand *n, dhara_page_t p,
                     const uint8_t *data,
                     dhara_error_t *err) {
-    int ret;
+    int ret = 0;
     uint32_t metadata = DATA_BLOCK;
     // printf("PROG page:%d, data:%p\n",p, data);
     // ret = MTD_WritePhyPage(p + (DATA_START_BLOCK *  pMtdinfo->PagesPerBlock) , (uint8_t *)data);
@@ -113,7 +113,7 @@ int dhara_nand_prog(const struct dhara_nand *n, dhara_page_t p,
 }
 
 int dhara_nand_is_free(const struct dhara_nand *n, dhara_page_t p) {
-    int ret;
+    int ret = 0;
     ret = MTD_ReadPhyPage(p + (DATA_START_BLOCK * pMtdinfo->PagesPerBlock), 0, _pow(2, n->log2_page_size), NULL);
     // printf("is_free %d\n",ret);
     return (ret == 1);
@@ -123,7 +123,7 @@ int dhara_nand_read(const struct dhara_nand *n, dhara_page_t p,
                     size_t offset, size_t length,
                     uint8_t *data,
                     dhara_error_t *err) {
-    int ret;
+    int ret = 0;
     // printf("start READ page:%d, offset:%d, len:%d, buff:%p\n", p,offset,length,data);
     ret = MTD_ReadPhyPage(p + (DATA_START_BLOCK * pMtdinfo->PagesPerBlock), offset, length, data);
 
@@ -202,20 +202,20 @@ void FTL_ClearAllSector() {
 
 int FTL_MapInit() {
     dhara_error_t err;
-    int ret;
+    int ret = 0;
     dhara_map_init(&FTLmap, &nandDevice, PageBuffer, GC_RATIO);
     err = 0;
     ret = dhara_map_resume(&FTLmap, &err);
     INFO("Resume FTL: %d\n", ret);
 
     max_ftl_pages = dhara_map_capacity(&FTLmap);
-    INFO("FTL capacity %ld/%ld (%ld K/ %ld K)\n", dhara_map_size(&FTLmap), max_ftl_pages, dhara_map_size(&FTLmap) * pMtdinfo->PageSize_B / 1024, dhara_map_capacity(&FTLmap) * pMtdinfo->PageSize_B / 1024);
+    INFO("FTL capacity %u/%u (%u K/ %u K)\n", dhara_map_size(&FTLmap), max_ftl_pages, dhara_map_size(&FTLmap) * pMtdinfo->PageSize_B / 1024, dhara_map_capacity(&FTLmap) * pMtdinfo->PageSize_B / 1024);
 
     return ret;
 }
 
 int FTL_init() {
-    int ret;
+    int ret = 0;
 
     FTL_Operates_Queue = xQueueCreate(32, sizeof(FTL_Operates));
     // FTLLockEventGroup = xEventGroupCreate();
@@ -333,14 +333,14 @@ int FTL_GetSectorSize() {
 int FTL_ReadSector(uint32_t sector, uint32_t num, uint8_t *buf) {
 
     FTL_Operates newOpa;
-    int retVal;
+    int retVal = 0;
     if (!FTL_inited()) {
         INFO("FTL Not Inited.\n");
         return -1;
     }
 
     if (sector + num > max_ftl_pages) {
-        INFO("sector + num > max_ftl_pages, %ld, %ld, %ld\n", sector, num, max_ftl_pages);
+        INFO("sector + num > max_ftl_pages, %u, %u, %u\n", sector, num, max_ftl_pages);
         return -1;
     }
 
@@ -359,7 +359,7 @@ int FTL_ReadSector(uint32_t sector, uint32_t num, uint8_t *buf) {
 
 int FTL_WriteSector(uint32_t sector, uint32_t num, uint8_t *buf) {
     FTL_Operates newOpa;
-    int retVal;
+    int retVal = 0;
     if (!FTL_inited()) {
         return -1;
     }
@@ -389,7 +389,7 @@ int FTL_WriteSector(uint32_t sector, uint32_t num, uint8_t *buf) {
 
 int FTL_TrimSector(uint32_t sector) {
     FTL_Operates newOpa;
-    int retVal;
+    int retVal = 0;
     if (!FTL_inited()) {
         INFO("FTL Not Inited.\n");
         return -1;
@@ -417,9 +417,9 @@ int FTL_TrimSector(uint32_t sector) {
 int FTL_Sync() {
     //FTL_Operates newOpa;
     dhara_error_t err;
-    int ret;
+    int ret = 0;
 
-    int retVal;
+    int retVal = 0;
     if (!FTL_inited()) {
         return -1;
     }

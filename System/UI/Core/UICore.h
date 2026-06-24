@@ -27,7 +27,7 @@ private:
     int disp_w, disp_h;
     void (*drawf)(uint8_t *buf, uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1);
     inline void buf_set(uint32_t x, uint32_t y, uint8_t c) {
-        if (disp_buf) {
+        if (disp_buf != nullptr) {
             if ((x < this->disp_w) && (y < this->disp_h))
                 this->disp_buf[x + y * this->disp_w] = c;
         }
@@ -49,14 +49,14 @@ public:
     }
 
     void releaseBuffer() {
-        if (disp_buf) {
+        if (disp_buf != nullptr) {
             vPortFree(disp_buf);
             disp_buf = NULL;
         }
     }
 
     void restoreBuffer() {
-        if (!disp_buf) {
+        if (disp_buf == nullptr) {
             this->disp_buf = (uint8_t *)pvPortMalloc(disp_w * disp_h);
         }
     }
@@ -79,7 +79,11 @@ public:
             goto draw_fin;
         }
 
-        int x, y, dx, dy, e;
+        int x;
+        int y;
+        int dx;
+        int dy;
+        int e;
         dx = x1 - x0;
         dy = y1 - y0;
         e = -dx;
@@ -123,10 +127,13 @@ public:
     }
 
     void draw_char_ascii(uint32_t x0, uint32_t y0, char ch, uint8_t fontSize, uint8_t fg, int16_t bg) {
-        int font_w;
-        int font_h;
-        const unsigned char *pCh;
-        unsigned int x = 0, y = 0, i = 0, j = 0;
+        int font_w = 0;
+        int font_h = 0;
+        const unsigned char *pCh = nullptr;
+        unsigned int x = 0;
+        unsigned int y = 0;
+        unsigned int i = 0;
+        unsigned int j = 0;
 
         if ((ch < ' ') || (ch > '~' + 1)) {
             return;
@@ -154,11 +161,11 @@ public:
         default:
             return;
         }
-        char pix;
+        char pix = 0;
         while (y < font_h) {
             while (x < font_w) {
                 pix = ((*pCh << x) & 0x80U);
-                if (pix) {
+                if (pix != 0u) {
                     buf_set(x0 + x, y0 + y, fg);
                 } else {
                     if (bg != -1) {
@@ -185,12 +192,13 @@ public:
             return;
         }
 
-        int x = x0, y = y0;
+        int x = x0;
+        int y = y0;
 
         for (int i = 0; i < 32; i += 2) {
-            uint8_t pix;
+            uint8_t pix = 0;
             for (int t = 0, pix = font_data[i]; t < 8; t++) {
-                if (pix & 0x80) {
+                if ((pix & 0x80) != 0) {
                     buf_set(x, y, fg);
                 } else {
                     if (bg != -1)
@@ -201,7 +209,7 @@ public:
             }
 
             for (int t = 0, pix = font_data[i + 1]; t < 8; t++) {
-                if (pix & 0x80) {
+                if ((pix & 0x80) != 0) {
                     buf_set(x, y, fg);
                 } else {
                     if (bg != -1)
@@ -219,7 +227,7 @@ public:
     }
     int draw_printf(uint32_t x0, uint32_t y0, uint8_t fontSize, uint8_t fg, int16_t bg, const char *format, ...) {
         va_list aptr;
-        int ret;
+        int ret = 0;
 
         char buffer[256];
 
@@ -232,7 +240,7 @@ public:
         }
         buffer[sizeof(buffer) - 1] = '\0';
 
-        for (int i = 0, x = x0; (i < sizeof(buffer)) && (buffer[i]); i++) {
+        for (int i = 0, x = x0; (i < sizeof(buffer)) && ((buffer[i]) != 0u); i++) {
             unsigned char ch = (unsigned char)buffer[i];
             if (ch < 0x80) {
                 draw_char_ascii(x, y0, buffer[i], fontSize, fg, bg);
@@ -433,10 +441,10 @@ public:
         this->child = child;
         this->disp = disp;
         memset(this->funcKey, 0, sizeof(this->funcKey));
-        if (title) {
+        if (title != nullptr) {
             size_t title_len = strlen(title) + 1;
             this->title = (char *)pvPortMalloc(title_len);
-            if (this->title) {
+            if (this->title != nullptr) {
                 memcpy(this->title, title, title_len);
             }
             this->content_x0 = x0 + 1;
@@ -455,7 +463,7 @@ public:
 
     void refreshTitle() {
         disp->draw_box(x0 + 1, y0, x0 + width, y0 + WIN_DEFAULT_FONTSIZE - 3, WIN_DEFAULT_BORDER_COLOR, WIN_DEFAULT_TITLE_BG_COLOR);
-        if (this->title) {
+        if (this->title != nullptr) {
             disp->draw_printf(x0 + 1, y0, WIN_DEFAULT_FONTSIZE, WIN_DEFAULT_TITLE_FONT_COLOR, WIN_DEFAULT_TITLE_BG_COLOR, "%s", this->title);
         }
         // disp->draw_line(x0, WIN_DEFAULT_FONTSIZE, x0 + width, WIN_DEFAULT_FONTSIZE, WIN_DEFAULT_BORDER_COLOR);
@@ -472,7 +480,7 @@ public:
             }
 
             for (int i = 0; i < 6; i++) {
-                if (this->funcKey[i][0]) {
+                if (this->funcKey[i][0] != 0u) {
                     disp->draw_printf(i * item_w, FUNCKEY_BAR_Y, FUNCKEY_FONTSIZE, 255 - FUNCKEY_BAR_BG_COLOR, -1,
                                       "%*s",
                                       3 + strlen(this->funcKey[i]) / 2, this->funcKey[i], 3 - strlen(this->funcKey[i]) / 2, "");
@@ -506,14 +514,16 @@ public:
     }
 
     void setFuncKeys(const char *list) {
-        int i = 0, j = 0, ind = 0;
+        int i = 0;
+        int j = 0;
+        int ind = 0;
         memset(this->funcKey, 0, sizeof(this->funcKey));
-        while (list[i]) {
+        while (list[i] != 0u) {
             if (list[i] != '|') {
                 this->funcKey[ind][j++] = list[i++];
                 if (j >= FUNCKEY_ITEM_MAX_CHAR) {
                     this->funcKey[ind][j] = '\0';
-                    while ((list[i]) && (list[i] != '|')) {
+                    while (((list[i]) != 0u) && (list[i] != '|')) {
                         i++;
                     }
                 }
@@ -590,7 +600,7 @@ public:
     }
 
     bool show() {
-        uint32_t key;
+        uint32_t key = 0;
         uint32_t keyVal = 0;
         uint32_t press = 0;
         vTaskDelay(20);
@@ -598,10 +608,10 @@ public:
             key = ll_vm_check_key();
             press = key >> 16;
             keyVal = key & 0xFFFF;
-            if (!press) {
+            if (press == 0u) {
                 vTaskDelay(20);
             }
-        } while (!press);
+        } while (press == 0u);
         if (keyVal == KEY_ENTER)
             return true;
 
@@ -611,7 +621,7 @@ public:
     void setText(const char *_text) {
         size_t text_len = strlen(_text) + 1;
         char *new_text = (char *)pvPortRealloc(this->text, text_len);
-        if (new_text) {
+        if (new_text != nullptr) {
             this->text = new_text;
             memcpy(this->text, _text, text_len);
         }
@@ -1012,7 +1022,7 @@ struct SimpShell {
      * @return uint32_t scroll line counts
      */
     uint32_t scroll(uint32_t y) {
-        if (y) {
+        if (y != 0u) {
             if (y > CONSH) {
                 y = CONSH;
             }
@@ -1056,7 +1066,7 @@ struct SimpShell {
      * @param s null-terminated string
      */
     void puts(const char *s) {
-        while (s[0]) {
+        while (s[0] != 0u) {
             if (s[0] == '\n') {
                 if(this->cursor_displaying) this->blink();
                 cy++;
@@ -1089,7 +1099,7 @@ struct SimpShell {
      * @param s null-terminated string
      */
     void locate(const uint32_t &y, const uint32_t &x, const char *s) {
-        for (uint32_t i = 0; s[i] && i + x < CONSW; i++) {
+        for (uint32_t i = 0; (s[i] != 0u) && i + x < CONSW; i++) {
             lin[y].col[i + x] = s[i];
         }
     }

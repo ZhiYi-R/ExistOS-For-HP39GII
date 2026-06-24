@@ -64,7 +64,7 @@ static inline bool osal_semaphore_post(osal_semaphore_t sem_hdl, bool in_isr)
   }
   else
   {
-    BaseType_t xHigherPriorityTaskWoken;
+    BaseType_t xHigherPriorityTaskWoken = 0;
     BaseType_t res = xSemaphoreGiveFromISR(sem_hdl, &xHigherPriorityTaskWoken);
 
 #if CFG_TUSB_MCU == OPT_MCU_ESP32S2
@@ -136,7 +136,7 @@ static inline osal_queue_t osal_queue_create(osal_queue_def_t* qdef)
 
 static inline bool osal_queue_receive(osal_queue_t qhdl, void* data)
 {
-  return xQueueReceive(qhdl, data, portMAX_DELAY);
+  return xQueueReceive(qhdl, data, portMAX_DELAY) != 0;
 }
 
 static inline bool osal_queue_send(osal_queue_t qhdl, void const * data, bool in_isr)
@@ -147,7 +147,7 @@ static inline bool osal_queue_send(osal_queue_t qhdl, void const * data, bool in
   }
   else
   {
-    BaseType_t xHigherPriorityTaskWoken;
+    BaseType_t xHigherPriorityTaskWoken = 0;
     BaseType_t res = xQueueSendToBackFromISR(qhdl, data, &xHigherPriorityTaskWoken);
 
 #if CFG_TUSB_MCU == OPT_MCU_ESP32S2

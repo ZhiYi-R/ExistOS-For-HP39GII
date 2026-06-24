@@ -37,7 +37,7 @@ int capt_ON_Key(int ck, int cp);
 void key_task_capt()
 {
     int state = 0;
-    uint32_t kval;
+    uint32_t kval = 0;
     int capt_ck = 0;
 
     for(;;)
@@ -158,7 +158,7 @@ void key_task() {
         if (k == 255) {
             continue;
         } else {
-            press = portIsKeyDown(k);
+            press = (uint8_t)portIsKeyDown(k);
             key_notify = (press << 16) | (k & 0xFFFF);
 
             //ck = k;

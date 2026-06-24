@@ -127,9 +127,11 @@ static void timeChange(int hh, int mm, int ss) {
 }
 
 int exf_getfree(uint8_t *drv, uint32_t *total, uint32_t *free) {
-    FATFS *fs1;
+    FATFS *fs1 = nullptr;
     FRESULT res;
-    DWORD free_clust = 0, free_sect = 0, tot_sect = 0;
+    DWORD free_clust = 0;
+    DWORD free_sect = 0;
+    DWORD tot_sect = 0;
     res = f_getfree((const TCHAR *)drv, &free_clust, &fs1);
     if (res == 0) {
         tot_sect = (fs1->n_fatent - 2) * fs1->csize;
@@ -244,7 +246,7 @@ void pageUpdate() {
 
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "CPU:%3d/%d MHz, %s:%d `C", ll_get_cur_freq(), 480 * 18 / cur_cpu_div / cur_cpu_frac, UI_TEMPERRATURE, ll_get_core_temp());
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %d/%d KB", UI_MEMUSE, getHeapAllocateSize() / 1024, TotalAllocatableSize / 1024);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %d mv, %s: %s  ", UI_BATTERY, ll_get_bat_voltage(), UI_CHARGING, Charging ? UI_Yes : UI_No);
+            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %d mv, %s: %s  ", UI_BATTERY, ll_get_bat_voltage(), UI_CHARGING, (Charging != 0u) ? UI_Yes : UI_No);
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %s", UI_TIME, timeStr);
 
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "[%c]%s (1)", config_get_power_save(), UI_Power_Save_Mode);
@@ -257,13 +259,15 @@ void pageUpdate() {
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %s", UI_TIME, timeStr);
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s+ [7] %s+ [8] %s+ [9]", UI_Hours, UI_Minutes, UI_Seconds);
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s- [4] %s- [5] %s- [6]", UI_Hours, UI_Minutes, UI_Seconds);
-            uint32_t total, free;
+            uint32_t total;
+            uint32_t free;
             exf_getfree((uint8_t *)"0:", &total, &free);
 
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %d/%d KB", UI_Storage_Space, total - free, total);
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s", UI_ONF5Format);
         } else if (page3Subpage == 2) {
-            uint32_t free, total;
+            uint32_t free;
+            uint32_t total;
             float mem_cmpr = ll_mem_comprate();
             uint32_t total_phy_mem = ll_mem_phy_info(&free, &total);
             total_phy_mem /= 1024;
@@ -274,7 +278,7 @@ void pageUpdate() {
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s:%.2f", UI_Compression_rate, mem_cmpr);
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s:%d KB   ", UI_SRAM_Heap_Pre_Allocated, getOnChipHeapAllocated() / 1024);
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s:%d KB   ", UI_Swap_Heap_Pre_Allocated, getSwapMemHeapAllocated() / 1024);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "[%c] %s (1)", ll_mem_swap_size() ? 'X' : ' ', UI_Enable_Mem_Swap);
+            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "[%c] %s (1)", (ll_mem_swap_size() != 0u) ? 'X' : ' ', UI_Enable_Mem_Swap);
         } else if (page3Subpage == 3) {
             uidisp->draw_bmp((char *)logo, DISPX + 12, DISPY + 8, 50, 25);
 
@@ -799,7 +803,7 @@ void keyMsg(uint32_t key, int state) {
                 case 2: {
                     printf("enableMemSwap\n");
                     void enableMemSwap(bool enable);
-                    if (ll_mem_swap_size()) {
+                    if (ll_mem_swap_size() != 0u) {
                         enableMemSwap(false);
                         config_set_enable_mem_swap(false);
                     } else {
@@ -1034,7 +1038,7 @@ void refreshFileNames(TCHAR *path, TCHAR **names, bool *info, unsigned long *cou
     for (int i = 0; i < *counts; i++) {
         if (f_readdir(&dir, &fno) == FR_OK) {
             strcat(names[i], fno.fname);
-            if (fno.fattrib & AM_DIR) {
+            if ((fno.fattrib & AM_DIR) != 0) {
                 info[i] = false;
             } else {
                 info[i] = true;
@@ -1190,7 +1194,7 @@ void UI_Task(void *) {
 }
 
 void UI_keyScanner(void *_) {
-    uint32_t key;
+    uint32_t key = 0;
     uint32_t keyVal = 0;
 
     uint32_t delay = 0;
@@ -1203,7 +1207,7 @@ void UI_keyScanner(void *_) {
         uint32_t press = key >> 16;
         uint32_t keyVal = key & 0xFFFF;
 
-        if (press) {
+        if (press != 0u) {
             delay++;
             delayRel = 0;
 

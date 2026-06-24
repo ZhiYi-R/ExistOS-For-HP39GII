@@ -30,9 +30,9 @@ bool rom_is_packed()
 }
 
 int load_rom(const char *romfile) {
-    uint32_t testread;
+    uint32_t testread = 0;
     FRESULT fr;
-    UINT btr;
+    UINT btr = 0;
     romf = pvPortMalloc(sizeof(FIL));
     if (romf) {
 

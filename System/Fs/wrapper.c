@@ -52,7 +52,7 @@ _ssize_t _read_r(struct _reent *pReent, int fd, void *ptr, size_t len) {
 
 _ssize_t _write_r(struct _reent *pReent, int fd, const void *buf, size_t nbytes) {
 
-    int i;
+    int i = 0;
 	if(fd < 3){
         pReent->_errno = 0;
         ll_put_str2((char *)buf, nbytes);

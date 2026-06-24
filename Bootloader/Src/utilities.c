@@ -31,7 +31,7 @@ void _randSetSeed(uint32_t seed)
 
 uint32_t _rand(void)
 {
-    uint32_t value;
+    uint32_t value = 0;
     //Use a linear congruential generator (LCG) to update the state of the PRNG
     _randSeed *= 1103515245;
     _randSeed += 12345;

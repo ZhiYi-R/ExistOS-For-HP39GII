@@ -129,7 +129,7 @@ static bool LCDIF_checkReceiveFinish() {
 }
 
 static bool LCDIF_checkDMAFin() {
-    return !((HW_APBH_CHn_DEBUG2(0).B.AHB_BYTES) && (HW_APBH_CHn_DEBUG2(0).B.APB_BYTES));
+    return (!((HW_APBH_CHn_DEBUG2(0).B.AHB_BYTES) && (HW_APBH_CHn_DEBUG2(0).B.APB_BYTES))) != 0;
     // return ((HW_APBH_CHn_SEMA(0).B.INCREMENT_SEMA)==0);
 }
 
@@ -370,8 +370,12 @@ void portDispClean() {
 int save_bat = 0;
 int save_ind_bit = 0;
 void portDispSetIndicate(int indicateBit, int batteryBit) {
-    uint32_t sx, sy, ex, ey;
-    uint8_t setbit, setBat;
+    uint32_t sx;
+    uint32_t sy;
+    uint32_t ex;
+    uint32_t ey;
+    uint8_t setbit;
+    uint8_t setBat;
     sx = 0;
     ex = 86;
     sy = 0;

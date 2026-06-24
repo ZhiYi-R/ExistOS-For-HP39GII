@@ -66,7 +66,7 @@ static void extract_elf_section(struct elf_params_t *elf, int count, uint32_t id
     db_add_source(cmd_file, fileid, filename + strlen(g_out_prefix));
     db_add_inst_id(section, CMD_LOAD, fileid, 0);
     if(elf_get_start_addr(elf, NULL))
-        db_add_inst_id(section, is_call ? CMD_CALL : CMD_JUMP, fileid, arg);
+        db_add_inst_id(section, (int)is_call ? CMD_CALL : CMD_JUMP, fileid, arg);
 
     if(g_debug)
         printf("Write boot section %s to %s\n", name, filename);
@@ -86,7 +86,7 @@ static void extract_sb_section(struct sb_section_t *sec, struct cmd_file_t *cmd_
 {
     struct cmd_section_t *db_sec = db_add_section(cmd_file, sec->identifier, sec->is_data);
     db_add_int_opt(&db_sec->opt_list, "alignment", sec->alignment);
-    db_add_int_opt(&db_sec->opt_list, "cleartext", sec->is_cleartext);
+    db_add_int_opt(&db_sec->opt_list, "cleartext", (uint32_t)sec->is_cleartext);
     db_add_int_opt(&db_sec->opt_list, "sectionFlags", sec->other_flags);
 
     if(sec->is_data)
@@ -118,7 +118,8 @@ static void extract_sb_section(struct sb_section_t *sec, struct cmd_file_t *cmd_
     struct elf_params_t elf;
     elf_init(&elf);
 
-    int bss_idx = 0, text_idx = 0;
+    int bss_idx = 0;
+    int text_idx = 0;
     char secname[32];
     for(int i = 0; i < sec->nr_insts; i++)
     {
@@ -204,7 +205,8 @@ static void extract_sb1_file(struct sb1_file_t *file)
     struct elf_params_t elf;
     elf_init(&elf);
 
-    int bss_idx = 0, text_idx = 0;
+    int bss_idx = 0;
+    int text_idx = 0;
     char secname[32];
     for(int i = 0; i < file->nr_insts; i++)
     {

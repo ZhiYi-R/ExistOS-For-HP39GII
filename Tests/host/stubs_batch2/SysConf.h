@@ -1,8 +1,3 @@
-/**
- * @file Tests/host/stubs_batch2/SysConf.h
- * @brief SysConf module
- */
-
 #pragma once
 
 #define FS_FATFS 0

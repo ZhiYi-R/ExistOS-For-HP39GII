@@ -91,7 +91,7 @@ void DisplayFlushArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32
     opa.pars = pars;
     xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
     if (block) {
-        while (fin == false) {
+        while ((int)fin == false) {
             vTaskDelay(2);
         }
     }
@@ -183,7 +183,7 @@ void DisplayBoxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t
     opa.parNum = 6;
     opa.pars = pars;
     xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
-    while (fin == false)
+    while ((int)fin == false)
         ;
 }
 
@@ -220,7 +220,7 @@ void DisplayFillBoxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uin
     opa.parNum = 6;
     opa.pars = pars;
     xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
-    while (fin == false)
+    while ((int)fin == false)
         ;
 }
 
@@ -401,8 +401,8 @@ void DisplayTask() {
                 uint8_t fontSize = curOpa.pars[5];
 
                 uint32_t str_len = strlen(s);
-                uint8_t *font;
-                uint32_t fontWidth;
+                uint8_t *font = NULL;
+                uint32_t fontWidth = 0;
                 // if(fontSize == 16)
                 {
                     font = Ascii1608;

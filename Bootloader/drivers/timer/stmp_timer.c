@@ -50,7 +50,7 @@ bool portEnableTimerIRQ(int timer, bool enable)
 {
 
         BF_CS1n(TIMROT_TIMCTRLn, 0, IRQ_EN, enable);
-        portEnableIRQ(HW_IRQ_TIMER0, enable);
+        portEnableIRQ(HW_IRQ_TIMER0, (unsigned int)enable);
         return true;
 }
 

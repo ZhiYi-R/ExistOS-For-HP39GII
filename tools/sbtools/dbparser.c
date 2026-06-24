@@ -207,7 +207,7 @@ static void parse_number(struct context_t *ctx, struct lexem_t *lexem)
     {
         if(base == 10 && !isdigit(cur_char(ctx)))
             break;
-        byte v;
+        byte v = 0;
         if(convxdigit(cur_char(ctx), &v))
             break;
         lexem->num = base * lexem->num + v;
@@ -274,7 +274,7 @@ static void next_lexem(struct context_t *ctx, struct lexem_t *lexem)
     if(eof(ctx)) ret_simple(LEX_EOF, 0);
     char c = cur_char(ctx);
     bool nv = next_valid(ctx, 1);
-    char nc = nv  ? next_char(ctx, 1) : 0;
+    char nc = (int)nv  ? next_char(ctx, 1) : 0;
     if(c == '(') ret_simple(LEX_LPAREN, 1);
     if(c == ')') ret_simple(LEX_RPAREN, 1);
     if(c == '{') ret_simple(LEX_LBRACE, 1);
@@ -459,9 +459,9 @@ bool db_generate_sb_version(struct sb_version_t *ver, char *str, int size)
     str[3] = '.';
     str[7] = '.';
     str[11] = 0;
-    return db_generate_sb_subversion(ver->major, str) &&
+    return (db_generate_sb_subversion(ver->major, str) &&
         db_generate_sb_subversion(ver->minor, str + 4) &&
-        db_generate_sb_subversion(ver->revision, str + 8);
+        db_generate_sb_subversion(ver->revision, str + 8)) != 0;
 }
 
 #undef parse_error
@@ -540,7 +540,7 @@ static uint32_t init_const_value[NR_INITIAL_CONSTANTS] = {1, 0, 1, 0};
 
 struct cmd_file_t *db_parse_file(const char *file)
 {
-    size_t size;
+    size_t size = 0;
     FILE *f = fopen(file, "r");
     if(f == NULL)
     {
@@ -851,7 +851,7 @@ static bool db_generate_section_options(FILE *f, struct cmd_option_t *list)
     bool first = true;
     while(list)
     {
-        fprintf(f, "%c %s = ", first ? ';' : ',', list->name);
+        fprintf(f, "%c %s = ", (int)first ? ';' : ',', list->name);
         if(list->is_string)
             fprintf(f, "\"%s\"", list->str); // FIXME handle escape
         else
@@ -939,7 +939,7 @@ bool db_generate_file(struct cmd_file_t *file, const char *filename, void *user,
 {
     FILE *f = fopen(filename, "w");
     if(f == NULL)
-        return printf(user, true, GREY, "Cannot open '%s' for writing: %m\n", filename), false;
+        return (printf(user, true, GREY, "Cannot open '%s' for writing: %m\n", filename), false) != 0;
     if(!db_generate_options(f, "constants", file->constant_list))
         goto Lerr;
     if(!db_generate_options(f, "options", file->opt_list))

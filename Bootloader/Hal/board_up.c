@@ -21,7 +21,7 @@
 
 bool driverWaitTrueF(bool (*f)(), TickType_t timeout)
 {
-    while(((*f)()) == false)
+    while((int)((*f)()) == false)
     {
         //vTaskDelay(1);
         portDelayus(1);
@@ -40,7 +40,7 @@ bool driverWaitTrueF(bool (*f)(), TickType_t timeout)
 
 bool driverWaitFalseF(bool (*f)(), TickType_t timeout)
 {
-    while(((*f)()) == true)
+    while((int)((*f)()) == true)
     {
         //vTaskDelay(1);
         portDelayus(1);

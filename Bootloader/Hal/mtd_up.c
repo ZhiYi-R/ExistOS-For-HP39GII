@@ -62,7 +62,7 @@ bool MTD_upOpaFin(uint32_t eccResult)
     ECCResult = eccResult;
     mtd_opa_done = true;
     //xEventGroupSetBitsFromISR(MTDDriverOpaDone, 1, &flag);
-    return flag;
+    return flag != 0;
 
 }
 
@@ -147,13 +147,13 @@ void MTD_Task()
                 break;
             }
             uint32_t start_tick = xTaskGetTickCount();
-            while(mtd_opa_done == false)
+            while((int)mtd_opa_done == false)
             {
                 if(xTaskGetTickCount() - start_tick > pdMS_TO_TICKS(2000)){
-                    INFO("MTD Waiting Timeout! %ld\n", retry_cnt);
+                    INFO("MTD Waiting Timeout! %u\n", retry_cnt);
                     INFO("Cur opa:%d\n", curOpa.opa);
-                    INFO("Cur opa.page:%ld\n", curOpa.page);
-                    INFO("Cur opa.offset:%ld\n", curOpa.offset);
+                    INFO("Cur opa.page:%u\n", curOpa.page);
+                    INFO("Cur opa.offset:%u\n", curOpa.offset);
                     INFO("Cur opa.needToMoveData:%d\n", curOpa.needToMoveData);
                     INFO("Cur opa.buf:%p\n", curOpa.buf);
                     if(retry_cnt)
@@ -183,7 +183,7 @@ void MTD_Task()
                 if(curOpa.needToMoveData)
                 {
                     if(curOpa.len > mtdinfo.PageSize_B - curOpa.offset){
-                        MTD_WARN("MTD READ DATA Corrupted.page:%ld len:%ld offset:%ld\n",curOpa.page, curOpa.len, curOpa.offset);
+                        MTD_WARN("MTD READ DATA Corrupted.page:%u len:%u offset:%u\n",curOpa.page, curOpa.len, curOpa.offset);
                         curOpa.len = mtdinfo.PageSize_B - curOpa.offset;
                     }
                     MTD_INFO("Read Move Data,dst:%p,src:%p,len:%d\n",curOpa.buf, MTD_PageBuffer + curOpa.offset, curOpa.len);
@@ -196,7 +196,7 @@ void MTD_Task()
                     (((ECCResult >> 16) & 0xF) == 0xE) || 
                     (((ECCResult >> 24) & 0xF) == 0xE) 
                 ){
-                    MTD_WARN("BAD BLOCK:%ld\n", curOpa.page);
+                    MTD_WARN("BAD BLOCK:%u\n", curOpa.page);
                     //*curOpa.StatusBuf =  -1;
                     xTaskNotify(curOpa.task, -1, eSetValueWithOverwrite);
                 }else if(ECCResult == 0x0F0F0F0F){
@@ -239,7 +239,7 @@ void MTD_Task()
                         (((ECCResult >> 24) & 0xF) == 0xE) 
                     ){
                         g_mtd_ecc_fatal_cnt++;
-                        MTD_WARN("BAD BLOCK:%ld\n", curOpa.page);
+                        MTD_WARN("BAD BLOCK:%u\n", curOpa.page);
                         //*curOpa.StatusBuf =  -1;
                         xTaskNotify(curOpa.task, -1, eSetValueWithOverwrite);
                     }else if(ECCResult == 0x0F0F0F0F){

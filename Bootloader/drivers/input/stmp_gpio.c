@@ -19,7 +19,8 @@ Keys_t ChangedKey = 255;
 
 void portKeyboardGPIOInit()
 {
-    unsigned int tmp_DOUT, tmp_DOE;
+    unsigned int tmp_DOUT;
+    unsigned int tmp_DOE;
     
     BF_CS6(
         PINCTRL_MUXSEL3,
@@ -97,7 +98,8 @@ void portKeyboardGPIOInit()
 }
 
 static void set_row_line(int row_line) {
-    unsigned int tmp_DOUT, tmp_DOE;
+    unsigned int tmp_DOUT;
+    unsigned int tmp_DOE;
 
     tmp_DOUT = BF_RD(PINCTRL_DOUT2, DOUT);
     tmp_DOE = BF_RD(PINCTRL_DOE2, DOE);
@@ -214,7 +216,7 @@ Keys_t portGetChangedKey()
 
 bool portIsKeyDown(Keys_t key) 
 { 
-    return key_matrix[key % 8][key >> 3]; 
+    return key_matrix[key % 8][key >> 3] != 0u; 
 }
 
 void portKeyScan() 

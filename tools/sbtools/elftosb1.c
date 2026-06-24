@@ -86,7 +86,7 @@ static int sb1_add_load(struct sb1_file_t *sb, void *data, int size, uint32_t ad
         inst.cmd = SB1_INST_LOAD;
         inst.size = len;
         inst.addr = addr;
-        inst.critical = g_critical;
+        inst.critical = (uint8_t)g_critical;
         inst.data = xmalloc(len);
         memcpy(inst.data, data, len);
         if(g_debug)
@@ -106,7 +106,7 @@ static int sb1_add_switch(struct sb1_file_t *sb, uint32_t driver)
     struct sb1_inst_t inst;
     memset(&inst, 0, sizeof(inst));
     inst.cmd = SB1_INST_MODE;
-    inst.critical = g_critical;
+    inst.critical = (uint8_t)g_critical;
     inst.mode = driver;
     if(g_debug)
         printf("Add instruction: switch driver to  %#x\n", driver);
@@ -119,7 +119,7 @@ static int sb1_add_sdram(struct sb1_file_t *sb, uint32_t cs, uint32_t size)
     struct sb1_inst_t inst;
     memset(&inst, 0, sizeof(inst));
     inst.cmd = SB1_INST_SDRAM;
-    inst.critical = g_critical;
+    inst.critical = (uint8_t)g_critical;
     inst.sdram.chip_select = cs;
     inst.sdram.size_index = sb1_sdram_index_by_size(size);
     if(sb1_sdram_index_by_size(size) < 0)
@@ -134,7 +134,7 @@ static int sb1_add_call(struct sb1_file_t *sb, uint32_t addr, uint32_t arg)
     struct sb1_inst_t inst;
     memset(&inst, 0, sizeof(inst));
     inst.cmd = SB1_INST_CALL;
-    inst.critical = g_critical;
+    inst.critical = (uint8_t)g_critical;
     inst.addr = addr;
     inst.argument = arg;
     if(g_debug)
@@ -147,7 +147,7 @@ static int sb1_add_jump(struct sb1_file_t *sb, uint32_t addr, uint32_t arg)
     struct sb1_inst_t inst;
     memset(&inst, 0, sizeof(inst));
     inst.cmd = SB1_INST_JUMP;
-    inst.critical = g_critical;
+    inst.critical = (uint8_t)g_critical;
     inst.addr = addr;
     inst.argument = arg;
     if(g_debug)
@@ -164,7 +164,7 @@ static int sb1_add_fill(struct sb1_file_t *sb, uint32_t pattern, uint32_t size, 
         struct sb1_inst_t inst;
         memset(&inst, 0, sizeof(inst));
         inst.cmd = SB1_INST_FILL;
-        inst.critical = g_critical;
+        inst.critical = (uint8_t)g_critical;
         inst.size = len;
         inst.addr = addr;
         inst.pattern = pattern;
@@ -240,9 +240,9 @@ static bool parse_sb_version(struct sb1_version_t *ver, char *str)
     char *q = strchr(p + 1, '.');
     if(p == NULL || q == NULL) return false;
     *p = *q = 0;
-    return parse_sb_sub_version(&ver->major, str) &&
+    return (parse_sb_sub_version(&ver->major, str) &&
             parse_sb_sub_version(&ver->minor, p + 1) &&
-            parse_sb_sub_version(&ver->revision, q + 1);
+            parse_sb_sub_version(&ver->revision, q + 1)) != 0;
 }
 
 /**
@@ -301,7 +301,7 @@ CMD_FN(cmd_drive_tag)
 
 CMD_FN(cmd_load_binary)
 {
-    int size;
+    int size = 0;
     void *data = load_file(args[0].str, &size);
     int ret = sb1_add_load(sb, data, size, args[1].uint);
     free(data);
@@ -528,7 +528,7 @@ static int apply_args(struct sb1_file_t *sb, get_next_arg_t next, void *user)
                 bug("Option '%s' requires %d arguments, only %d given\n", cmd, g_cmds[i].nr_args, j);
             if(g_cmds[i].arg_type[j] == ARG_UINT)
             {
-                char *end;
+                char *end = NULL;
                 args[j].uint = strtoul(args[j].str, &end, 0);
                 if(*end)
                     bug("Option '%s' expects an integer as argument %d\n", cmd, j + 1);

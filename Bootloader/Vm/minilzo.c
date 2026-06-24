@@ -3584,7 +3584,7 @@ __lzo_static_forceinline unsigned lzo_bitops_ctlz32_func(lzo_uint32_t v)
     return (unsigned) r ^ 31;
 #define lzo_bitops_ctlz32(v)    lzo_bitops_ctlz32_func(v)
 #elif (LZO_BITOPS_USE_GNUC_BITSCAN) && (LZO_SIZEOF_INT == 4)
-    unsigned r; r = (unsigned) __builtin_clz(v); return r;
+    unsigned r = 0; r = (unsigned) __builtin_clz(v); return r;
 #define lzo_bitops_ctlz32(v)    ((unsigned) __builtin_clz(v))
 #elif (LZO_BITOPS_USE_GNUC_BITSCAN) && (LZO_SIZEOF_LONG == 8) && (LZO_WORDSIZE >= 8)
     unsigned r; r = (unsigned) __builtin_clzl(v); return r ^ 32;
@@ -3628,7 +3628,7 @@ __lzo_static_forceinline unsigned lzo_bitops_cttz32_func(lzo_uint32_t v)
     return (unsigned) r;
 #define lzo_bitops_cttz32(v)    lzo_bitops_cttz32_func(v)
 #elif (LZO_BITOPS_USE_GNUC_BITSCAN) && (LZO_SIZEOF_INT >= 4)
-    unsigned r; r = (unsigned) __builtin_ctz(v); return r;
+    unsigned r = 0; r = (unsigned) __builtin_ctz(v); return r;
 #define lzo_bitops_cttz32(v)    ((unsigned) __builtin_ctz(v))
 #else
     LZO_UNUSED(v); return 0;
@@ -3840,7 +3840,7 @@ LZO_COMPILE_TIME_ASSERT_HEADER(sizeof(*(lzo_memops_TU8p)0)==8)
 
 __lzo_static_forceinline lzo_uint16_t lzo_memops_get_le16(const lzo_voidp ss)
 {
-    lzo_uint16_t v;
+    lzo_uint16_t v = 0;
 #if (LZO_ABI_LITTLE_ENDIAN)
     LZO_MEMOPS_COPY2(&v, ss);
 #elif (LZO_OPT_UNALIGNED16 && LZO_ARCH_POWERPC && LZO_ABI_BIG_ENDIAN) && (LZO_ASM_SYNTAX_GNUC)
@@ -3862,7 +3862,7 @@ __lzo_static_forceinline lzo_uint16_t lzo_memops_get_le16(const lzo_voidp ss)
 
 __lzo_static_forceinline lzo_uint32_t lzo_memops_get_le32(const lzo_voidp ss)
 {
-    lzo_uint32_t v;
+    lzo_uint32_t v = 0;
 #if (LZO_ABI_LITTLE_ENDIAN)
     LZO_MEMOPS_COPY4(&v, ss);
 #elif (LZO_OPT_UNALIGNED32 && LZO_ARCH_POWERPC && LZO_ABI_BIG_ENDIAN) && (LZO_ASM_SYNTAX_GNUC)
@@ -3888,7 +3888,7 @@ __lzo_static_forceinline lzo_uint32_t lzo_memops_get_le32(const lzo_voidp ss)
 
 __lzo_static_forceinline lzo_uint16_t lzo_memops_get_ne16(const lzo_voidp ss)
 {
-    lzo_uint16_t v;
+    lzo_uint16_t v = 0;
     LZO_MEMOPS_COPY2(&v, ss);
     return v;
 }
@@ -3901,7 +3901,7 @@ LZO_COMPILE_TIME_ASSERT_HEADER(sizeof(*(lzo_memops_TU2p)0)==2)
 
 __lzo_static_forceinline lzo_uint32_t lzo_memops_get_ne32(const lzo_voidp ss)
 {
-    lzo_uint32_t v;
+    lzo_uint32_t v = 0;
     LZO_MEMOPS_COPY4(&v, ss);
     return v;
 }
@@ -4182,7 +4182,7 @@ lzo_full_align_t;
 LZO_PUBLIC(lzo_uintptr_t)
 __lzo_ptr_linear(const lzo_voidp ptr)
 {
-    lzo_uintptr_t p;
+    lzo_uintptr_t p = 0;
 
 #if (LZO_ARCH_I086)
 #error "LZO_ARCH_I086 is unsupported"
@@ -4201,7 +4201,7 @@ __lzo_align_gap(const lzo_voidp ptr, lzo_uint size)
 #if (__LZO_UINTPTR_T_IS_POINTER)
 #error "__LZO_UINTPTR_T_IS_POINTER is unsupported"
 #else
-    lzo_uintptr_t p, n;
+    lzo_uintptr_t p = 0, n = 0;
     if (size < 2) return 0;
     p = __lzo_ptr_linear(ptr);
 #if 0
@@ -4289,7 +4289,7 @@ lzo_adler32(lzo_uint32_t adler, const lzo_bytep buf, lzo_uint len)
 {
     lzo_uint32_t s1 = adler & 0xffff;
     lzo_uint32_t s2 = (adler >> 16) & 0xffff;
-    unsigned k;
+    unsigned k = 0;
 
     if (buf == NULL)
         return 1;
@@ -4460,7 +4460,7 @@ _lzo_config_check(void)
 # endif
 #endif
     union lzo_config_check_union u;
-    lzo_voidp p;
+    lzo_voidp p = NULL;
     unsigned r = 1;
 
     u.a[0] = u.a[1] = 0;
@@ -4520,7 +4520,7 @@ _lzo_config_check(void)
 #endif
 #endif
 #if defined(lzo_bitops_ctlz32)
-    { unsigned i = 0; lzo_uint32_t v;
+    { unsigned i = 0; lzo_uint32_t v = 0;
     for (v = 1; v != 0 && r == 1; v <<= 1, i++) {
         r &= lzo_bitops_ctlz32(v) == 31 - i;
         r &= lzo_bitops_ctlz32_func(v) == 31 - i;
@@ -4534,7 +4534,7 @@ _lzo_config_check(void)
     }}
 #endif
 #if defined(lzo_bitops_cttz32)
-    { unsigned i = 0; lzo_uint32_t v;
+    { unsigned i = 0; lzo_uint32_t v = 0;
     for (v = 1; v != 0 && r == 1; v <<= 1, i++) {
         r &= lzo_bitops_cttz32(v) == i;
         r &= lzo_bitops_cttz32_func(v) == i;
@@ -4557,7 +4557,7 @@ LZO_PUBLIC(int)
 __lzo_init_v2(unsigned v, int s1, int s2, int s3, int s4, int s5,
                           int s6, int s7, int s8, int s9)
 {
-    int r;
+    int r = 0;
 
 #if defined(__LZO_IN_MINILZO)
 #elif (LZO_CC_MSC && ((_MSC_VER) < 700))
@@ -4934,11 +4934,11 @@ do_compress ( const lzo_bytep in , lzo_uint  in_len,
                     lzo_bytep out, lzo_uintp out_len,
                     lzo_uint  ti,  lzo_voidp wrkmem)
 {
-    const lzo_bytep ip;
-    lzo_bytep op;
+    const lzo_bytep ip = NULL;
+    lzo_bytep op = NULL;
     const lzo_bytep const in_end = in + in_len;
     const lzo_bytep const ip_end = in + in_len - 20;
-    const lzo_bytep ii;
+    const lzo_bytep ii = NULL;
     lzo_dict_p const dict = (lzo_dict_p) wrkmem;
 
     op = out;
@@ -4948,7 +4948,7 @@ do_compress ( const lzo_bytep in , lzo_uint  in_len,
     ip += ti < 4 ? 4 - ti : 0;
     for (;;)
     {
-        const lzo_bytep m_pos;
+        const lzo_bytep m_pos = NULL;
 #if !(LZO_DETERMINISTIC)
         LZO_DEFINE_UNINITIALIZED_VAR(lzo_uint, m_off, 0);
         lzo_uint m_len;
@@ -4986,11 +4986,11 @@ literal:
         }
         UPDATE_I(dict,0,dindex,ip,in);
 #else
-        lzo_uint m_off;
-        lzo_uint m_len;
+        lzo_uint m_off = 0;
+        lzo_uint m_len = 0;
         {
-        lzo_uint32_t dv;
-        lzo_uint dindex;
+        lzo_uint32_t dv = 0;
+        lzo_uint dindex = 0;
 literal:
         ip += 1 + ((ip - ii) >> 5);
 next:
@@ -5229,7 +5229,7 @@ DO_COMPRESS      ( const lzo_bytep in , lzo_uint  in_len,
     while (l > 20)
     {
         lzo_uint ll = l;
-        lzo_uintptr_t ll_end;
+        lzo_uintptr_t ll_end = 0;
 #if 0 || (LZO_DETERMINISTIC)
         ll = LZO_MIN(ll, 49152);
 #endif
@@ -5405,14 +5405,14 @@ DO_DECOMPRESS  ( const lzo_bytep in , lzo_uint  in_len,
                        lzo_voidp wrkmem )
 #endif
 {
-    lzo_bytep op;
-    const lzo_bytep ip;
-    lzo_uint t;
+    lzo_bytep op = NULL;
+    const lzo_bytep ip = NULL;
+    lzo_uint t = 0;
 #if defined(COPY_DICT)
     lzo_uint m_off;
     const lzo_bytep dict_end;
 #else
-    const lzo_bytep m_pos;
+    const lzo_bytep m_pos = NULL;
 #endif
 
     const lzo_bytep const ip_end = in + in_len;
@@ -5946,14 +5946,14 @@ DO_DECOMPRESS  ( const lzo_bytep in , lzo_uint  in_len,
                        lzo_voidp wrkmem )
 #endif
 {
-    lzo_bytep op;
-    const lzo_bytep ip;
-    lzo_uint t;
+    lzo_bytep op = NULL;
+    const lzo_bytep ip = NULL;
+    lzo_uint t = 0;
 #if defined(COPY_DICT)
     lzo_uint m_off;
     const lzo_bytep dict_end;
 #else
-    const lzo_bytep m_pos;
+    const lzo_bytep m_pos = NULL;
 #endif
 
     const lzo_bytep const ip_end = in + in_len;

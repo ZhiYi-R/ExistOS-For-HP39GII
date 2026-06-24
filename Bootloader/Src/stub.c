@@ -62,7 +62,7 @@ extern unsigned int __HEAP_START;
 static void *heap = NULL;
 
 caddr_t _sbrk(int incr) {
-    void *prev_heap;
+    void *prev_heap = NULL;
 
     if (heap == NULL) {
         heap = &__HEAP_START;
@@ -179,7 +179,7 @@ uint32_t log_i = 0, log_j = 0;
 extern uint32_t g_CDC_TransTo;
 _ssize_t _write_r(struct _reent *pReent, int fd, const void *buf, size_t nbytes) {
 
-    int i;
+    int i = 0;
 
     if (fd < 3) {
         pReent->_errno = 0;

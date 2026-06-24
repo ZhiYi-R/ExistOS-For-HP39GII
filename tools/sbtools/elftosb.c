@@ -187,7 +187,7 @@ static struct sb_file_t *apply_cmd_file(struct cmd_file_t *cmd_file)
         do
         {
             /* cleartext */
-            sec->is_cleartext = get_int_opt(csec->opt_list, "cleartext", false);
+            sec->is_cleartext = (get_int_opt(csec->opt_list, "cleartext", false) != 0u);
             /* alignment */
             sec->alignment = get_int_opt(csec->opt_list, "alignment", BLOCK_SIZE);
             // alignement cannot be lower than block size

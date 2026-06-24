@@ -74,7 +74,8 @@ uint32_t g_core_temp, g_batt_volt;
 uint32_t g_core_cur_freq_mhz = 1;
 
 uint32_t check_frequency() {
-    volatile uint32_t s0, s1;
+    volatile uint32_t s0;
+    volatile uint32_t s1;
     s0 = *((volatile uint32_t *)0x8001C020);
     vTaskDelay(pdMS_TO_TICKS(1000));
     s1 = *((volatile uint32_t *)0x8001C020);
@@ -98,18 +99,18 @@ void printTaskList() {
     printf("Free PhyMem:   %d Bytes\n", (unsigned int)xPortGetFreeHeapSize());
 
     printf("=================OS Loader Info==================\r\n");
-    printf("VRAM PageFault:   %ld \n", g_page_vram_fault_cnt);
-    printf("VROM PageFault:   %ld \n", g_page_vrom_fault_cnt);
-    printf("HCLK Freq:%ld MHz\n", HCLK_Freq / 1000000);
-    printf("CPU Freq:%ld MHz\n", g_core_cur_freq_mhz);
-    printf("Flash IO_Writes:%lu\n", g_mtd_write_cnt);
-    printf("Flash IO_Reads:%lu\n", g_mtd_read_cnt);
-    printf("Flash IO_Erases:%lu\n", g_mtd_erase_cnt);
-    printf("Flash ECC Count:%lu\n", g_mtd_ecc_cnt);
-    printf("Flash ECC FATAL:%lu\n", g_mtd_ecc_fatal_cnt);
+    printf("VRAM PageFault:   %u \n", g_page_vram_fault_cnt);
+    printf("VROM PageFault:   %u \n", g_page_vrom_fault_cnt);
+    printf("HCLK Freq:%u MHz\n", HCLK_Freq / 1000000);
+    printf("CPU Freq:%u MHz\n", g_core_cur_freq_mhz);
+    printf("Flash IO_Writes:%u\n", g_mtd_write_cnt);
+    printf("Flash IO_Reads:%u\n", g_mtd_read_cnt);
+    printf("Flash IO_Erases:%u\n", g_mtd_erase_cnt);
+    printf("Flash ECC Count:%u\n", g_mtd_ecc_cnt);
+    printf("Flash ECC FATAL:%u\n", g_mtd_ecc_fatal_cnt);
     printf("Batt Charge:%d\n", HW_POWER_STS.B.CHRGSTS);
     printf("PWD_BATTCHRG:%d\n", HW_POWER_CHARGE.B.PWD_BATTCHRG);
-    printf("RTC:%ld\n", rtc_get_seconds());
+    printf("RTC:%u\n", rtc_get_seconds());
 
     for (int i = 0; i < 16; i++) {
         mem_cr += g_mem_comp_rate[i];
@@ -145,8 +146,8 @@ static void getKey(uint32_t *key, uint32_t *press) {
 }
 
 static uint32_t waitAnyKey() {
-    uint32_t key;
-    uint32_t lkey;
+    uint32_t key = 0;
+    uint32_t lkey = 0;
 
     key = g_latest_key_status & 0xFFFF;
     lkey = key;
@@ -179,7 +180,8 @@ void System(void *par) {
     // DisplayPutStr(64, 16 * 3, "Waiting for Flash GC...", 255, 32, 16);
 
     vTaskDelay(pdMS_TO_TICKS(100));
-    uint32_t k, kp;
+    uint32_t k;
+    uint32_t kp;
     getKey(&k, &kp);
     if ((k == KEY_F2) && kp) {
         slowDownEnable(false);
@@ -226,7 +228,7 @@ void System(void *par) {
 
         DisplayFillBox(32, 32, 224, 64, 128);
         DisplayFillBox(48, 80, 208, 96, 255);
-        DisplayPutStr(54, 42, isInterrupted ? " Boot  Interrupted  " : "No System Installed ", 255, 128, 16);
+        DisplayPutStr(54, 42, (int)isInterrupted ? " Boot  Interrupted  " : "No System Installed ", 255, 128, 16);
 
         // DisplayFillBox(0, 0, 255, 126, 255);
 
@@ -356,23 +358,23 @@ void VM_Unconscious(TaskHandle_t task, char *res, uint32_t address) {
         */
 
         memset(buf, 0, sizeof(buf));
-        sprintf(buf, "R12:%08lx  R0:%08lx ", pRegFrame[12], pRegFrame[0]);
+        sprintf(buf, "R12:%08x  R0:%08x ", pRegFrame[12], pRegFrame[0]);
         DisplayPutStr(24, 16 * 3 - 8, buf, 0, 208, 16);
 
         memset(buf, 0, sizeof(buf));
-        sprintf(buf, "R13:%08lx  R1:%08lx ", pRegFrame[13], pRegFrame[1]);
+        sprintf(buf, "R13:%08x  R1:%08x ", pRegFrame[13], pRegFrame[1]);
         DisplayPutStr(24, 16 * 4 - 8, buf, 0, 208, 16);
 
         memset(buf, 0, sizeof(buf));
-        sprintf(buf, "R14:%08lx  R2:%08lx ", pRegFrame[14], pRegFrame[2]);
+        sprintf(buf, "R14:%08x  R2:%08x ", pRegFrame[14], pRegFrame[2]);
         DisplayPutStr(24, 16 * 5 - 8, buf, 0, 208, 16);
 
         memset(buf, 0, sizeof(buf));
-        sprintf(buf, "R15:%08lx  R3:%08lx ", pRegFrame[15], pRegFrame[3]);
+        sprintf(buf, "R15:%08x  R3:%08x ", pRegFrame[15], pRegFrame[3]);
         DisplayPutStr(24, 16 * 6 - 8, buf, 0, 208, 16);
 
         memset(buf, 0, sizeof(buf));
-        sprintf(buf, "CPSR:%08lx FAR:%08lx ", pRegFrame[-1], address);
+        sprintf(buf, "CPSR:%08x FAR:%08x ", pRegFrame[-1], address);
         DisplayPutStr(24, 16 * 7 - 8, buf, 0, 208, 16);
 
         g_vm_status = VM_STATUS_UNCONSCIOUS;
@@ -426,7 +428,7 @@ void parseCDCCommand(char *cmd) {
     }
 
     if (strcmp(cmd, "BUFCHK") == 0) {
-        uint8_t chk;
+        uint8_t chk = 0;
         if (binBuf == NULL) {
             binBuf = (char *)VMMGR_GetCacheAddress();
         }
@@ -442,8 +444,8 @@ void parseCDCCommand(char *cmd) {
 
     if (memcmp(cmd, "ERASEB", 6) == 0) {
         uint32_t erase_blk = 30;
-        sscanf(cmd, "ERASEB:%ld", &erase_blk);
-        printf("ERASEB:%ld\n", erase_blk);
+        sscanf(cmd, "ERASEB:%d", &erase_blk);
+        printf("ERASEB:%u\n", erase_blk);
 
         MTD_ErasePhyBlock(erase_blk);
 
@@ -454,10 +456,10 @@ void parseCDCCommand(char *cmd) {
 
     if (memcmp(cmd, "PROGP", 5) == 0) {
         uint32_t prog_page = 1111;
-        uint32_t wrMeta;
+        uint32_t wrMeta = 0;
         uint8_t mtbuff[32];
-        sscanf(cmd, "PROGP:%ld,%ld", &prog_page, &wrMeta);
-        printf("PROGP:%ld,%ld\n", prog_page, wrMeta);
+        sscanf(cmd, "PROGP:%d,%d", &prog_page, &wrMeta);
+        printf("PROGP:%u,%u\n", prog_page, wrMeta);
 
         if (wrMeta) {
             // mtbuff = pvPortMalloc(19);
@@ -486,9 +488,10 @@ void parseCDCCommand(char *cmd) {
     }
 
     if (memcmp(cmd, "MKNCB", 5) == 0) {
-        uint32_t stblock, pages;
-        sscanf(cmd, "MKNCB:%ld,%ld", &stblock, &pages);
-        printf("MKNCB:%ld,%ld\n", stblock, pages);
+        uint32_t stblock;
+        uint32_t pages;
+        sscanf(cmd, "MKNCB:%d,%d", &stblock, &pages);
+        printf("MKNCB:%u,%u\n", stblock, pages);
         mkSTMPNandStructure(stblock, pages);
         MscSetCmd("MKOK\n");
 
@@ -570,7 +573,7 @@ char cdc_path_loader_buffer[64];
 // Invoked when CDC interface received data from host
 void tud_cdc_rx_cb(uint8_t itf) {
     (void)itf;
-    int32_t nRead;
+    int32_t nRead = 0;
 
     if (g_CDC_TransTo == CDC_PATH_SYS) {
         nRead = tud_cdc_available();
@@ -624,7 +627,7 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
     //     vTaskDelay(pdMS_TO_TICKS(1000));
     // }
 
-    printf("FTL Code:%ld\n", g_FTL_status);
+    printf("FTL Code:%u\n", g_FTL_status);
 
     portLRADCConvCh(7, 1);
 
@@ -667,7 +670,8 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
             VMSuspend();
             DisplayClean();
 
-            uint8_t key, op;
+            uint8_t key;
+            uint8_t op;
             op = 0;
             DisplayFillBox(4, 4, 252, 20, 0);
             DisplayPutStr(36, 5, "Device Maintenance Menu ", 255, 0, 16);
@@ -754,7 +758,7 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
             }
         }
 
-        uint8_t *vramBuf;
+        uint8_t *vramBuf = NULL;
         if (transScr) {
             vTaskDelay(pdMS_TO_TICKS(1000));
 
@@ -764,7 +768,7 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
             }
 
             for (int y = 0; y < 128; y += 2) {
-                bool fin;
+                bool fin = false;
                 DisplayReadArea(0, y, 255, y + 2, vramBuf, &fin);
                 while (!fin) {
                     vTaskDelay(pdMS_TO_TICKS(30));
@@ -871,7 +875,7 @@ void vBatteryMon(void *__n) {
     long t = 0;
     int n = 0;
 
-    uint32_t show_bat_val;
+    uint32_t show_bat_val = 0;
 
     for (;;) {
 
@@ -905,12 +909,12 @@ void vBatteryMon(void *__n) {
                             printf("Battery = Single AA or AAA\n");
                         }
                         */
-            printf("Batt. voltage:%ld mv, adc:%ld\n", batt_voltage, vatt_adc);
+            printf("Batt. voltage:%u mv, adc:%u\n", batt_voltage, vatt_adc);
             printf("VDDIO: %d mV\n", (int)(portLRADCConvCh(6, 5) * 0.9));
-            printf("VDD5V: %ld mV\n", vdd5v_voltage);
+            printf("VDD5V: %u mV\n", vdd5v_voltage);
             // printf("VBG: %d mV\n", (int)(portLRADCConvCh(2, 5) * 0.45));
             printf("Core Temp: %d ℃\n", coreTemp);
-            printf("Power Speed:%lu\n", portGetPWRSpeed());
+            printf("Power Speed:%u\n", portGetPWRSpeed());
         }
         t++;
 
@@ -946,7 +950,7 @@ void TaskUSBLog(void *_) {
     vTaskDelay(pdMS_TO_TICKS(2000));
     for (;;) {
 
-        int ava;
+        int ava = 0;
         if (g_CDC_TransTo == CDC_PATH_LOADER) {
             ava = tud_cdc_write_available();
             if (ava > 0) {

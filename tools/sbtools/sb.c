@@ -215,8 +215,8 @@ static void produce_sb_section_header(struct sb_section_t *sec,
     sec_hdr->identifier = sec->identifier;
     sec_hdr->offset = sec->file_offset;
     sec_hdr->size = sec->sec_size;
-    sec_hdr->flags = (sec->is_data ? 0 : SECTION_BOOTABLE)
-        | (sec->is_cleartext ? SECTION_CLEARTEXT : 0)
+    sec_hdr->flags = ((int)sec->is_data ? 0 : SECTION_BOOTABLE)
+        | ((int)sec->is_cleartext ? SECTION_CLEARTEXT : 0)
         | sec->other_flags;
 }
 
@@ -233,15 +233,15 @@ static void produce_section_tag_cmd(struct sb_section_t *sec,
     struct sb_instruction_tag_t *tag, bool is_last)
 {
     tag->hdr.opcode = SB_INST_TAG;
-    tag->hdr.flags = is_last ? SB_INST_LAST_TAG : 0;
+    tag->hdr.flags = (int)is_last ? SB_INST_LAST_TAG : 0;
     tag->identifier = sec->identifier;
     /* there is a catch here: in the section header at the beginning of the SB
      * file, we put the *useful* length of the section (without padding) but
      * the bootloader will not use those and only use the TAG commande which
      * need to give the *actual* length (with padding) */
     tag->len = sec->sec_size + sec->pad_size;
-    tag->flags = (sec->is_data ? 0 : SECTION_BOOTABLE)
-        | (sec->is_cleartext ? SECTION_CLEARTEXT : 0)
+    tag->flags = ((int)sec->is_data ? 0 : SECTION_BOOTABLE)
+        | ((int)sec->is_cleartext ? SECTION_CLEARTEXT : 0)
         | sec->other_flags;
     tag->hdr.checksum = instruction_checksum(&tag->hdr);
 }
@@ -1014,13 +1014,13 @@ struct sb_file_t *sb_read_memory(void *_buf, size_t filesize, unsigned flags, vo
             else
                 memcpy(sec, buf + pos, size);
 
-            struct sb_section_t *s = read_section(data_sec, sec_hdr->identifier,
+            struct sb_section_t *s = read_section(data_sec != 0, sec_hdr->identifier,
                 sec, size, "      ", u, cprintf, out_err);
             free(sec);
             if(s)
             {
                 s->other_flags = sec_hdr->flags & ~SECTION_STD_MASK;
-                s->is_cleartext = !encrypted;
+                s->is_cleartext = ((!encrypted) != 0);
                 s->alignment = guess_alignment(pos);
                 memcpy(&sb_file->sections[i], s, sizeof(struct sb_section_t));
                 free(s);
@@ -1112,13 +1112,13 @@ struct sb_file_t *sb_read_memory(void *_buf, size_t filesize, unsigned flags, vo
                 else
                     memcpy(sec, buf + pos, size);
 
-                struct sb_section_t *s = read_section(data_sec, tag->identifier,
+                struct sb_section_t *s = read_section(data_sec != 0, tag->identifier,
                     sec, size, "      ", u, cprintf, out_err);
                 free(sec);
                 if(s)
                 {
                     s->other_flags = tag->flags & ~SECTION_STD_MASK;
-                    s->is_cleartext = !encrypted;
+                    s->is_cleartext = ((!encrypted) != 0);
                     s->alignment = guess_alignment(pos);
                     sb_file->sections = augment_array(sb_file->sections,
                         sizeof(struct sb_section_t), sb_file->nr_sections++,

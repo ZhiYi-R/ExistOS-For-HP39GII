@@ -132,15 +132,17 @@ static void GPMI_ResetDMAChannel()
 static void GPMI_SetAccessTiming(GPMI_Timing_t timing)
 {
 
-    uint32_t dh,ds,as;
+    uint32_t dh;
+    uint32_t ds;
+    uint32_t as;
     DeviceTimeOutCycles = nsToCycles(80000000, 1000000000ULL / (GPMIFreq / 4096ULL), 0);  //80ms
     //DeviceTimeOutCycles = 0xFFFF;
     ds = nsToCycles(timing.DataSetup_ns, 1000000000ULL / GPMIFreq, 1);
     dh = nsToCycles(timing.DataHold_ns, 1000000000ULL / GPMIFreq, 1);
     as = nsToCycles(timing.DataSetup_ns, 1000000000ULL / GPMIFreq, 0);
-    INFO("DATA_SETUP:%ld\n", ds);
-    INFO("DATA_HOLD:%ld\n", dh);
-    INFO("ADDRESS_SETUP:%ld\n", as);
+    INFO("DATA_SETUP:%u\n", ds);
+    INFO("DATA_HOLD:%u\n", dh);
+    INFO("ADDRESS_SETUP:%u\n", as);
     
     BF_CS3(
         GPMI_TIMING0,
@@ -978,7 +980,7 @@ static inline void    GPMI_sendCommand(uint32_t *cmd, uint32_t *para, uint16_t p
 
 static inline void   GPMI_ReadPage(uint32_t ColumnAddress, uint32_t RowAddress, uint32_t *data, uint32_t *auxData, bool block)
 {
-    volatile uint8_t *probe;
+    volatile uint8_t *probe = NULL;
     waitLastOpa();
     //INFO("Start READ\n");
     volatile uint8_t *cmdBuf = (uint8_t *)FlashSendCommandBuffer;
@@ -1238,11 +1240,11 @@ static void GPMI_GetNANDInfo(mtdInfo_t *mtdinfo)
     mtdinfo->MetaSize_B = 19;
     mtdinfo->Blocks = 1024;
 
-    INFO("PageSize:%lu B\n", mtdinfo->PageSize_B);
-    INFO("SpareSizePerPage:%lu B\n", mtdinfo->SpareSizePerPage_B);
-    INFO("BlockSize:%lu KB\n", mtdinfo->BlockSize_KB);
-    INFO("PagesPerBlock:%lu\n", mtdinfo->PagesPerBlock);
-    INFO("Blocks:%lu\n", mtdinfo->Blocks);
+    INFO("PageSize:%u B\n", mtdinfo->PageSize_B);
+    INFO("SpareSizePerPage:%u B\n", mtdinfo->SpareSizePerPage_B);
+    INFO("BlockSize:%u KB\n", mtdinfo->BlockSize_KB);
+    INFO("PagesPerBlock:%u\n", mtdinfo->PagesPerBlock);
+    INFO("Blocks:%u\n", mtdinfo->Blocks);
 
 }
 

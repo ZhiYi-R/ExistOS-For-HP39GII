@@ -98,8 +98,8 @@ void *GetFsObj()
 }
 
 void SystemFSInit() {
-    uint32_t sel;
-    int err ;
+    uint32_t sel = 0;
+    int err  = 0;
 
 #if FS_TYPE == FS_FATFS
 

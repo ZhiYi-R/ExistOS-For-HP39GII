@@ -13,5 +13,5 @@ extern "C" {
 
 extern "C" void __cxa_pure_virtual() {
   printf("Unsupported pure-virtual method.\n");
-  while(1);
+  while(true);
 }

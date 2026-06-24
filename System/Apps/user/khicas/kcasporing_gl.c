@@ -60,7 +60,8 @@ void vGL_FlushVScreen()
     char *src=screen_1bpp;
     for (int r=0;r<VIR_LCD_PIX_H;++r){
       char tab[VIR_LCD_PIX_W];
-      char *dest=tab,*end=dest+VIR_LCD_PIX_W;
+      char *dest=tab;
+      char *end=dest+VIR_LCD_PIX_W;
       for (;dest<end;dest+=8,++src){
         char cur=*src;
         if (cur){
@@ -153,10 +154,13 @@ static const unsigned char *ext_glyph_ptr(unsigned char code, int fontSize);
 
     
 void vGL_putChar(int x0, int y0, char ch, int fg, int bg, int fontSize) {
-    int font_w;
-    int font_h;
-    const unsigned char *pCh;
-    unsigned int x = 0, y = 0, i = 0, j = 0; 
+    int font_w = 0;
+    int font_h = 0;
+    const unsigned char *pCh = NULL;
+    unsigned int x = 0;
+    unsigned int y = 0;
+    unsigned int i = 0;
+    unsigned int j = 0; 
  
     if ((unsigned char)ch >= 0x80) {
         pCh = ext_glyph_ptr((unsigned char)ch, fontSize);
@@ -346,9 +350,10 @@ static int utf8_decode(const unsigned char *s, unsigned int *cp) {
 }
 
 void vGL_putString(int x0, int y0, const char *s, int fg, int bg, int fontSize) {
-    int font_w;
-    int font_h;
-    int x = 0, y = 0;
+    int font_w = 0;
+    int font_h = 0;
+    int x = 0;
+    int y = 0;
 
     if (fontSize <= 16) {
         switch (fontSize) {
@@ -361,7 +366,7 @@ void vGL_putString(int x0, int y0, const char *s, int fg, int bg, int fontSize) 
 
         font_h = fontSize;
         while (*s) {
-            unsigned int cp;
+            unsigned int cp = 0;
             int adv = utf8_decode(s, &cp);
             if (adv <= 0) { s++; continue; }
             if (cp < 0x80) {
@@ -487,7 +492,7 @@ void vGL_reverseArea(unsigned int x0, unsigned int y0, unsigned int x1, unsigned
 
 static void vGL_flushTask(void *arg)
 {
-    unsigned int _delay;
+    unsigned int _delay = 0;
     while(1)
     {
         vTaskDelay(pdMS_TO_TICKS(50));
@@ -514,7 +519,7 @@ extern int shell_fontw,shell_fonth;
 
 static void vGL_concur_reverse()
 {
-    concur_reverse = !concur_reverse;
+    concur_reverse = ((!concur_reverse) != 0);
     vGL_reverseArea((cursor_x + 1) * shell_fontw, (cursor_y + 1) * shell_fonth, (cursor_x + 1) * shell_fontw + 1, (cursor_y + 1) * shell_fonth + shell_fonth);
 }
 
@@ -617,7 +622,9 @@ extern volatile bool ctrl_c ;
 
 bool vGL_chkEsc()
 {
-    uint32_t keys, key, kpress;
+    uint32_t keys;
+    uint32_t key;
+    uint32_t kpress;
     keys = ll_vm_check_key();
     key = keys & 0xFFFF;
     kpress = keys >> 16;
@@ -632,7 +639,9 @@ bool vGL_chkEsc()
  
 bool vGL_getkey(int *keyid)
 {
-    uint32_t keys, key, kpress;
+    uint32_t keys;
+    uint32_t key;
+    uint32_t kpress;
     static uint32_t last_key;
     static uint32_t last_press;
     static bool initialized = false;
@@ -661,7 +670,7 @@ bool vGL_getkey(int *keyid)
     last_press = kpress;
 
     *keyid = key;
-    return kpress;
+    return kpress != 0u;
 }
 
 

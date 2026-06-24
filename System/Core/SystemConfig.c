@@ -90,7 +90,7 @@ void config_load(void) {
         return;
     }
     
-    UINT bytes_read;
+    UINT bytes_read = 0;
     res = f_read(&file, buffer, 1023, &bytes_read);
     buffer[bytes_read] = '\0';
     f_close(&file);
@@ -152,8 +152,8 @@ void config_save(void) {
         "}",
         g_config.language,
         g_config.power_save,
-        g_config.enable_charge ? "true" : "false",
-        g_config.enable_mem_swap ? "true" : "false"
+        (int)g_config.enable_charge ? "true" : "false",
+        (int)g_config.enable_mem_swap ? "true" : "false"
     );
     
     // 打开文件进行写入
@@ -163,7 +163,7 @@ void config_save(void) {
     }
     
     // 写入JSON数据
-    UINT bytes_written;
+    UINT bytes_written = 0;
     res = f_write(&file, json_buffer, strlen(json_buffer), &bytes_written);
     f_close(&file);
     

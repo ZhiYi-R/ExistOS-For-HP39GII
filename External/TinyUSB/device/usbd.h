@@ -68,7 +68,7 @@ bool tud_suspended(void);
 // Check if device is ready to transfer
 static inline bool tud_ready(void)
 {
-  return tud_mounted() && !tud_suspended();
+  return (tud_mounted() && !tud_suspended()) != 0;
 }
 
 // Remote wake up host, only if suspended and enabled by host

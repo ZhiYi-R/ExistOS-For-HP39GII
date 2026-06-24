@@ -200,7 +200,7 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid)
 {
   (void) langid;
 
-  uint8_t chr_count;
+  uint8_t chr_count = 0;
 
   if ( index == 0)
   {

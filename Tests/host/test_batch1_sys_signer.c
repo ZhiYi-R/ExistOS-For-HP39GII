@@ -1,8 +1,3 @@
-/**
- * @file Tests/host/test_batch1_sys_signer.c
- * @brief test_batch1_sys_signer module
- */
-
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>

@@ -24,7 +24,7 @@
 //#include "ff.h"
 
 #include "debug.h"
-#include "crash/CrashLog.h"
+#include "Crash/CrashLog.h"
 
 #include "SystemFs.h"
 #include "SystemUI.h"
@@ -42,7 +42,7 @@ bool MemorySwapEnable = false;
 
 void enableMemSwap(bool enable) {
     MemorySwapEnable = enable;
-    ll_mem_swap_enable(enable);
+    ll_mem_swap_enable((uint32_t)enable);
     if (enable) {
         SwapMemorySize = ll_mem_swap_size();
     } else {
@@ -69,7 +69,8 @@ void printTaskList() {
     printf("%s\n", pcWriteBuffer);
     printf("Status:  X-Running  R-Ready  B-Block  S-Suspend  D-Delete\n");
 
-    uint32_t free, total;
+    uint32_t free;
+    uint32_t total;
     float mem_cmpr = ll_mem_comprate();
     uint32_t total_phy_mem = ll_mem_phy_info(&free, &total);
     total_phy_mem /= 1024;
@@ -172,7 +173,9 @@ void main() {
 
     ll_cpu_slowdown_enable(false);
 
-    uint32_t memsz, phy_total, phy_free;
+    uint32_t memsz;
+    uint32_t phy_total;
+    uint32_t phy_free;
     memsz = ll_mem_phy_info(&phy_free, &phy_total);
     if (memsz > OnChipMemorySize) {
         OnChipMemorySize = memsz;
@@ -184,7 +187,9 @@ void main() {
 
     printf("SP:%08x\n", getCurStackAdr());
 
-    uint32_t free, total, total_comp;
+    uint32_t free;
+    uint32_t total;
+    uint32_t total_comp;
     total_comp = ll_mem_phy_info(&free, &total);
     if (total_comp > OnChipMemorySize) {
         OnChipMemorySize = total_comp;
@@ -232,7 +237,7 @@ void check_emulator_status() {
         if (EMU_DATA_PORT[0]) {
             FIL savef;
             FRESULT fr;
-            UINT br;
+            UINT br = 0;
             char *fname = (char *)&EMU_DATA_PORT[10];
             uint32_t fsz = ((uint32_t *)(&EMU_DATA_PORT[4]))[0];
             printf("File send command detected.\n");

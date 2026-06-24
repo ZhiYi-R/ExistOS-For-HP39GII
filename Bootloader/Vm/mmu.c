@@ -71,7 +71,7 @@ void mmu_clean_invalidated_cache_index(uint32_t index)
 
 void mmu_clean_invalidated_dcache(uint32_t buffer, uint32_t size)
 {
-    register uint32_t ptr;
+    register uint32_t ptr = 0;
 
     ptr = buffer & ~(CACHE_LINE_SIZE - 1);
 
@@ -85,7 +85,7 @@ void mmu_clean_invalidated_dcache(uint32_t buffer, uint32_t size)
 
 void mmu_clean_dcache(uint32_t buffer, uint32_t size)
 {
-    register uint32_t ptr;
+    register uint32_t ptr = 0;
 
     ptr = buffer & ~(CACHE_LINE_SIZE - 1);
 
@@ -98,7 +98,7 @@ void mmu_clean_dcache(uint32_t buffer, uint32_t size)
 
 void mmu_drain_buffer()
 {
-    register uint32_t reg;
+    register uint32_t reg = 0;
     reg = 0;
     __asm volatile("mcr p15,0,%0,c7,c10,4" :: "r"(reg));
 
@@ -107,7 +107,7 @@ void mmu_drain_buffer()
 
 void mmu_invalidate_dcache(uint32_t buffer, uint32_t size)
 {
-    register uint32_t ptr;
+    register uint32_t ptr = 0;
 
     ptr = buffer & ~(CACHE_LINE_SIZE - 1);
 
@@ -120,7 +120,7 @@ void mmu_invalidate_dcache(uint32_t buffer, uint32_t size)
 
 void mmu_invalidate_tlb()
 {
-    register uint32_t value asm("r0");
+    register uint32_t value asm("r0") = 0;
 
     value = 0;
     __asm volatile ("mcr p15, 0, %0, c8, c7, 0" :: "r"(value) );
@@ -129,7 +129,7 @@ void mmu_invalidate_tlb()
 
 void mmu_invalidate_icache()
 {
-    register uint32_t value asm("r0");
+    register uint32_t value asm("r0") = 0;
 
     value = 0;
 
@@ -139,7 +139,7 @@ void mmu_invalidate_icache()
 
 void mmu_invalidate_dcache_all()
 {
-    register uint32_t value asm("r0");
+    register uint32_t value asm("r0") = 0;
 
     value = 0;
 
@@ -156,7 +156,7 @@ volatile void mmu_set_rs(uint32_t rs) {
 
 void mmu_SetDomainPermCheck(uint32_t domain, bool check)
 {
-    register uint32_t c3 asm("r2");
+    register uint32_t c3 asm("r2") = 0;
     __asm volatile("mrc p15,0,%0,c3,c0,0" ::"r"(c3)); 
 
 
@@ -260,7 +260,7 @@ static inline void SetL1PTE(uint32_t pte, uint32_t interpret, uint32_t targetAdd
         PTE_LOC[pte] |= 1 << 4;
         break;
     default:
-        INFO("ERROR: Unexpected L1 Interpret:%lu\n", interpret);
+        INFO("ERROR: Unexpected L1 Interpret:%u\n", interpret);
         break;
     }
 
@@ -282,19 +282,19 @@ void mmu_dumpMapInfo()
             switch (GetPTEMapType(L1PTE[i]))
             {
             case L1PTE_INTERPRET_SECTION:
-                INFO("L1PTE:  VirtAddr:%08x ~ %08x  MapTo  %08lx ~ %08lx\n",
+                INFO("L1PTE:  VirtAddr:%08x ~ %08x  MapTo  %08x ~ %08x\n",
                     i*SEG_SIZE,(i+1)*SEG_SIZE - 1, 
                     (L1PTE[i] & 0xFFF00000), (L1PTE[i] & 0xFFF00000) | (SEG_SIZE - 1));
                     
                 break;
             case L1PTE_INTERPRET_COARSE:
-                INFO("L1PTE:  Seg %d(%08x) Reference L2 Table:%08lx:\n",
+                INFO("L1PTE:  Seg %d(%08x) Reference L2 Table:%08x:\n",
                     i, i*SEG_SIZE, (L1PTE[i] & ~0x3FF));
 
                     uint32_t *L2PTE = ((uint32_t *)(L1PTE[i] & ~0x3FF));
                     for(int j=0; j<256; j++){
                         if(L2PTE[j] != 0){
-                            INFO("\tL2PTE:  VirtAddr:%08x ~ %08x MapTo %08lx ~ %08lx, AP:%lx, buffer:%ld, cache:%ld, VAL:%08lx\n",
+                            INFO("\tL2PTE:  VirtAddr:%08x ~ %08x MapTo %08x ~ %08x, AP:%x, buffer:%u, cache:%u, VAL:%08x\n",
                                 i*SEG_SIZE + j*PAGE_SIZE, i*SEG_SIZE + (j+1)*PAGE_SIZE - 1,
                                 (L2PTE[j] & 0xFFFFF000), (L2PTE[j] & 0xFFFFF000) | (PAGE_SIZE - 1),
                                 (L2PTE[j] >> 4) & 0xFF,
@@ -370,7 +370,7 @@ void mmu_map_page(uint32_t vaddr, uint32_t paddr,
     
     uint32_t seg = vaddr >> 20;
     uint32_t *L1PTE = (uint32_t *)DFLPT_BASE;
-    uint32_t *L2PTE;
+    uint32_t *L2PTE = NULL;
 
     if(seg == 0)
     {
@@ -411,8 +411,8 @@ void mmu_map_page(uint32_t vaddr, uint32_t paddr,
 #if USE_TINY_PAGE
     val  = (paddr & (~0x3FF));
     val |= (AP & 0x3) << 4;
-    val |= ((cache & 1) << 3);
-    val |= ((buffer & 1) << 2);
+    val |= (((int)cache & 1) << 3);
+    val |= (((int)buffer & 1) << 2);
     val |= 3;
     L2PTE[(vaddr >> 10) & 0x3FF] = val;
 #else
@@ -438,7 +438,7 @@ void dump_MPTE()
 {
     for(int i = 0; i < 8; i++)
     {
-        printf("MPTE %d, at seg:%ld\n", i, GetMPTELoc(i));
+        printf("MPTE %d, at seg:%u\n", i, GetMPTELoc(i));
     }
 }
 
@@ -448,7 +448,7 @@ void dump_DFLPT_rec()
 {
     for(int j = 0; j < MAX_SEG_SUPPORTED; j++)
     {
-        printf("ind:%d, seg:%d, val:%08lx\n", j, MPTE_Table[j].seg, MPTE_Table[j].val);
+        printf("ind:%d, seg:%d, val:%08x\n", j, MPTE_Table[j].seg, MPTE_Table[j].val);
     }
 }
 

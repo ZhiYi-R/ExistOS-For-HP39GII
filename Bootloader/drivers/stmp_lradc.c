@@ -37,9 +37,9 @@ void portLRADC_init()
 
 void portLRADCEnable(bool enable ,uint32_t ch)
 {
-    INFO("Enable LRADC:%lu,%d\n",ch, enable);
+    INFO("Enable LRADC:%u,%d\n",ch, enable);
 
-    portEnableIRQ(HW_IRQ_LRADC_CH0 + ch, enable);
+    portEnableIRQ(HW_IRQ_LRADC_CH0 + ch, (unsigned int)enable);
     
     if(enable)
     {
@@ -77,7 +77,7 @@ uint32_t portLRADCConvCh(uint32_t ch, uint32_t samples)
 void port_LRADC_IRQ(uint32_t ch)
 {
 
-    INFO("\n\nLRADC IRQ:%ld, val:%d\n", ch, BF_RDn(LRADC_CHn, ch, VALUE));
+    INFO("\n\nLRADC IRQ:%u, val:%d\n", ch, BF_RDn(LRADC_CHn, ch, VALUE));
     HW_LRADC_CTRL1_CLR(1 << ch);  
 
 

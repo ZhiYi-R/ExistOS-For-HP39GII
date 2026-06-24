@@ -150,7 +150,7 @@ TU_ATTR_WEAK void tud_cdc_line_coding_cb(uint8_t itf, cdc_line_coding_t const* p
 //--------------------------------------------------------------------+
 static inline int32_t tud_cdc_n_read_char (uint8_t itf)
 {
-  uint8_t ch;
+  uint8_t ch = 0;
   return tud_cdc_n_read(itf, &ch, 1) ? (int32_t) ch : -1;
 }
 
