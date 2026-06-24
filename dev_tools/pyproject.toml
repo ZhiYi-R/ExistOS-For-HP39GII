@@ -1,0 +1,18 @@
+[project]
+name = "existos-glyph-gen"
+version = "0.1.0"
+description = "Math glyph bitmap generator for ExistOS"
+requires-python = ">=3.10"
+dependencies = ["pillow>=11.0"]
+
+[project.scripts]
+gen-glyphs = "gen_glyphs:main"
+gen_glyphs = "gen_glyphs:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+only-include = ["gen_glyphs.py"]
