@@ -1,0 +1,76 @@
+[files]
+# 排除第三方库、构建产物、资源文件和工具链
+extend-exclude = [
+    "Libs/src/",
+    "System/KLib/lvgl/",
+    "System/KLib/mpy/",
+    "System/filesystem/fatfs/",
+    "System/filesystem/littlefs/",
+    "System/third_party/",
+    "OSLoader/Component3rd/",
+    "OSLoader/Scheduler/",
+    "OSLoader/VmMgr/tlsf/",
+    "OSLoader/VmMgr/minilzo*",
+    "OSLoader/VmMgr/quicklz*",
+    "OSLoader/VmMgr/lzoconf*",
+    "OSLoader/VmMgr/lzodefs*",
+    "OSLoader/HAL/Hardware/registers/",
+    "System/KLib/tjpgdec/",
+    "build/",
+    "fonts/",
+    "Image/",
+    "Script/",
+    "tools/",
+    "*.ld",
+    "*.ico",
+    "*.ico.c",
+    "CMakeLists.txt",
+    "_typos.toml",
+    "static_analysis_report.md",
+    "clang_tidy_report.txt",
+    "typos_summary.md",
+    "typos_report.txt",
+]
+
+[default]
+check-filename = true
+check-file = true
+
+[default.extend-words]
+# 项目中的合法缩写/术语，避免误报
+"comprate" = "comprate"        # 压缩率（compression rate），代码中已存在
+"compatable" = "compatable"    # 如需保留旧命名
+"DOUT" = "DOUT"                # 硬件寄存器 Data Output
+"NCE" = "NCE"                  # Negative Chip Enable（硬件控件ID）
+"CNA" = "CNA"                  # USB 序列号前缀
+"PRIORIT" = "PRIORIT"          # 寄存器名 PRIORITYn 截断
+"WRONLY" = "WRONLY"            # 标准宏 LFS_O_WRONLY
+"STRNG" = "STRNG"              # giac 内部类型 _STRNG
+"DAA" = "DAA"                  # Z80 指令 Decimal Adjust Accumulator
+"Ba" = "Ba"                    # Saturn 指令 oBa0-oBa5
+"MENUE" = "MENUE"              # HP Saturn DISP_MENUE 常量
+"writeable" = "writeable"      # Emu48 INI 配置键名
+"OEN" = "OEN"                  # 硬件寄存器 Output Enable
+"UE" = "UE"                    # 硬件寄存器 USB Error
+"FRE" = "FRE"                  # 硬件寄存器 Frame List Rollover Enable
+"URE" = "URE"                  # 硬件寄存器 USB Reset Enable
+"FPR" = "FPR"                  # 硬件寄存器 Force Port Resume
+"OT" = "OT"                    # 硬件寄存器 OTG
+"BSE" = "BSE"                  # 硬件寄存器 B-Session End
+"ACTIV" = "ACTIV"              # 硬件寄存器 PWM ACTIVE
+"Pn" = "Pn"                    # 硬件寄存器 HWCAPn
+"INDX" = "INDX"                # 硬件寄存器 IR_TCCTRL INDX
+"IST" = "IST"                  # 硬件寄存器 USBCTRL HCCPARAMS IST
+"fo" = "fo"                    # file offset 缩写
+"nd" = "nd"                    # 2nd / and 缩写
+"sur" = "sur"                  # 法语 "sur"（Taper sur une touche）
+"DSKTOP" = "DSKTOP"            # HP Saturn RPL 常量
+"Fand" = "Fand"                # HP Saturn 指令 NFand
+"Nnot" = "Nnot"                # HP Saturn 指令 Nnot
+"Tne" = "Tne"                  # HP Saturn 指令 Tne
+"Tbe" = "Tbe"                  # HP Saturn 指令 Tbe
+"Poin" = "Poin"                # HP Saturn 术语 Pointer 截断
+"ETO" = "ETO"                  # Windows GDI 常量 ETO_OPAQUE
+
+[type.c]
+extend-glob = ["*.c", "*.h", "*.cpp", "*.hpp"]
