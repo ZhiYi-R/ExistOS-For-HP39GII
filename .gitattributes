@@ -1,0 +1,46 @@
+# Auto-detect text files and normalize to LF
+* text=auto
+
+# Ensure LF line endings for all text files on all platforms
+*.c text eol=lf
+*.h text eol=lf
+*.cpp text eol=lf
+*.hpp text eol=lf
+*.py text eol=lf
+*.cmake text eol=lf
+*.txt text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.cfg text eol=lf
+*.inc text eol=lf
+*.ld text eol=lf
+*.s text eol=lf
+*.S text eol=lf
+*.rules text eol=lf
+*.in text eol=lf
+*.toml text eol=lf
+*.nix text eol=lf
+*.sh text eol=lf
+*.bd text eol=lf
+*.mk text eol=lf
+Makefile text eol=lf
+makefile text eol=lf
+*.gitignore text eol=lf
+*.gitattributes text eol=lf
+.clang-format text eol=lf
+README text eol=lf
+LICENSE text eol=lf
+lock text eol=lf
+
+# Binary files - never touch
+*.png binary
+*.exe binary
+*.otf binary
+*.ico binary
+*.bin binary
+
+# Font data files - raw binary format
+fonts/fonts_hzk16h binary
+fonts/fonts_hzk16s binary
