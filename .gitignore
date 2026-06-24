@@ -102,3 +102,4 @@ UI_build_stamp.h
 .claude/
 claude.md
 glyphs3/
+Scripts/__pycache__/
