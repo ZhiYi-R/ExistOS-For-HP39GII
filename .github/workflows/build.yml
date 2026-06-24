@@ -47,12 +47,10 @@ jobs:
     - name: Build sys signer
       if: steps.sys_signer-cache.outputs.cache-hit != 'true'
       run: |
-        cd tools/sys_signer
-        cmake .
-        cmake --build .
-        rm -rf ../sys_signer
-        cp sys_signer ../
-        cd ../..
+        cmake -S tools/sys_signer -B /tmp/sys_signer_build
+        cmake --build /tmp/sys_signer_build
+        rm -rf tools/sys_signer
+        cp /tmp/sys_signer_build/sys_signer tools/sys_signer
     - uses: actions/cache@v3
       id: mpy-cache
       with:
