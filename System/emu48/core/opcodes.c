@@ -1238,7 +1238,7 @@ VOID o80B(LPBYTE I) // BUSCC
 	// InfoMessage(_T("BUSCC instruction executed."));
 	if (cCurrentRomType=='Q' || cCurrentRomType=='2' || cCurrentRomType=='P')
 	{
-		o80BExt(I);							// Saturnator extentions
+		o80BExt(I);							// Saturnator extensions
 	}
 	return;
 }

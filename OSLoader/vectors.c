@@ -40,8 +40,8 @@ uint32_t
     asm volatile("STR     R0, [SP, #-68]"); /*{NESTING_CNT <-, SPSR, R0-R15 } 16*4*/                                  \
     asm volatile("SUB     SP, SP, #68");                                                                              \
     uint32_t *context = (uint32_t *)_get_sp();                                                                        \
-    uint32_t *pRegFram = (uint32_t *)((uint32_t *)pxCurrentTCB)[1];                                                   \
-    memcpy(pRegFram, context, 18 * 4);                                                                                \
+    uint32_t *pRegFrame = (uint32_t *)((uint32_t *)pxCurrentTCB)[1];                                                   \
+    memcpy(pRegFrame, context, 18 * 4);                                                                                \
     ((uint32_t *)pxCurrentTCB)[1] = ((uint32_t *)pxCurrentTCB)[1] + 18 * 4; /*Set The Registers frame stack pointer*/ \
     ((uint32_t *)pxCurrentTCB)[0] = context[13 + 2];                        /*Set the task stack pointer*/
 
@@ -80,7 +80,7 @@ extern bool vm_in_exception, g_chargeEnable;
 bool is_pcm_buffer_idle();
 void pcm_buffer_load(void *pcmdat);
 
-void volatile arm_do_swi(uint32_t SWINum, uint32_t *pRegFram) {
+void volatile arm_do_swi(uint32_t SWINum, uint32_t *pRegFrame) {
 
     LLAPI_CallInfo_t currentCall;
     BaseType_t SwitchContext;
@@ -90,35 +90,35 @@ void volatile arm_do_swi(uint32_t SWINum, uint32_t *pRegFram) {
 
         switch (SWINum) {
         case LL_FAST_SWI_GET_STVAL:
-            if (pRegFram[0 + 2] < 16) {
-                pRegFram[0 + 2] = vm_temp_storage[0];
+            if (pRegFrame[0 + 2] < 16) {
+                pRegFrame[0 + 2] = vm_temp_storage[0];
             }
             break;
         case LL_FAST_SWI_SET_STVAL:
-            if (pRegFram[0 + 2] < 16) {
-                vm_temp_storage[pRegFram[0 + 2]] = pRegFram[1 + 2];
+            if (pRegFrame[0 + 2] < 16) {
+                vm_temp_storage[pRegFrame[0 + 2]] = pRegFrame[1 + 2];
             }
             break;
 
         case LL_FAST_SWI_GET_TIME_US:
-            pRegFram[0 + 2] = portBoardGetTime_us();
+            pRegFrame[0 + 2] = portBoardGetTime_us();
             break;
         case LL_FAST_SWI_GET_TIME_MS:
-            pRegFram[0 + 2] = portBoardGetTime_ms();
+            pRegFrame[0 + 2] = portBoardGetTime_ms();
             break;
         case LL_FAST_SWI_VM_SLEEP_MS:
-            vTaskDelayInSWI(pdMS_TO_TICKS(pRegFram[0 + 2]));
+            vTaskDelayInSWI(pdMS_TO_TICKS(pRegFrame[0 + 2]));
             vTaskSwitchContext();
             break;
         case LL_FAST_SWI_CHECK_KEY:
-            pRegFram[0 + 2] = g_latest_key_status;
+            pRegFrame[0 + 2] = g_latest_key_status;
             break;
 
         case LL_FAST_SWI_PWR_VOLTAGE:
-            pRegFram[0 + 2] = g_batt_volt;
+            pRegFrame[0 + 2] = g_batt_volt;
             break;
         case LL_FAST_SWI_CORE_TEMP:
-            pRegFram[0 + 2] = g_core_temp;
+            pRegFrame[0 + 2] = g_core_temp;
             break;
 
         case LL_FAST_SWI_SYSTEM_IDLE:
@@ -126,24 +126,24 @@ void volatile arm_do_swi(uint32_t SWINum, uint32_t *pRegFram) {
             break;
 
         case LL_FAST_SWI_CORE_CUR_FREQ:
-            pRegFram[0 + 2] = g_core_cur_freq_mhz;
+            pRegFrame[0 + 2] = g_core_cur_freq_mhz;
             break;
 
         case LL_FAST_SWI_GET_CHARGE_STATUS:
-            pRegFram[0 + 2] = g_chargeEnable;
+            pRegFrame[0 + 2] = g_chargeEnable;
             break;
 
         case LL_FAST_SWI_RTC_GET_SEC:
-            pRegFram[0 + 2] = rtc_get_seconds();
+            pRegFrame[0 + 2] = rtc_get_seconds();
             break;
         case LL_FAST_SWI_RTC_SET_SEC:
-            rtc_set_seconds(pRegFram[0 + 2]);
+            rtc_set_seconds(pRegFrame[0 + 2]);
             break;
 
         case LL_FAST_SWI_MEM_COMPRATE: {
             extern float mem_cr;
-            // pRegFram[0 + 2] = *((uint32_t *)&mem_cr);
-            memcpy(&pRegFram[0 + 2], &mem_cr, 4);
+            // pRegFrame[0 + 2] = *((uint32_t *)&mem_cr);
+            memcpy(&pRegFrame[0 + 2], &mem_cr, 4);
             break;
         }
 
@@ -151,14 +151,14 @@ void volatile arm_do_swi(uint32_t SWINum, uint32_t *pRegFram) {
 #if SEPARATE_VMM_CACHE
             extern bool mem_swap_enable;
             if (mem_swap_enable) {
-                pRegFram[0 + 2] = VM_RAM_SIZE;
+                pRegFrame[0 + 2] = VM_RAM_SIZE;
             } else {
-                pRegFram[0 + 2] = 0;
+                pRegFrame[0 + 2] = 0;
             }
 
 #else
 
-            pRegFram[0 + 2] = VM_RAM_SIZE;
+            pRegFrame[0 + 2] = VM_RAM_SIZE;
 #endif
 
             break;
@@ -167,22 +167,22 @@ void volatile arm_do_swi(uint32_t SWINum, uint32_t *pRegFram) {
         case LL_FAST_SWI_MEM_ENABLE_SWAP: {
 #if SEPARATE_VMM_CACHE
             extern bool mem_swap_enable;
-            mem_swap_enable = pRegFram[0 + 2];
+            mem_swap_enable = pRegFrame[0 + 2];
 #endif
             break;
         }
 
         case LL_FAST_SWI_PCM_BUFFER_IS_IDLE:
-            pRegFram[0 + 2] = 1;
+            pRegFrame[0 + 2] = 1;
 #ifdef ENABLE_AUIDIOOUT
-            pRegFram[0 + 2] = is_pcm_buffer_idle();
+            pRegFrame[0 + 2] = is_pcm_buffer_idle();
 #endif
             break;
 
         case LL_FAST_SWI_PCM_BUFFER_PLAY:
 
 #ifdef ENABLE_AUIDIOOUT
-            pcm_buffer_load((void *)pRegFram[0 + 2]);
+            pcm_buffer_load((void *)pRegFrame[0 + 2]);
 #endif
             break;
 
@@ -198,12 +198,12 @@ void volatile arm_do_swi(uint32_t SWINum, uint32_t *pRegFram) {
         // vm_in_exception = true;
         currentCall.task = xTaskGetCurrentTaskHandle();
         currentCall.SWINum = SWINum;
-        currentCall.para0 = pRegFram[0 + 2];
-        currentCall.para1 = pRegFram[1 + 2];
-        currentCall.para2 = pRegFram[2 + 2];
-        currentCall.para3 = pRegFram[3 + 2];
-        currentCall.sp = pRegFram[13 + 2];
-        currentCall.pRet = &pRegFram[0 + 2];
+        currentCall.para0 = pRegFrame[0 + 2];
+        currentCall.para1 = pRegFrame[1 + 2];
+        currentCall.para2 = pRegFrame[2 + 2];
+        currentCall.para3 = pRegFrame[3 + 2];
+        currentCall.sp = pRegFrame[13 + 2];
+        currentCall.pRet = &pRegFrame[0 + 2];
         xQueueSendFromISR(LLAPI_Queue, &currentCall, &SwitchContext);
     default:
         vTaskSwitchContext();
@@ -217,7 +217,7 @@ void volatile arm_vector_swi() {
     SAVE_CONTEXT();
 
     uint32_t SWINum = *((uint32_t *)(context[15 + 2] - 8)) & 0x00FFFFFF;
-    arm_do_swi(SWINum, pRegFram);
+    arm_do_swi(SWINum, pRegFrame);
 
     asm volatile("ADD     SP, SP, #68");
     portRESTORE_CONTEXT();
@@ -242,14 +242,14 @@ void volatile arm_vector_und() {
     __asm volatile("SUB   LR, LR, #4");
     SAVE_CONTEXT();
 
-    printf("ERROR: [%s] Undefind Instruction AT:%08lx\n", pcTaskGetName(xTaskGetCurrentTaskHandle()), pRegFram[2 + 15]);
+    printf("ERROR: [%s] Undefined Instruction AT:%08lx\n", pcTaskGetName(xTaskGetCurrentTaskHandle()), pRegFrame[2 + 15]);
 
-    printf("NESTING:%ld\nSPSR:%08lx\n", pRegFram[0], pRegFram[1]);
+    printf("NESTING:%ld\nSPSR:%08lx\n", pRegFrame[0], pRegFrame[1]);
     for (int i = 2; i < 18; i++) {
-        printf("R%d: %08lx\n", i - 2, pRegFram[i]);
+        printf("R%d: %08lx\n", i - 2, pRegFrame[i]);
     }
 
-    VM_Unconscious(NULL, "[UND]", pRegFram[2 + 15]);
+    VM_Unconscious(NULL, "[UND]", pRegFrame[2 + 15]);
     vTaskSuspend(NULL);
 
     asm volatile("ADD     SP, SP, #68");

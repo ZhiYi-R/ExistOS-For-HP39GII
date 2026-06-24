@@ -325,8 +325,8 @@ void VM_Unconscious(TaskHandle_t task, char *res, uint32_t address) {
         vTaskSuspend(pLLAPITask);
         LLIRQ_enable(false);
 
-        uint32_t *pRegFram = (uint32_t *)(((uint32_t *)task)[1]);
-        pRegFram -= 16;
+        uint32_t *pRegFrame = (uint32_t *)(((uint32_t *)task)[1]);
+        pRegFrame -= 16;
 
         DisplayClean();
         DisplayFillBox(4, 4, 252, 20, 0);
@@ -342,32 +342,32 @@ void VM_Unconscious(TaskHandle_t task, char *res, uint32_t address) {
         /*
                 for(i = 0; i < 4; i++){
                     memset(buf, 0, sizeof(buf));
-                    sprintf(buf, "%08lx %08lx ", pRegFram[12 + i], pRegFram[i]);
+                    sprintf(buf, "%08lx %08lx ", pRegFrame[12 + i], pRegFrame[i]);
                     DisplayPutStr(56, 16 * (i + 2), buf, 0, 208, 16);
                 }
                 memset(buf, 0, sizeof(buf));
-                sprintf(buf, "%08lx %08lx ", pRegFram[-1], address);
+                sprintf(buf, "%08lx %08lx ", pRegFrame[-1], address);
                 DisplayPutStr(56, 96, buf, 0, 208, 16);
         */
 
         memset(buf, 0, sizeof(buf));
-        sprintf(buf, "R12:%08lx  R0:%08lx ", pRegFram[12], pRegFram[0]);
+        sprintf(buf, "R12:%08lx  R0:%08lx ", pRegFrame[12], pRegFrame[0]);
         DisplayPutStr(24, 16 * 3 - 8, buf, 0, 208, 16);
 
         memset(buf, 0, sizeof(buf));
-        sprintf(buf, "R13:%08lx  R1:%08lx ", pRegFram[13], pRegFram[1]);
+        sprintf(buf, "R13:%08lx  R1:%08lx ", pRegFrame[13], pRegFrame[1]);
         DisplayPutStr(24, 16 * 4 - 8, buf, 0, 208, 16);
 
         memset(buf, 0, sizeof(buf));
-        sprintf(buf, "R14:%08lx  R2:%08lx ", pRegFram[14], pRegFram[2]);
+        sprintf(buf, "R14:%08lx  R2:%08lx ", pRegFrame[14], pRegFrame[2]);
         DisplayPutStr(24, 16 * 5 - 8, buf, 0, 208, 16);
 
         memset(buf, 0, sizeof(buf));
-        sprintf(buf, "R15:%08lx  R3:%08lx ", pRegFram[15], pRegFram[3]);
+        sprintf(buf, "R15:%08lx  R3:%08lx ", pRegFrame[15], pRegFrame[3]);
         DisplayPutStr(24, 16 * 6 - 8, buf, 0, 208, 16);
 
         memset(buf, 0, sizeof(buf));
-        sprintf(buf, "CPSR:%08lx FAR:%08lx ", pRegFram[-1], address);
+        sprintf(buf, "CPSR:%08lx FAR:%08lx ", pRegFrame[-1], address);
         DisplayPutStr(24, 16 * 7 - 8, buf, 0, 208, 16);
 
         g_vm_status = VM_STATUS_UNCONSCIOUS;

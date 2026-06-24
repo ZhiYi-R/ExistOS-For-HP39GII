@@ -51,7 +51,7 @@ unsigned int MBC1_write_byte(unsigned short d, unsigned char i)
 	if(d >= 0x2000 && d < 0x4000)
 	{
 		/* Bits 0-4 come from the value written to memory here,
-		 * bits 5-6 come from a seperate write to 4000-5fff if
+		 * bits 5-6 come from a separate write to 4000-5fff if
 		 * RAM select is 1.
 		 */
 		bank = i & 0x1F;

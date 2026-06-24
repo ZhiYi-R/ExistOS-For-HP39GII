@@ -170,7 +170,7 @@ static BP_T   sBreakpoint[MAXBREAKPOINTS];	// breakpoint table
 
 static INT    nRplBreak;					// RPL breakpoint
 
-static DWORD  dwAdrLine[MAXCODELINES];		// addresses of disassember lines in code window
+static DWORD  dwAdrLine[MAXCODELINES];		// addresses of disassembler lines in code window
 static DWORD  dwAdrMem = 0;					// start address of memory window
 
 static UINT   uIDFol = ID_DEBUG_MEM_FNONE;	// follow mode
@@ -182,7 +182,7 @@ static DWORD  dwMapDataSize;				// data size
 
 static LONG   lCharWidth;					// width of a character (is a fix font)
 
-static HMENU  hMenuCode,hMenuMem,hMenuStack;// handle of context menues
+static HMENU  hMenuCode,hMenuMem,hMenuStack;// handle of context menus
 static HWND   hWndToolbar;					// toolbar handle
 
 static MODEL_MAP_T CONST *pMapping;			// model specific memory mapping
@@ -484,7 +484,7 @@ static VOID ViewMemWnd(HWND hDlg, DWORD dwAddress)
 
 			_ASSERT(lbyMapData);			// valid module
 
-			// fetch modul data line
+			// fetch module data line
 			for (i = 0; i < MAXMEMITEMS; ++i)
 			{
 				byLineData[i] = lbyMapData[(dwAddress + i) & (dwMapDataSize - 1)];
@@ -539,7 +539,7 @@ static VOID UpdateCodeWnd(HWND hDlg)
 
 	j = (INT) SendMessage(hWnd,LB_GETCOUNT,0,0); // no. of items in table
 
-	// seach for actual address in code area
+	// search for actual address in code area
 	for (i = 0; i < j; ++i)
 	{
 		if (dwAdrLine[i] == Chipset.pc)		// found new pc address line
@@ -1131,7 +1131,7 @@ static BOOL OnStackPush(HWND hDlg)
 	Chipset.rstk[(Chipset.rstkp-j)&7] = dwAddr;
 
 	UpdateStackWnd(hDlg);					// update stack window
-	SendMessage(hWnd,LB_SETCURSEL,i,0);		// restore cursor postion
+	SendMessage(hWnd,LB_SETCURSEL,i,0);		// restore cursor position
 	return 0;
 }
 
@@ -1159,7 +1159,7 @@ static BOOL OnStackPop(HWND hDlg)
 	Chipset.rstk[Chipset.rstkp] = 0;
 
 	UpdateStackWnd(hDlg);					// update stack window
-	SendMessage(hWnd,LB_SETCURSEL,i,0);		// restore cursor postion
+	SendMessage(hWnd,LB_SETCURSEL,i,0);		// restore cursor position
 	return 0;
 }
 
@@ -1183,7 +1183,7 @@ static BOOL OnStackModify(HWND hDlg)
 	_stscanf(&szBuffer[3],_T("%5X"),&Chipset.rstk[(Chipset.rstkp-i-1)&7]);
 
 	UpdateStackWnd(hDlg);					// update stack window
-	SendMessage(hWnd,LB_SETCURSEL,i,0);		// restore cursor postion
+	SendMessage(hWnd,LB_SETCURSEL,i,0);		// restore cursor position
 	return 0;
 }
 
@@ -1696,11 +1696,11 @@ static __inline HWND CreateToolbar(HWND hWnd)
 
 	_ASSERT(pData->wVersion == 1);			// toolbar resource version
 
-	// alloc memory for TBBUTTON stucture
+	// alloc memory for TBBUTTON structure
     if (!(ptbb = HeapAlloc(hHeap,0,pData->wItemCount*sizeof(TBBUTTON))))
 		goto unlock;
 
-	// fill TBBUTTON stucture with resource data
+	// fill TBBUTTON structure with resource data
 	for (i = j = 0; i < pData->wItemCount; ++i)
     {
 		if (pData->aItems[i])

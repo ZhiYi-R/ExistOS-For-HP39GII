@@ -31,7 +31,7 @@ void get_cur_clk() {
     cur_hclk_div = tmp[2];
 }
 
-void refresh_lable() {
+void refresh_label() {
 
     lv_label_set_text_fmt(lab_cpu_freq, "CPU: %d MHz -> %d MHz",
                           480 * 18 / cur_cpu_div / cur_cpu_frac,
@@ -49,7 +49,7 @@ void slider_cpu_div_event_cb(lv_event_t *e) {
     lv_label_set_text(lab1, buf);
 
     new_cpu_div = val;
-    refresh_lable();
+    refresh_label();
 }
 
 void slider_cpu_frac_event_cb(lv_event_t *e) {
@@ -61,7 +61,7 @@ void slider_cpu_frac_event_cb(lv_event_t *e) {
 
     new_cpu_frac = val;
 
-    refresh_lable();
+    refresh_label();
 }
 
 void slider_hclk_div_event_cb(lv_event_t *e) {
@@ -73,7 +73,7 @@ void slider_hclk_div_event_cb(lv_event_t *e) {
 
     new_hlck_div = val;
 
-    refresh_lable();
+    refresh_label();
 }
 
 void update_btn_cb(lv_event_t *e) {
@@ -83,7 +83,7 @@ void update_btn_cb(lv_event_t *e) {
 
         ll_set_clkctrl_div(new_cpu_div, new_cpu_frac, new_hlck_div);
         get_cur_clk();
-        refresh_lable();
+        refresh_label();
         // LV_LOG_USER("Clicked");
     }
 }
@@ -185,6 +185,6 @@ void SystemTest() {
     lv_label_set_text(obj, "Update");
 
     get_cur_clk();
-    refresh_lable();
+    refresh_label();
 }
 

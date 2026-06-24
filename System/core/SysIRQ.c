@@ -16,7 +16,7 @@
 volatile uint32_t Timer_Count = 0;
 
 extern uint32_t g_key;
-extern uint32_t g_ket_press;
+extern uint32_t g_key_press;
 
 uint32_t irq_saved_context[32]; //{SPSR , R0-R15}
 uint32_t swi_saved_context[32]; //{SPSR , R0-R15}
@@ -52,7 +52,7 @@ volatile void IRQ_ISR(uint32_t IRQNum, uint32_t par1, uint32_t par2, uint32_t pa
     case LL_IRQ_KEYBOARD:
         printf("Key:%d, %d\n", par1, par2);
         g_key = par1;
-        g_ket_press = par2;
+        g_key_press = par2;
         break;
 
     case LL_IRQ_MMU:

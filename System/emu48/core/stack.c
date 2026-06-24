@@ -132,7 +132,7 @@ static INT RPL_GetBcd(BYTE CONST *pbyNum,INT nMantLen,INT nExpLen,CONST TCHAR cD
 		if (v >= 0L)						// still mantissa digits left
 			byNib = *pbyNum++;
 		else
-			byNib = 0;						// zero for negativ exponent
+			byNib = 0;						// zero for negative exponent
 
 		if (!i)								// still delete zeros at end
 		{
@@ -157,7 +157,7 @@ static INT RPL_GetBcd(BYTE CONST *pbyNum,INT nMantLen,INT nExpLen,CONST TCHAR cD
 				if (i >= nSize) return 0;	// dest buffer overflow
 				cp[i++] = _T('0');			// write heading zero
 			}
-			bPflag = FALSE;					// finished with negativ exponents
+			bPflag = FALSE;					// finished with negative exponents
 		}
 
 		if (v >= 0 || bPflag)
@@ -248,7 +248,7 @@ static INT RPL_SetBcd(LPCTSTR cp,INT nMantLen,INT nExpLen,CONST TCHAR cDec,LPBYT
 	{
 		INT j;
 
-		nIp -= i;							// for later ajust of exponent
+		nIp -= i;							// for later adjust of exponent
 		for (j = 1; j <= nIp + nDp; ++j)	// normalize mantissa
 			byNum[j] = byNum[j + i];
 	}

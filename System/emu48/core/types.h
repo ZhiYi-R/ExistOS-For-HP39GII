@@ -106,5 +106,5 @@ typedef struct
 	BYTE    d0memory[4096*2];				// memory for header display area
 	DWORD   d0offset;						// offset inside the header display for the content
 	DWORD   d0address;						// address in saturn addr area for d0memory (2 pages)
-//	BOOL    d0Cfig;							// modul configured
+//	BOOL    d0Cfig;							// module configured
 } Chipset_t;

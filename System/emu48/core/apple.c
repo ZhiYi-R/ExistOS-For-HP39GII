@@ -260,7 +260,7 @@ VOID o80B24(VOID)
 }
 
 // CdB for HP: add apples BUSCC commands
-VOID o80BExt(LPBYTE I) // Saturnator extentions
+VOID o80BExt(LPBYTE I) // Saturnator extensions
 {
 	DWORD a;
 

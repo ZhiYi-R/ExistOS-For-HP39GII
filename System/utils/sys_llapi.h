@@ -28,7 +28,7 @@ DECDEF_LLSWI(void,         ll_vm_sleep_ms,        (uint32_t ms)                 
 DECDEF_LLSWI(uint32_t,     ll_vm_check_key,       (void)                                  ,LL_FAST_SWI_CHECK_KEY          );
 DECDEF_LLSWI(void,         ll_set_keyboard,       (bool enable_report)                    ,LL_SWI_SET_KEY_REPORT          );
 DECDEF_LLSWI(void,         ll_set_serial,         (bool enable)                           ,LL_SWI_SET_SERIALPORT          );
-DECDEF_LLSWI(void,         ll_set_timer,          (bool enbale, uint32_t period_ms)       ,LL_SWI_ENABLE_TIMER            );
+DECDEF_LLSWI(void,         ll_set_timer,          (bool enable, uint32_t period_ms)       ,LL_SWI_ENABLE_TIMER            );
 DECDEF_LLSWI(void,         ll_set_irq_vector,     (uint32_t addr)                         ,LL_SWI_SET_IRQ_VECTOR          );
 DECDEF_LLSWI(void,         ll_set_irq_stack,      (uint32_t addr)                         ,LL_SWI_SET_IRQ_STACK           );
 DECDEF_LLSWI(void,         ll_set_svc_vector,     (uint32_t addr)                         ,LL_SWI_SET_SVC_VECTOR          );

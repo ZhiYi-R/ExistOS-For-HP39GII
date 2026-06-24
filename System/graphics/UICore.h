@@ -458,9 +458,9 @@ public:
 
     void refreshFuncKeyBar() {
         if (funcKey_enable) {
-            uint32_t item_w = FUNCKEY_BAR_WITDH / 6;
+            uint32_t item_w = FUNCKEY_BAR_WIDTH / 6;
 
-            disp->draw_box(FUNCKEY_BAR_X, FUNCKEY_BAR_Y, FUNCKEY_BAR_WITDH, FUNCKEY_BAR_Y + FUNCKEY_FONTSIZE, FUNCKEY_BAR_BG_COLOR, FUNCKEY_BAR_BG_COLOR);
+            disp->draw_box(FUNCKEY_BAR_X, FUNCKEY_BAR_Y, FUNCKEY_BAR_WIDTH, FUNCKEY_BAR_Y + FUNCKEY_FONTSIZE, FUNCKEY_BAR_BG_COLOR, FUNCKEY_BAR_BG_COLOR);
 
             for (int i = 1; i < 6; i++) {
                 disp->draw_box(i * item_w, FUNCKEY_BAR_Y, i * item_w, FUNCKEY_BAR_Y + FUNCKEY_FONTSIZE - 1, 255 - FUNCKEY_BAR_BG_COLOR, 255 - FUNCKEY_BAR_BG_COLOR);
@@ -963,7 +963,7 @@ struct SimpShell {
 
     /**
      * @brief refresh console screen area [x0,x1), [y0,y1)
-     * @note will not check if outside of console screen interface or param out of console screnn range
+     * @note will not check if outside of console screen interface or param out of console screen range
      * @param x0 start x pos
      * @param y0 start y pos
      * @param x1 end x pos
@@ -1003,7 +1003,7 @@ struct SimpShell {
      * @param y {{{ if set 0, will scroll screen only cursor out of screen range;
      * else will scroll screen (y) line to above
      * }}}
-     * @note if param (y) invaild, will work formally as (y) set to the maxium
+     * @note if param (y) invalid, will work formally as (y) set to the maximum
      * @return uint32_t scroll line counts
      */
     uint32_t scroll(uint32_t y) {

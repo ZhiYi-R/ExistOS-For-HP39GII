@@ -369,7 +369,7 @@ VOID CheckSerial(VOID)
 
 VOID InitAdjustSpeed(VOID)
 {
-	// slow down function not initalized
+	// slow down function not initialized
 	if (!bEnableSlow || (!bCpuSlow && !bKeySlow && !bSoundSlow && nOpcSlow == 0))
 	{
 		LARGE_INTEGER lTime;				// sample timer ticks

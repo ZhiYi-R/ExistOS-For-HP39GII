@@ -19,9 +19,9 @@ Refer to the [Install Guide](#only-installing) for installing procedures.
 
 | | User Guide | |
 | :---: | :---: | :---: |
-| [Current Development Status](#current-developping-status) | | [Experimental Fautures](#experimental-features) |
+| [Current Development Status](#current-developing-status) | | [Experimental Features](#experimental-features) |
 | | **[Install Guide](#only-installing)** | |
-| For Windows 10/11 | [ExistOS Updater](#for-windows-10--11-existos-updater) | Automated tools for beginers |
+| For Windows 10/11 | [ExistOS Updater](#for-windows-10--11-existos-updater) | Automated tools for beginners |
 | Win/Linux | [OS Loader & EDB](#for-windows--linux) | |
 | Windows | [Emulator](#emulator) | |
 | | **[Usage](#basic-usage-of-the-firmware)** | |
@@ -34,14 +34,14 @@ Refer to the [Install Guide](#only-installing) for installing procedures.
 
 | | Developer Guide | |
 | :---: | :---: | :---: |
-| [Current Development Status](#current-developping-status) | | [Experimental Fautures](#experimental-features) |
-| | **[Comiling and Installing](#compiling-and-installing)** | |
+| [Current Development Status](#current-developing-status) | | [Experimental Features](#experimental-features) |
+| | **[Compiling and Installing](#compiling-and-installing)** | |
 | [Prerequisites](#prerequisites) | [Compiling ExistOS](#compiling-existos) | [Flash firmware](#installing) |
 | | **Code contribution** | |
-| Documents (To do) | [Third-party App developing](#third-party-app-developing) | [Code submision standard](#code-submission-standard) |
+| Documents (To do) | [Third-party App developing](#third-party-app-developing) | [Code submission standard](#code-submission-standard) |
 | **[Uninstalling and Flashing Back](#uninstalling-existos-and-flashing-back-to-the-hp-firmware)** | **[Contributors](#contributors)** | **[License](#license)** |
 
-## Current Developping Status
+## Current Developing Status
 
 - [x] Boot
 - [x] Serial debugging
@@ -60,7 +60,7 @@ Refer to the [Install Guide](#only-installing) for installing procedures.
 - [x] Multitasking
 - [x] Virtual memory
 - [x] Loading applications
-- [x] Miminal MicroPython implementation
+- [x] Minimal MicroPython implementation
 - [x] Graphical user interface
 - [x] Basic power management
 - [ ] Complete power management
@@ -100,7 +100,7 @@ Requires:
     - `cd tools/sbtools/`
     - `make`
     - Then you will get the executable file `sb_loader`
-- EDB (ExistOS Debug Brige): Used to flash firmwares.
+- EDB (ExistOS Debug Bridge): Used to flash firmwares.
   - Windows: Download binary file from [here](../../raw/main/tools/edb.exe).
   - Linux: Download zip file from [here](https://github.com/ExistOS-Team/edb-unix/archive/refs/heads/master.zip) and extract it. Then run the following commands:
     - `mkdir build`
@@ -181,7 +181,7 @@ Install dependencies:
 |Ubuntu|`apt-get install libcrypto++6 libcrypto++-dev libusb-1.0.0-dev`|
 |Arch Linux|`pacman -Syu libusb crypto++`|
 |Others|Install libusb 1.0, [libcrypto++](https://cryptopp.com/wiki/Linux#Distribution_Package)|
-||Check installtion with `pkg-config`|
+||Check installation with `pkg-config`|
 
 _Tips: `pkg-config` will search for libraries according to `/usr/lib/pkgconfig/*.pc`. If you would like to manually add libraries, please modify `CMakeLists.txt` to correct paths._
 
@@ -231,7 +231,7 @@ cd build
 Preparing to compile:
 |System|Install|Note|
 |----|----|----|
-|Windows|`cmake .. -G Ninja`|Specifies `Ninja` as complier|
+|Windows|`cmake .. -G Ninja`|Specifies `Ninja` as compiler|
 |Linux|`cmake ..`||
 
 Compiling:
@@ -337,7 +337,7 @@ Holding down the `F2` key while booting (or immediately after pressing the `ON/C
 
 ![Sys1](Image/38.png)
 
-An 80 MB USB drive, the data section of the onboard flash, will show up on your computer. The `System` directory stores the assets, for example, fonts and pictures (Unused right now). The `xcas` directory stores KhiCAS user scripts, sessions (history) and other datas.
+An 80 MB USB drive, the data section of the onboard flash, will show up on your computer. The `System` directory stores the assets, for example, fonts and pictures (Unused right now). The `xcas` directory stores KhiCAS user scripts, sessions (history) and other data.
 
 ![Sys1](Image/39.png)
 
@@ -363,7 +363,7 @@ Press `SHIFT` + `ON/C` to save the session and quit KhiCAS.
 
 #### Basic calculations
 
-General expressions can be entered in KhiCAS to perform calculations. Calculation of large integers is supported. However for floating point calculation, only single-percision floating point numbers calculation is supported.
+General expressions can be entered in KhiCAS to perform calculations. Calculation of large integers is supported. However for floating point calculation, only single-precision floating point numbers calculation is supported.
 
 ![Sys1](Image/8.png)
 
@@ -379,7 +379,7 @@ Press `F1` and `F2` to bring up *could-be* commonly-used commands menu.
 
 ![Sys1](Image/12.png)
 
-The `cmds` menu (`F4`) lists all available commands in KhiCAS as nested entries, including algebraic, complex, polynominal, probability, plotting, etc., where you can search commands needed. After selecting the command, press `Input` to copy them to the main menu, `ex1` `ex2` to copy built-in examples or `help` to show built-in help.
+The `cmds` menu (`F4`) lists all available commands in KhiCAS as nested entries, including algebraic, complex, polynomial, probability, plotting, etc., where you can search commands needed. After selecting the command, press `Input` to copy them to the main menu, `ex1` `ex2` to copy built-in examples or `help` to show built-in help.
 
 ![Sys1](Image/13.png)
 
@@ -486,7 +486,7 @@ Final output:
 
 ### Charging (Not fully tested)
 
-ExistOS supports controlling the DC-DC and linear regulators inside the SoC to step-down 5V USB voltage, feeding 1.4V to the battery compartment. Make sure you're using rechargable batteries when using this feature to avoid possible danger.
+ExistOS supports controlling the DC-DC and linear regulators inside the SoC to step-down 5V USB voltage, feeding 1.4V to the battery compartment. Make sure you're using rechargeable batteries when using this feature to avoid possible danger.
 
 Usage: Plug in USB cable and switch to the `Status` tab. Scroll to the bottom and tick `Enable Charge` to start charging. The core temperature shown above may rise up to 50℃, since the voltage regulators are integrated in the same chip along with the CPU.
 
@@ -536,14 +536,14 @@ https://github.com/ExistOS-Team/ExistOS-App-demo
     * Variables are named using lower camel case. For example, `windowHeight`
     * Function parameter naming is the same as variable.
     * Don't name using a single letter except for temporary or loop variable. 
-    * It is prefered to add some meaningful prefix. For example, `p` means pointer.
+    * It is preferred to add some meaningful prefix. For example, `p` means pointer.
     * Don't define variable and pointer at the same time on one line, such as `char *p, q;`
 
 2. Function
 
     * Functions are named using underline. For example, `get_window_width`。
     * Function names should follow the Verb - object relationship.
-    * It is prefered to add some meaningful prefix. For example, `is` means the type of return value is bool.
+    * It is preferred to add some meaningful prefix. For example, `is` means the type of return value is bool.
     * Short function can be defined as inline, function parameters and return values should be pointer instead of variable.
     * Avoid using recursion, consider refactoring to cycling.
 
@@ -559,7 +559,7 @@ https://github.com/ExistOS-Team/ExistOS-App-demo
 5. Operator and other symbol
 
     * Unary operators should appress the variable, such as `c++`, `*p`.
-    * Binary operators shold have spaces on both sides, such as `i == 1`, `a += 3`, except for `->`
+    * Binary operators should have spaces on both sides, such as `i == 1`, `a += 3`, except for `->`
     * Ternary are the same as binary, such as `isLeft ? 1 : 0`.
     * commas should be followed by a space.
     * Parentheses should be added appropriately where it is not easy to understand.

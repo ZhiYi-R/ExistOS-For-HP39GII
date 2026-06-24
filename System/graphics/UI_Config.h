@@ -28,7 +28,7 @@
 
 #define FUNCKEY_BAR_Y                   (LCD_PIX_H - FUNCKEY_FONTSIZE)
 #define FUNCKEY_BAR_X                   (1)
-#define FUNCKEY_BAR_WITDH               (LCD_PIX_W - FUNCKEY_BAR_X)
+#define FUNCKEY_BAR_WIDTH               (LCD_PIX_W - FUNCKEY_BAR_X)
 #define FUNCKEY_BAR_BG_COLOR            (0)
 
 #define FUNCKEY_ITEM_MAX_CHAR           (6)

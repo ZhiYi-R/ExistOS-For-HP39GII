@@ -59,14 +59,14 @@ static VOID Beeper(DWORD freq,DWORD dur)
 		}
 		else								// VER_PLATFORM_WIN32_NT
 		{
-			if (freq < 37) freq = 37;		// low limit of freqency (NT)
+			if (freq < 37) freq = 37;		// low limit of frequency (NT)
 
 			_ASSERT(freq >= 0x25 && freq <= 0x7FFF);
 			Beep(freq,dur);					// NT: ok, Windows 95: default sound or standard system beep
 		}
 	}
 #else
-    if (freq < 37) freq = 37;		// low limit of freqency (NT)
+    if (freq < 37) freq = 37;		// low limit of frequency (NT)
 
     _ASSERT(freq >= 0x25 && freq <= 0x7FFF);
 	

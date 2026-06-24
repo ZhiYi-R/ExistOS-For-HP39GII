@@ -439,7 +439,7 @@ VOID WriteToMainDisplay(LPBYTE a, DWORD d, UINT s)
 
 	d -= Chipset.start1;					// nibble offset to DISPADDR (start of display)
 	y0 = y = (d / lWidth) + Chipset.d0size;		// bitmap row
-	x0 = x = d % lWidth;					// bitmap coloumn
+	x0 = x = d % lWidth;					// bitmap column
 	p = (DWORD*)(pbyLcd + y0*LCD_ROW + x0*sizeof(*p));
 
 	// outside main display area
@@ -456,7 +456,7 @@ VOID WriteToMainDisplay(LPBYTE a, DWORD d, UINT s)
 		x++;								// next x position
 		if (((INT) x==lWidth)&&s)			// end of display line
 		{
-			x = 0;							// first coloumn
+			x = 0;							// first column
 			y++;							// next row
 			if (y == (INT) MAINSCREENHEIGHT+Chipset.d0size) break;
 			// recalculate bitmap memory position of new line
@@ -503,7 +503,7 @@ VOID WriteToMenuDisplay(LPBYTE a, DWORD d, UINT s)
 
 	d -= Chipset.start2;					// nibble offset to DISPADDR (start of display)
 	y0 = y = (d / 34) + MAINSCREENHEIGHT+Chipset.d0size;         	// bitmap row
-	x0 = x = d % 34;                                        	// bitmap coloumn
+	x0 = x = d % 34;                                        	// bitmap column
 	p = (DWORD*)(pbyLcd + y0*LCD_ROW + x0*sizeof(*p));
 
 	// outside menu display area
@@ -520,7 +520,7 @@ VOID WriteToMenuDisplay(LPBYTE a, DWORD d, UINT s)
 		x++;								// next x position
 		if ((x==34)&&s)					// end of display line
 		{
-			x = 0;							// first coloumn
+			x = 0;							// first column
 			y++;							// next row
 			if (y == SCREENHEIGHTREAL) break;
 			// recalculate bitmap memory position of new line

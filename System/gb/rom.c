@@ -121,7 +121,7 @@ static int rom_init(unsigned char *rombytes, off_t filesize)
 	printf("Cartridge type: %s (%02X)\n", carts[type], type);
 
 	bank_index = rombytes[0x148];
-	/* Adjust for the gap in the bank indicies */
+	/* Adjust for the gap in the bank indices */
 	if(bank_index >= 0x52 && bank_index <= 0x54)
 		bank_index -= 74;
 	else if(bank_index > 7)

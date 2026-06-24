@@ -73,7 +73,7 @@ extern bool OS_UISuspend;
 //static TaskHandle_t lvgl_tick_task;
 
 uint32_t g_key;
-uint32_t g_ket_press;
+uint32_t g_key_press;
 
 
 

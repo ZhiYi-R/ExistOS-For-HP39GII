@@ -12,7 +12,7 @@
 #define PLL_FREQ_HZ (480000000UL)
 
 int g_slowdown_enable = 0;
-static uint8_t min_cpu_frac_sd = CPU_DIVIDE_IDLE_INTIAL;
+static uint8_t min_cpu_frac_sd = CPU_DIVIDE_IDLE_INITIAL;
 
 static void PLLEnable(bool enable) {
     BF_SETV(CLKCTRL_PLLCTRL0, POWER, enable);

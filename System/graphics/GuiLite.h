@@ -157,12 +157,12 @@ enum COLOR_LIST
 	COLOR_WND_PUSHED,
 	COLOR_WND_FOCUS,
 	COLOR_WND_BORDER,
-	COLOR_CUSTOME1,
-	COLOR_CUSTOME2,
-	COLOR_CUSTOME3,
-	COLOR_CUSTOME4,
-	COLOR_CUSTOME5,
-	COLOR_CUSTOME6,
+	COLOR_CUSTOM1,
+	COLOR_CUSTOM2,
+	COLOR_CUSTOM3,
+	COLOR_CUSTOM4,
+	COLOR_CUSTOM5,
+	COLOR_CUSTOM6,
 	COLOR_MAX
 };
 class c_theme
@@ -647,7 +647,7 @@ protected:
 	bool			m_is_active;	//active flag
 	Z_ORDER_LEVEL	m_max_zorder;	//the highest graphic layer the surface will have
 	Z_ORDER_LEVEL	m_top_zorder;	//the current highest graphic layer the surface have
-	void*			m_phy_fb;		//physical framebufer
+	void*			m_phy_fb;		//physical framebuffer
 	int*			m_phy_write_index;
 	c_display*		m_display;
 };
@@ -1870,9 +1870,9 @@ private:
 #define ENTER_WIDTH			(KEY_WIDTH * 2 + 2)
 #define POS_X(c)			((KEY_WIDTH * c) + (c + 1) * 2)
 #define POS_Y(r)			((KEY_HEIGHT * r) + (r + 1) * 2)
-#define KEYBORAD_CLICK			0x5014
-#define ON_KEYBORAD_UPDATE(func)  \
-{MSG_TYPE_WND, KEYBORAD_CLICK, 0,  msgCallback(&func)},
+#define KEYBOARD_CLICK			0x5014
+#define ON_KEYBOARD_UPDATE(func)  \
+{MSG_TYPE_WND, KEYBOARD_CLICK, 0,  msgCallback(&func)},
 typedef enum
 {
 	STATUS_UPPERCASE,
@@ -2095,7 +2095,7 @@ public:
 			strcpy(m_str, str);
 		}
 	}
-	void set_keyboard_style(KEYBOARD_STYLE kb_sytle) { m_kb_style = kb_sytle; }
+	void set_keyboard_style(KEYBOARD_STYLE kb_style) { m_kb_style = kb_style; }
 	
 protected:
 	virtual void pre_create_wnd()
@@ -2592,7 +2592,7 @@ public:
 		ASSERT(false);
 		return -3;
 	}
-	void disabel_all_slide()
+	void disable_all_slide()
 	{
 		for (int i = 0; i < MAX_PAGES; i++)
 		{
@@ -2672,7 +2672,7 @@ private:
 		{
 			return false;
 		}
-		m_slide_group->disabel_all_slide();
+		m_slide_group->disable_all_slide();
 		m_move_x = x;
 		if ((m_move_x - m_down_x) > 0)
 		{
@@ -2694,7 +2694,7 @@ private:
 		{
 			return true;
 		}
-		m_slide_group->disabel_all_slide();
+		m_slide_group->disable_all_slide();
 		int page = -1;
 		m_move_x = x;
 		if ((m_move_x - m_down_x) > 0)
@@ -3819,7 +3819,7 @@ void create_thread(unsigned long* thread_id, void* attr, void *(*start_routine) 
 
 extern "C" void delay_ms(unsigned short nms);
 void thread_sleep(unsigned int milli_seconds)
-{//MCU alway implemnet driver code in APP.
+{//MCU always implement driver code in APP.
 		delay_ms(milli_seconds);
 }
 

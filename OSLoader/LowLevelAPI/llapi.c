@@ -57,15 +57,15 @@ static void vm_load_context(uint32_t *from, bool add_pc_4) {
     }
     isSaved = false;
 
-    uint32_t *pRegFram = (uint32_t *)((volatile uint32_t *)vm_sys)[1];
-    pRegFram -= 17;
-    // memcpy(&pRegFram[1], from, 16 * 4);
-    // pRegFram[0] = from[16];
-    memcpy(pRegFram, from, 17 * 4);
-    pRegFram[0] &= ~(0x1F);
-    pRegFram[0] |= 0x10;
+    uint32_t *pRegFrame = (uint32_t *)((volatile uint32_t *)vm_sys)[1];
+    pRegFrame -= 17;
+    // memcpy(&pRegFrame[1], from, 16 * 4);
+    // pRegFrame[0] = from[16];
+    memcpy(pRegFrame, from, 17 * 4);
+    pRegFrame[0] &= ~(0x1F);
+    pRegFrame[0] |= 0x10;
     if (add_pc_4) {
-        pRegFram[2 + 15] += 4;
+        pRegFrame[2 + 15] += 4;
     }
 }
 
@@ -76,13 +76,13 @@ void vm_save_context() {/*
 
     isSaved = true;
 
-    uint32_t *pRegFram = (uint32_t *)((volatile uint32_t *)vm_sys)[1];
-    pRegFram -= 17;
-    // memcpy(vm_saved_context, &pRegFram[1], 16 * 4);
-    // vm_saved_context[16] = pRegFram[0];
+    uint32_t *pRegFrame = (uint32_t *)((volatile uint32_t *)vm_sys)[1];
+    pRegFrame -= 17;
+    // memcpy(vm_saved_context, &pRegFrame[1], 16 * 4);
+    // vm_saved_context[16] = pRegFrame[0];
 
 
-    memcpy((uint32_t *)(&vm_saved_context[context_ptr]), pRegFram, 17 * 4);
+    memcpy((uint32_t *)(&vm_saved_context[context_ptr]), pRegFrame, 17 * 4);
     context_ptr += 17;
 }
 
@@ -106,11 +106,11 @@ void vm_jump_irq()
     }
     curExp = 1;
     vm_in_exception = true;
-    uint32_t *pRegFram = (uint32_t *)((volatile uint32_t *)vm_sys)[1];
-    pRegFram -= 16;
-    pRegFram[-1] = 0x10;
-    pRegFram[15] = vm_irq_vector_address;
-    pRegFram[13] = vm_irq_stack_address;
+    uint32_t *pRegFrame = (uint32_t *)((volatile uint32_t *)vm_sys)[1];
+    pRegFrame -= 16;
+    pRegFrame[-1] = 0x10;
+    pRegFrame[15] = vm_irq_vector_address;
+    pRegFrame[13] = vm_irq_stack_address;
 }
 
 static void vm_jump_svc() {/*
@@ -120,21 +120,21 @@ static void vm_jump_svc() {/*
     }*/
     curExp = 2;
     vm_in_exception = true;
-    uint32_t *pRegFram = (uint32_t *)((volatile uint32_t *)vm_sys)[1];
-    pRegFram -= 16;
-    pRegFram[-1] = 0x10;
-    pRegFram[15] = vm_svc_vector_address;
-    pRegFram[13] = vm_svc_stack_address;
+    uint32_t *pRegFrame = (uint32_t *)((volatile uint32_t *)vm_sys)[1];
+    pRegFrame -= 16;
+    pRegFrame[-1] = 0x10;
+    pRegFrame[15] = vm_svc_vector_address;
+    pRegFrame[13] = vm_svc_stack_address;
 }
 
 void vm_set_irq_num(uint32_t IRQNum, uint32_t r1, uint32_t r2, uint32_t r3) 
 {
-    uint32_t *pRegFram = (uint32_t *)((uint32_t *)vm_sys)[1];
-    pRegFram -= 16;
-    pRegFram[0] = IRQNum;
-    pRegFram[1] = r1;
-    pRegFram[2] = r2;
-    pRegFram[3] = r3;
+    uint32_t *pRegFrame = (uint32_t *)((uint32_t *)vm_sys)[1];
+    pRegFrame -= 16;
+    pRegFrame[0] = IRQNum;
+    pRegFrame[1] = r1;
+    pRegFrame[2] = r2;
+    pRegFrame[3] = r3;
 }
 
 void tickTimer(TimerHandle_t xTimer) {

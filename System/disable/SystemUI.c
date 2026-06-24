@@ -74,7 +74,7 @@ static TaskHandle_t lvgl_svc_task;
 static TaskHandle_t lvgl_tick_task;
 
 uint32_t g_key;
-uint32_t g_ket_press;
+uint32_t g_key_press;
 
 static lv_disp_draw_buf_t draw_buf_dsc_1;
 static lv_color_t disp_buf_1[DISP_HOR_RES * VBUFFER_LINE];

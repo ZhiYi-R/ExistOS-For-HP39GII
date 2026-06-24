@@ -138,7 +138,7 @@ void MTD_Task()
                 break;
                 
             default:
-                MTD_WARN("UNEXCEPTED MTD REC OPA!\n");
+                MTD_WARN("UNEXPECTED MTD REC OPA!\n");
                 break;
             }
             uint32_t start_tick = xTaskGetTickCount();

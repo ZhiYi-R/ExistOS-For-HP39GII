@@ -347,7 +347,7 @@ static INT_PTR CALLBACK SettingsProc(HWND hDlg, UINT message, WPARAM wParam, LPA
 		CheckDlgButton(hDlg,IDC_OBJECTLOADWARNING,bLoadObjectWarning);
 		CheckDlgButton(hDlg,IDC_ALWAYSDISPLOG,bAlwaysDisplayLog);
 
-		// set disassebler mode
+		// set disassembler mode
 		CheckDlgButton(hDlg,(disassembler_mode == HP_MNEMONICS) ? IDC_DISASM_HP : IDC_DISASM_CLASS,BST_CHECKED);
 
 		// set sound slider
@@ -428,7 +428,7 @@ static INT_PTR CALLBACK SettingsProc(HWND hDlg, UINT message, WPARAM wParam, LPA
 				// check if file path and Emu48 directory path is identical
 				if (GetFullPathName(szBufferFilename,ARRAYSIZEOF(szFilename),szFilename,&lpFilePart))
 				{
-					*(lpFilePart-1) = 0;	// devide path and name
+					*(lpFilePart-1) = 0;	// divide path and name
 
 					// name is in the Emu48 directory -> use only name
 					if (lstrcmpi(szEmuDirectory,szFilename) == 0)
@@ -598,7 +598,7 @@ static INT_PTR CALLBACK SettingsProc(HWND hDlg, UINT message, WPARAM wParam, LPA
 //
 // UINT SaveChanges(BOOL bAuto);
 // Return code :
-// IDYES    File successfuly saved
+// IDYES    File successfully saved
 // IDNO     File not saved
 // IDCANCEL Cancel command
 //

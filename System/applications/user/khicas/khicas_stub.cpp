@@ -482,7 +482,7 @@ void Bdisp_AllClr_VRAM() {
     // vGL_FlushVScreen();
 }
 void Bdisp_SetPoint_VRAM(int x, int y, int c) {
-    //printf("setp:%d,%d,%d\n",x,y,c);
+    //printf("step:%d,%d,%d\n",x,y,c);
     //vGL_SetPoint(x, y, (c > 0) ? COLOR_BLACK : COLOR_WHITE);
     vGL_SetPoint(x, y, c);
 }
@@ -918,9 +918,9 @@ int Bfile_FindClose(int FindHandle) {
 }
 
 char memLoad_path_buf[270];
-void *memory_load(char *adresse) {
-    printf("memLoad:%s\n",adresse);
-    Bfile_StrToName_ncpy((unsigned short *)memLoad_path_buf, (const unsigned char *)adresse, 270);
+void *memory_load(char *address) {
+    printf("memLoad:%s\n",address);
+    Bfile_StrToName_ncpy((unsigned short *)memLoad_path_buf, (const unsigned char *)address, 270);
 #if FS_TYPE == FS_FATFS
     
     FRESULT fr;

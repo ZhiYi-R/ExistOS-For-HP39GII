@@ -8,7 +8,7 @@
 typedef struct exp_header_t
 {
     uint32_t Mark0;     //0x5AA52333
-    uint32_t Mark1;     //1936291909    Exis
+    uint32_t Mark1;     //1936291909    Exist
     uint32_t Mark2;     //1347436916    tApp
 
     uint32_t exp_ver;   //1
@@ -48,7 +48,7 @@ extern const char system_build_time[];
 extern const uint32_t g_system_symtab_hash;
 extern bool g_allow_load_err_app;
 
-static TaskHandle_t exp_loader_task_handel;
+static TaskHandle_t exp_loader_task_handle;
 
 
 static lv_group_t *group_backup;
@@ -84,7 +84,7 @@ void exp_exec(void *par) {
     exp_header_t exp_h;
     static FIL *f;
     void (*app_entry)();
-    exp_loader_task_handel = xTaskGetCurrentTaskHandle();
+    exp_loader_task_handle = xTaskGetCurrentTaskHandle();
 
     group_default_backup = lv_group_get_default();
     group_backup = SystemGetInKeypad()->group;
@@ -183,7 +183,7 @@ exp_load_exit0:
 
 void exp_app_exit()
 {
-    vTaskResume(exp_loader_task_handel);
+    vTaskResume(exp_loader_task_handle);
 }
 
 

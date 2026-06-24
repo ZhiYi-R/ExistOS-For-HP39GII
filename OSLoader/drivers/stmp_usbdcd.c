@@ -108,7 +108,7 @@ enum {
   USBMODE_SLOM = TU_BIT(3),
   USBMODE_SDIS = TU_BIT(4),
 
-  USBMODE_VBUS_POWER_SELCT = TU_BIT(5), // Enable for LPC18XX/43XX in host most only
+  USBMODE_VBUS_POWER_SELECT = TU_BIT(5), // Enable for LPC18XX/43XX in host most only
 };
 
 #define __I volatile const /*!< defines 'read only' permissions      */

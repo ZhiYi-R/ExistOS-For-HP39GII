@@ -80,7 +80,7 @@ struct strNode {
 TCHAR *suffix;
 TCHAR *pathNow;
 TCHAR **dirItemNames;
-bool *dirItemInfos; // ture:file false:folder
+bool *dirItemInfos; // true:file false:folder
 unsigned long *filesCount;
 unsigned int *pageNow, *pageAll;
 unsigned char *selectedItem;
@@ -124,17 +124,17 @@ static void timeChange(int hh, int mm, int ss) {
 int exf_getfree(uint8_t *drv, uint32_t *total, uint32_t *free) {
     FATFS *fs1;
     FRESULT res;
-    DWORD fre_clust = 0, fre_sect = 0, tot_sect = 0;
-    res = f_getfree((const TCHAR *)drv, &fre_clust, &fs1);
+    DWORD free_clust = 0, free_sect = 0, tot_sect = 0;
+    res = f_getfree((const TCHAR *)drv, &free_clust, &fs1);
     if (res == 0) {
         tot_sect = (fs1->n_fatent - 2) * fs1->csize;
-        fre_sect = fre_clust * fs1->csize;
+        free_sect = free_clust * fs1->csize;
 #if _MAX_SS != 512
         tot_sect *= fs1->ssize / 512;
-        fre_sect *= fs1->ssize / 512;
+        free_sect *= fs1->ssize / 512;
 #endif
         *total = tot_sect >> 1;
-        *free = fre_sect >> 1;
+        *free = free_sect >> 1;
     }
     return res;
 }
@@ -987,7 +987,7 @@ inline void refreshConsole() {
  * @param key Keys_t
  */
 void keyupConsole(Keys_t key) {
-#define K(ORGIN_KEY, LEFT_SHIFT, RIGHT_SHIFT, CAPITAL_ALPHA, SMALL_ALPHA)
+#define K(ORIGIN_KEY, LEFT_SHIFT, RIGHT_SHIFT, CAPITAL_ALPHA, SMALL_ALPHA)
     switch (key) {
     case KEY_ALPHA:
         break;

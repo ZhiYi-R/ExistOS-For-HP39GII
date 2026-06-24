@@ -366,7 +366,7 @@ static VOID WrStateE8C(BYTE a, DWORD d)
 			a = WSMset.pbyWrite1[byPos];	// get char from buffer
 
 			_ASSERT(d+1 < dwRomSize);		// address valid?
-			// no error set in BWSLBS, because I could alway program a "0"
+			// no error set in BWSLBS, because I could always program a "0"
 			*(pbyRom+d++) &= (a & 0x0F);	// write LSB
 			*(pbyRom+d++) &= (a >> 4);		// write MSB
 		}
@@ -397,7 +397,7 @@ static VOID WrState40D(BYTE a, DWORD d)
 {
 	d <<= 1;								// nibble start address
 	_ASSERT(d+1 < dwRomSize);				// address valid?
-	// no error set in BWSLBS, because I could alway program a "0"
+	// no error set in BWSLBS, because I could always program a "0"
 	*(pbyRom+d++) &= (a & 0x0F);			// write LSB
 	*(pbyRom+d)   &= (a >> 4);				// write MSB
 	WSMset.byStatusReg |= WSMS;				// data written
@@ -593,7 +593,7 @@ static BYTE RdStateId(DWORD d)
 		byData = (BYTE) ((WSMset.dwLockCnfg >> (d >> 15)) & 1);
 
 		d &= 0x1F;							// data repetition
-		if (d >= 4)	byData |= 0x02;			// set bit 1 on wrong ID adress
+		if (d >= 4)	byData |= 0x02;			// set bit 1 on wrong ID address
 	}
 	return byData;
 }
@@ -665,7 +665,7 @@ VOID FlashRead(BYTE *a, DWORD d, UINT s)
 	printf("Flash Read:%d %d\n", d ,s);
 	while (s)								// each nibble
 	{
-		// output muliplexer
+		// output multiplexer
 		_ASSERT(WSMset.uRdState < ARRAYSIZEOF(fnRdState));
 		v = fnRdState[WSMset.uRdState](d>>1);
 
@@ -697,7 +697,7 @@ VOID FlashWrite(BYTE *a, DWORD d, UINT s)
 		}
 		else
 		{
-			// get byte from output muliplexer
+			// get byte from output multiplexer
 			_ASSERT(WSMset.uRdState < ARRAYSIZEOF(fnRdState));
 			v = fnRdState[WSMset.uRdState](p);
 

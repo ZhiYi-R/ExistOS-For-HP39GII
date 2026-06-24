@@ -1,5 +1,5 @@
-#ifndef __STMP_NAND_CONTRL_BLOCK__
-#define __STMP_NAND_CONTRL_BLOCK__
+#ifndef __STMP_NAND_CONTROL_BLOCK__
+#define __STMP_NAND_CONTROL_BLOCK__
 
 #include <stdint.h>
 

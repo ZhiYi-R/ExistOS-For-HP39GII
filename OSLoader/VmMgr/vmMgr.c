@@ -201,7 +201,7 @@ static void taskAccessFaultAddr(pageFaultInfo_t *info, char *res) {
 
 extern volatile uint32_t swapping;
 
-inline static bool vmMgr_CheckAddrVaild(uint32_t addr) {
+inline static bool vmMgr_CheckAddrValid(uint32_t addr) {
     MapList_t *L;
     L = mapList_findVirtAddrInWhichMap(addr);
 
@@ -360,7 +360,7 @@ static inline int save_cache_page(CachePageInfo_t *cache_page) {
             }
             cdmp_free(ZRAMAddress_Tab[ind]);
             ZRAMAddress_Tab[ind] = cdmp_alloc(sz);
-            cdmp_wrtie(ZRAMAddress_Tab[ind], 0, sz, (void *)compress_buffer);
+            cdmp_write(ZRAMAddress_Tab[ind], 0, sz, (void *)compress_buffer);
 #endif
 #if MEM_COMPRESSION_ALGORITHM == MINILZO
             int ret = lzo1x_1_compress((void *)cache_page->PageOnPhyAddr, PAGE_SIZE, (char *)compress_buffer, &sz, comp_wrkbuffer);
@@ -388,7 +388,7 @@ static inline int save_cache_page(CachePageInfo_t *cache_page) {
             
             //cdmp_free(ZRAMAddress_Tab[ind]);
             //ZRAMAddress_Tab[ind] = cdmp_alloc(sz);
-            //cdmp_wrtie(ZRAMAddress_Tab[ind], 0, sz, (void *)compress_buffer);
+            //cdmp_write(ZRAMAddress_Tab[ind], 0, sz, (void *)compress_buffer);
 #endif
 #if MEM_COMPRESSION_ALGORITHM == 0
             g_mem_comp_rate[g_mem_comp_rate_ptr++] = PAGE_SIZE * 100 / PAGE_SIZE;
@@ -405,12 +405,12 @@ static inline int save_cache_page(CachePageInfo_t *cache_page) {
             }
             //cdmp_free(ZRAMAddress_Tab[ind]);
             //ZRAMAddress_Tab[ind] = cdmp_alloc(PAGE_SIZE);
-            //cdmp_wrtie(ZRAMAddress_Tab[ind], 0, sz, (void *)cache_page->PageOnPhyAddr);
+            //cdmp_write(ZRAMAddress_Tab[ind], 0, sz, (void *)cache_page->PageOnPhyAddr);
 #endif
 
             // printf("page comp:%d -> %ld\n", PAGE_SIZE, sz);
 
-            // cdmp_wrtie(ZRAMAddress_Tab[ind], 0, PAGE_SIZE, (void *)cache_page->PageOnPhyAddr);
+            // cdmp_write(ZRAMAddress_Tab[ind], 0, PAGE_SIZE, (void *)cache_page->PageOnPhyAddr);
         } else {
             // printf("TO SWAP AREA\n");
             if (mem_swap_enable) {
@@ -430,7 +430,7 @@ static inline int save_cache_page(CachePageInfo_t *cache_page) {
 
             //printf("Save IND:%d\n", (cache_page->mapToVirtAddr - VM_RAM_BASE) / PAGE_SIZE );
             ZRAMAddress_Tab[ind] = cdmp_alloc(PAGE_SIZE);
-            cdmp_wrtie(ZRAMAddress_Tab[ind], 0, PAGE_SIZE, (void *)cache_page->PageOnPhyAddr);
+            cdmp_write(ZRAMAddress_Tab[ind], 0, PAGE_SIZE, (void *)cache_page->PageOnPhyAddr);
             chksum[ind] = calc_chksum((uint8_t *)cache_page->PageOnPhyAddr, PAGE_SIZE);
 
         }else{
@@ -687,7 +687,7 @@ void __attribute__((optimize("-Os"))) vmMgr_task() {
             }
 #endif
 
-            if (vmMgr_CheckAddrVaild(currentFault.FaultMemAddr) == false) {
+            if (vmMgr_CheckAddrValid(currentFault.FaultMemAddr) == false) {
                 taskAccessFaultAddr(&currentFault, "Area is not mapped.");
                 if (currentFault.FSR == FSR_DATA_ACCESS_UNMAP_PAB) {
                     printf("PAB\n");

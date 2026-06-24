@@ -111,7 +111,7 @@ void vApplicationIdleHook(void) {
 }
 
 void exp_exec(void *par);
-static bool time_lable_refresh = true;
+static bool time_label_refresh = true;
 
 #define EMU_DATA_PORT ((volatile uint8_t *)0x20000000)
 extern bool g_system_in_emulator;

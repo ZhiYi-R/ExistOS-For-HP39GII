@@ -16,4 +16,4 @@ extern VOID o80B80(VOID);
 extern VOID o80B04(VOID);
 extern VOID o80B14(VOID);
 extern VOID o80B24(VOID);
-extern VOID o80BExt(LPBYTE I);				// Saturnator extentions
+extern VOID o80BExt(LPBYTE I);				// Saturnator extensions

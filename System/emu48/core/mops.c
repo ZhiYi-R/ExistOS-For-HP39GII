@@ -397,7 +397,7 @@ VOID Map(BYTE a, BYTE b)					// maps 2KB pages with priority
 		if (Chipset.BSCfig) MapBS(a,b);		// CE1, bank select (lower priority than CE2)
 		if (Chipset.P1Cfig) MapP1(a,b);		// CE2, port1 (higher priority than CE1)
 	}
-	if (Chipset.P0Cfig) MapP0(a,b);			// RAM, highest priority (execpt HDW)
+	if (Chipset.P0Cfig) MapP0(a,b);			// RAM, highest priority (except HDW)
     // CdB for HP: add apples header
     // @todo cg, bug if display header area is mapped to addr 0
 	if (Chipset.d0address!=0)

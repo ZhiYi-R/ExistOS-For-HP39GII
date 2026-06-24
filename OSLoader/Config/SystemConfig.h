@@ -125,7 +125,7 @@
 
 #define CPU_DIVIDE_NORMAL       1
 #define CPU_DIVIDE_PWRSAVE      3
-#define CPU_DIVIDE_IDLE_INTIAL  10
+#define CPU_DIVIDE_IDLE_INITIAL  10
 
 // Flash is divided in sectors of size 2K,
 // a block is 64 sectors, i.e. 128K,
