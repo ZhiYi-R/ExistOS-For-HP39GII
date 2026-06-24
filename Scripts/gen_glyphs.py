@@ -71,50 +71,15 @@ SIZES = [
     (16, 8, "8x16"),
 ]
 
-FONT_NAME = "Noto Sans SC"
+FONT_PATH = Path(__file__).resolve().parent.parent / "fonts" / "Assets" / "unifont-17.0.04.otf"
 
 
-def find_font_path(font_name: str) -> Path:
-    """Locate a TrueType/OpenType font file matching ``font_name`` on the system."""
-    system = platform.system()
-    candidates: list[Path] = []
-
-    if system == "Windows":
-        fonts_dir = Path(os.environ.get("WINDIR", "C:\\Windows")) / "Fonts"
-        # Noto Sans SC is often distributed as an OpenType or TrueType font,
-        # including variable-font variants.
-        candidates = [
-            fonts_dir / "NotoSansSC-Regular.otf",
-            fonts_dir / "NotoSansSC-Regular.ttf",
-            fonts_dir / "NotoSansSC-VF.ttf",
-            fonts_dir / "NotoSansSC-VF.otf",
-            fonts_dir / "NotoSansSC-Bold.otf",
-            fonts_dir / "NotoSansSC-Bold.ttf",
-            fonts_dir / "NotoSansCJKsc-Regular.otf",
-            fonts_dir / "NotoSansCJKsc-Regular.ttf",
-        ]
-    else:
-        search_roots = [
-            Path("/usr/share/fonts"),
-            Path("/usr/local/share/fonts"),
-            Path.home() / ".local" / "share" / "fonts",
-            Path.home() / ".fonts",
-        ]
-        for root in search_roots:
-            if not root.exists():
-                continue
-            for path in root.rglob("*"):
-                if path.is_file() and path.suffix.lower() in (".ttf", ".otf"):
-                    if font_name.replace(" ", "").lower() in path.stem.lower():
-                        candidates.append(path)
-
-    for path in candidates:
-        if path.exists():
-            return path
-
-    raise FileNotFoundError(
-        f"Could not find '{font_name}' font. Please install it and rerun."
-    )
+def find_font_path(font_name: str = "") -> Path:
+    """Return the bundled unifont path regardless of ``font_name``."""
+    path = FONT_PATH
+    if not path.exists():
+        raise FileNotFoundError(f"Bundled font not found at {path}")
+    return path
 
 
 def find_bounding_box(img: Image.Image, threshold: int) -> tuple[int, int, int, int]:
@@ -260,7 +225,7 @@ def main(argv: list[str] | None = None) -> int:
     script_dir = Path(__file__).resolve().parent
     out_dir = args.output_dir or script_dir / "glyphs3"
 
-    font_path = find_font_path(FONT_NAME)
+    font_path = find_font_path()
     font = ImageFont.truetype(str(font_path), args.render_height)
 
     for target_h, target_w, label in SIZES:
