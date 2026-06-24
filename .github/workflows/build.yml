@@ -50,6 +50,7 @@ jobs:
         cd tools/sys_signer
         cmake .
         cmake --build .
+        rm -rf ../sys_signer
         cp sys_signer ../
         cd ../..
     - uses: actions/cache@v3
