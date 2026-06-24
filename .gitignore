@@ -78,7 +78,7 @@ elftosb1
 rsrctool
 sbtoelf
 edb
-sysigner
+sys_signer
 
 # nix outputs
 result

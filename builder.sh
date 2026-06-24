@@ -9,8 +9,8 @@ chmod -R 755 $TMP/ExistOS
 cd $TMP/ExistOS
 
 echo '#!/bin/sh -e
-sysigner $@' >> ./tools/sysigner
-chmod +x ./tools/sysigner
+sys_signer $@' >> ./tools/sys_signer
+chmod +x ./tools/sys_signer
 
 echo '#!/bin/sh -e
 elftosb $@' >> ./tools/sbtools/elftosb

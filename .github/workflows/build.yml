@@ -42,7 +42,7 @@ jobs:
       with:
         path: |
           tools/sys_signer
-          tools/sysigner
+          tools/sys_signer
         key: ${{ runner.os }}-${{ hashFiles('tools/sys_signer/**/*') }}
     - name: Build sys signer
       if: steps.sys_signer-cache.outputs.cache-hit != 'true'
@@ -50,7 +50,7 @@ jobs:
         cd tools/sys_signer
         cmake .
         cmake --build .
-        cp sysigner ../
+        cp sys_signer ../
         cd ../..
     - uses: actions/cache@v3
       id: mpy-cache

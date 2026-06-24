@@ -36,7 +36,7 @@ aux_source_directory(./kernel/scheduler/freertos/memory              SYS_SRCS)
 aux_source_directory(./filesystem                                    SYS_SRCS)
 aux_source_directory(./filesystem/fatfs                              SYS_SRCS)
 #aux_source_directory(./filesystem/littlefs                          SYS_SRCS)
-aux_source_directory(./crush                                         SYS_SRCS)
+aux_source_directory(./crash                                         SYS_SRCS)
 
 # 添加getentropy.c文件到编译源文件
 list(APPEND SYS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/core/getentropy.c)
@@ -121,7 +121,7 @@ add_custom_target(
   ExistOS.sys ALL
   COMMAND ${CMAKE_OBJCOPY} -I elf32-little -O binary -R .note -R .comment -S ${CMAKE_CURRENT_BINARY_DIR}/sys.elf ${CMAKE_CURRENT_BINARY_DIR}/ExistOS.sys 
   COMMAND ${CMAKE_NM} -n ${CMAKE_CURRENT_BINARY_DIR}/sys.elf > ${CMAKE_CURRENT_BINARY_DIR}/sys_symtab.txt 
-  COMMAND ${CMAKE_SOURCE_DIR}/tools/sysigner ${CMAKE_CURRENT_BINARY_DIR}/sys_symtab.txt ${CMAKE_CURRENT_BINARY_DIR}/ExistOS.sys 
+  COMMAND ${CMAKE_SOURCE_DIR}/tools/sys_signer ${CMAKE_CURRENT_BINARY_DIR}/sys_symtab.txt ${CMAKE_CURRENT_BINARY_DIR}/ExistOS.sys 
   DEPENDS sys.elf 
   )
 

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 
-project(sysigner VERSION 0.1.0)
+project(sys_signer VERSION 0.1.0)
 
 
 set(CMAKE_CXX_STANDARD 20)
@@ -16,12 +16,12 @@ aux_source_directory(.              EXE_SRCS)
 
 add_subdirectory(libelf)
 
-add_executable(sysigner ${EXE_SRCS})
+add_executable(sys_signer ${EXE_SRCS})
  
-SET_TARGET_PROPERTIES(sysigner PROPERTIES COMPILE_FLAGS "-O0 -static" ) 
+SET_TARGET_PROPERTIES(sys_signer PROPERTIES COMPILE_FLAGS "-O0 -static" ) 
 
 
-target_link_libraries(sysigner -lm -lgcc -lstdc++
+target_link_libraries(sys_signer -lm -lgcc -lstdc++
 libelf -static
 )
 

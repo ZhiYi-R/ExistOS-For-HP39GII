@@ -19,7 +19,7 @@
 //#include "ff.h"
 
 #include "debug.h"
-#include "crush/CrashLog.h"
+#include "crash/CrashLog.h"
 
 #include "SystemFs.h"
 #include "SystemUI.h"
