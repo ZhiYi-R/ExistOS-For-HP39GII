@@ -4,7 +4,14 @@
  */
 
 #pragma once
-#include "UI_Chinese.h"
+/*
+ * UI_Chinese_gbk.h is generated at build time by transcoding the UTF-8 source
+ * System/UI/Lang/UI_Chinese.h to GBK (the renderer decodes GB2312 and gcc has no
+ * iconv). Do NOT include the UTF-8 source "UI_Chinese.h" directly here — it would
+ * shadow the generated header via same-directory quote-include resolution and the
+ * Chinese strings would render as mojibake. See System/CMakeLists.txt (gen_lang_gbk).
+ */
+#include "UI_Chinese_gbk.h"
 #include "UI_English.h"
 
 const char *MAIN_WIN_TITLE = MAIN_WIN_TITLE_EN;

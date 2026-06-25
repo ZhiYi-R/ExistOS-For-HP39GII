@@ -49,6 +49,36 @@ add_subdirectory(Apps/user/khicas)
 
 add_executable(sys.elf ${SYS_SRCS})
 
+# --- Generate GBK copy of the UTF-8 UI_Chinese.h at build time ---------------
+# The on-screen CJK renderer (draw_char_GBK16) decodes GB2312 and arm-none-eabi-gcc
+# has no iconv, so string literals must already be GBK bytes in the source fed to the
+# compiler. We keep the checked-in source UTF-8 (editor/git/CI friendly) and transcode
+# it here into a differently-named header so it does not shadow the UTF-8 source via
+# same-directory quote-include. UI_Language.h includes the generated UI_Chinese_gbk.h.
+find_program(UV uv)
+if(NOT UV)
+  message(FATAL_ERROR "uv not found: it is required to transcode UI_Chinese.h (UTF-8) to GBK. Install uv or add it to PATH.")
+endif()
+
+set(LANG_GBK_DIR ${CMAKE_CURRENT_BINARY_DIR}/lang_gbk)
+add_custom_command(
+  OUTPUT ${LANG_GBK_DIR}/UI_Chinese_gbk.h
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${LANG_GBK_DIR}
+  COMMAND ${UV} run -q --project ${CMAKE_SOURCE_DIR}/Scripts python
+          ${CMAKE_SOURCE_DIR}/Scripts/transcode.py
+          ${CMAKE_CURRENT_SOURCE_DIR}/UI/Lang/UI_Chinese.h
+          ${LANG_GBK_DIR}/UI_Chinese_gbk.h
+          gbk
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/UI/Lang/UI_Chinese.h
+          ${CMAKE_SOURCE_DIR}/Scripts/transcode.py
+  COMMENT "Transcoding UI_Chinese.h (UTF-8) -> UI_Chinese_gbk.h (GBK)"
+  VERBATIM
+)
+add_custom_target(gen_lang_gbk DEPENDS ${LANG_GBK_DIR}/UI_Chinese_gbk.h)
+add_dependencies(sys.elf gen_lang_gbk)
+include_directories(${LANG_GBK_DIR})
+# -----------------------------------------------------------------------------
+
 set(FONT_HZK16S_LD "${CMAKE_SOURCE_DIR}/fonts/fonts_hzk16s.ld")
 configure_file(
   ${CMAKE_SOURCE_DIR}/Script/sys_ld.script.in
