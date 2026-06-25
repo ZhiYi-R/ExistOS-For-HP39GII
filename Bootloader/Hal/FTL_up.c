@@ -139,6 +139,13 @@ int dhara_nand_read(const struct dhara_nand *n, dhara_page_t p,
         printf("READ ERR\n");
         return ret;
     }
+    /* ECC-scrub hook (not implemented):
+     * MTD_ReadPhyPage() currently collapses every correctable read to ret==0,
+     * so the per-read bit-correction count is not visible here. Scrubbing must
+     * also run out-of-band (re-entering dhara_map_* from this callback is
+     * forbidden). The actual refresh hook therefore lives in FTL_task()'s
+     * FTL_SECTOR_READ branch; see the note there and mtd_up.c (ECCResult /
+     * g_mtd_ecc_cnt) for the correction count that would need to be exposed. */
     return 0;
 }
 
@@ -268,6 +275,15 @@ void FTL_task() {
                     #ifdef PR_FTL_TIMING_STATUS
                     INFO("frd=%ld\n",HW_DIGCTL_MICROSECONDS_RD() - ftl_rdt);
                     #endif
+                    /* ECC-scrub hook (not implemented this round):
+                     * The sector just read is (curOpa.sector - 1). To refresh a
+                     * page whose ECC correction count crossed a threshold, rewrite
+                     * it here via dhara_map_write(&FTLmap, curOpa.sector - 1,
+                     * curOpa.buf, &err) -- this runs in FTL_task context, safely
+                     * out of the Dhara NAND callbacks. Gate it on a real metric:
+                     * MTD must first expose the per-read correction count
+                     * (mtd_up.c ECCResult / g_mtd_ecc_cnt), which it currently
+                     * does not surface through MTD_ReadPhyPage(). */
                     curOpa.buf += pMtdinfo->PageSize_B;
                     if (ret) {
                         FTL_WARN("FTL READ FAIL:%d,%s\n", ret, dhara_strerror(err));
