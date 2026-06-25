@@ -283,7 +283,10 @@ void tstrun(const char *s)
   
 #endif
 
-int kcas_main(int isAppli, unsigned short OptionNum);
+// Corrected KhiCAS REPL entry (System/Apps/user/khicas/khicas_repl.cpp). Replaces
+// the prebuilt kcas_main(), whose loop reports a bogus "memory error" and hangs
+// when the user presses Home/MENU to quit (Console_GetLine returns NULL).
+int khicas_repl(int isAppli, unsigned short OptionNum);
 extern "C"{
 extern bool khicasRunning;
 #include "SystemFs.h"
@@ -330,7 +333,14 @@ extern bool khicasRunning;
 	#endif
 		printf("KhiCAS STACK ADDR:%08x\n", getCurStackAdr() );
 
-		kcas_main(0,0);
+		khicas_repl(0,0);
+
+		// khicas_repl() returns when the user picks "Quit" from the Home menu
+		// (Console_GetLine -> NULL). Stop the KhiCAS helper tasks before releasing
+		// the framebuffers, otherwise the orphaned vGL flush task keeps painting
+		// KhiCAS over the resumed system UI (flicker) and stale tasks eat input.
+		void khicasStopHelpers();
+		khicasStopHelpers();
 
 	vGL_Release();
         /*

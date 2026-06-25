@@ -120,9 +120,14 @@ $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>
 
 target_link_libraries(sys.elf -lm -lc -lrdimon -lgcc -lstdc++ -nostartfiles
 tjpgd
-#gb 
+#gb
 #emu48
 #lvgl
+# The prebuilt KhiCAS/CAS blobs and khicas_lib are mutually dependent: the GUI blob
+# calls porting stubs in khicas_lib, and khicas_repl.cpp (in khicas_lib) calls back
+# into the blobs (xcas::Console_*, giac::*). Single-pass link order can't satisfy a
+# cycle, so wrap them in a group the linker iterates until all refs resolve.
+-Wl,--start-group
 ${CMAKE_SOURCE_DIR}/External/KhiCAS/libkcasgui.libcpp
 #${CMAKE_SOURCE_DIR}/External/MicroPython/libmpy.libc
 ${CMAKE_SOURCE_DIR}/External/KhiCAS/libcas.libcpp
@@ -130,6 +135,7 @@ ${CMAKE_SOURCE_DIR}/External/KhiCAS/libcas.libcpp
 ${CMAKE_SOURCE_DIR}/External/LibTomMath/libtommath.libcpp
 ${CMAKE_SOURCE_DIR}/External/GMP/libgmp.libcpp
 khicas_lib
+-Wl,--end-group
 )
 
 # build time in UTC ISO 8601
