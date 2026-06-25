@@ -259,8 +259,8 @@ void pageUpdate() {
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %s", UI_TIME, timeStr);
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s+ [7] %s+ [8] %s+ [9]", UI_Hours, UI_Minutes, UI_Seconds);
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s- [4] %s- [5] %s- [6]", UI_Hours, UI_Minutes, UI_Seconds);
-            uint32_t total;
-            uint32_t free;
+            uint32_t total = 0;
+            uint32_t free = 0;
             exf_getfree((uint8_t *)"0:", &total, &free);
 
             uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %d/%d KB", UI_Storage_Space, total - free, total);
@@ -528,30 +528,32 @@ void keyMsg(uint32_t key, int state) {
                         msgbox = new UI_Msgbox(uidisp, 16, 32, 256 - 32, 64, "Delete Folder", "Press ENTER to confirm.");
                     }
 
-                    isMsgBoxShow = true;
-                    drawPage(curPage);
-
-                    if (msgbox->show()) {
-                        msgbox->setText("Please wait...");
+                    if (msgbox) {
+                        isMsgBoxShow = true;
                         drawPage(curPage);
 
-                        strcat(pathNow, dirItemNames[(*pageNow - 1) * 5 + *selectedItem - 1]);
+                        if (msgbox->show()) {
+                            msgbox->setText("Please wait...");
+                            drawPage(curPage);
 
-                        // if (dirItemInfos[(*pageNow - 1) * 5 + *selectedItem - 1]) {
-                        //     f_unlink(pathNow);
-                        // } else {
-                        //     // strcat(pathNow, "/");
-                        //     deleteFiles(pathNow);
-                        // }
+                            strcat(pathNow, dirItemNames[(*pageNow - 1) * 5 + *selectedItem - 1]);
 
-                        FS_DeleteFolderOrFile(pathNow);
+                            // if (dirItemInfos[(*pageNow - 1) * 5 + *selectedItem - 1]) {
+                            //     f_unlink(pathNow);
+                            // } else {
+                            //     // strcat(pathNow, "/");
+                            //     deleteFiles(pathNow);
+                            // }
 
-                        getWholePath(pathNow);
-                        refreshDir();
+                            FS_DeleteFolderOrFile(pathNow);
+
+                            getWholePath(pathNow);
+                            refreshDir();
+                        }
+                        isMsgBoxShow = false;
+                        delete msgbox;
+                        drawPage(curPage);
                     }
-                    isMsgBoxShow = false;
-                    delete msgbox;
-                    drawPage(curPage);
                 }
 
             } else {

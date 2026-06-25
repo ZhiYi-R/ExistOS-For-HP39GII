@@ -164,7 +164,7 @@ char *Setup_SetEntry(unsigned int index, char setting) {
 
 bool IsKeyDown(int test_key)
 {
-    uint32_t tr_key;
+    uint32_t tr_key = 0xFFFFFFFFu;
     uint32_t keys, key_get, kpress, *key = &tr_key;
     keys = ll_vm_check_key();
     key_get = keys & 0xFFFF;
@@ -768,10 +768,11 @@ int Bfile_ReadFile_OS(int HANDLE, void *buf, int size, int readpos) {
 #if FS_TYPE == FS_FATFS
     FIL *handle = (FIL *)HANDLE;
     UINT bw;
-    FRESULT fr;
+    FRESULT fr = FR_OK;
     if(!handle)
     {
         printf("VOID POINTER!\n");
+        return -1;
     }
     if(readpos >= 0)
         fr = f_lseek(handle, readpos);
