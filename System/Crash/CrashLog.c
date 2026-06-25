@@ -186,13 +186,31 @@ bool crash_log_create_file(const crash_log_t* log) {
         
         for (uint32_t i = 0; i < log->stack_trace_size; i += 16) {
             int line_len = snprintf(buffer, sizeof(buffer), "%08X: ", (uint32_t)(log->sp + i));
-            
-            for (uint32_t j = 0; j < 16 && (i + j) < log->stack_trace_size; j++) {
-                line_len += snprintf(buffer + line_len, sizeof(buffer) - line_len, 
-                                    "%02X ", log->stack_trace[i + j]);
+            if (line_len < 0) {
+                line_len = 0;
             }
-            
-            line_len += snprintf(buffer + line_len, sizeof(buffer) - line_len, "\n");
+
+            for (uint32_t j = 0; j < 16 && (i + j) < log->stack_trace_size; j++) {
+                if (line_len >= (int)sizeof(buffer)) {
+                    break;
+                }
+                int n = snprintf(buffer + line_len, sizeof(buffer) - line_len,
+                                    "%02X ", log->stack_trace[i + j]);
+                if (n < 0) {
+                    break;
+                }
+                line_len += n;
+            }
+
+            if (line_len < (int)sizeof(buffer)) {
+                int n = snprintf(buffer + line_len, sizeof(buffer) - line_len, "\n");
+                if (n > 0) {
+                    line_len += n;
+                }
+            }
+            if (line_len > (int)sizeof(buffer)) {
+                line_len = sizeof(buffer);
+            }
             f_write(&file, buffer, line_len, &bytes_written);
         }
     }
@@ -236,13 +254,31 @@ bool crash_log_create_file(const crash_log_t* log) {
         
         for (uint32_t i = 0; i < log->stack_trace_size; i += 16) {
             int line_len = snprintf(buffer, sizeof(buffer), "%08lX: ", (uint32_t)(log->sp + i));
-            
-            for (uint32_t j = 0; j < 16 && (i + j) < log->stack_trace_size; j++) {
-                line_len += snprintf(buffer + line_len, sizeof(buffer) - line_len, 
-                                    "%02X ", log->stack_trace[i + j]);
+            if (line_len < 0) {
+                line_len = 0;
             }
-            
-            line_len += snprintf(buffer + line_len, sizeof(buffer) - line_len, "\n");
+
+            for (uint32_t j = 0; j < 16 && (i + j) < log->stack_trace_size; j++) {
+                if (line_len >= (int)sizeof(buffer)) {
+                    break;
+                }
+                int n = snprintf(buffer + line_len, sizeof(buffer) - line_len,
+                                    "%02X ", log->stack_trace[i + j]);
+                if (n < 0) {
+                    break;
+                }
+                line_len += n;
+            }
+
+            if (line_len < (int)sizeof(buffer)) {
+                int n = snprintf(buffer + line_len, sizeof(buffer) - line_len, "\n");
+                if (n > 0) {
+                    line_len += n;
+                }
+            }
+            if (line_len > (int)sizeof(buffer)) {
+                line_len = sizeof(buffer);
+            }
             lfs_file_write(lfs, &file, buffer, line_len);
         }
     }
