@@ -376,7 +376,7 @@ void DisplayTask() {
                 uint8_t fontSize = curOpa.pars[5];
 
                 uint32_t n = c - ' ';
-                uint8_t *p = &Ascii1608[fontSize * n];
+                const uint8_t *p = &VGA_Ascii_8x16[16 * n];
                 uint8_t *buf = pvPortMalloc(8 * fontSize);
                 for (int y = 0; y < fontSize; y++) {
                     for (int x = 0; x < 8; x++) {
@@ -401,17 +401,17 @@ void DisplayTask() {
                 uint8_t fontSize = curOpa.pars[5];
 
                 uint32_t str_len = strlen(s);
-                uint8_t *font = NULL;
+                const uint8_t *font = NULL;
                 uint32_t fontWidth = 0;
                 // if(fontSize == 16)
                 {
-                    font = Ascii1608;
+                    font = VGA_Ascii_8x16;
                     fontWidth = 8;
                 }
                 // else
                 {
-                    // font = Ascii1206;
-                    // fontWidth = 7;
+                    // font = VGA_Ascii_6x12;
+                    // fontWidth = 6;
                 }
 
                 uint8_t *buf = pvPortMalloc(8 * str_len * fontSize);
@@ -419,7 +419,7 @@ void DisplayTask() {
                 for (int n = 0; n < str_len; n++) {
                     char c = s[n];
                     uint32_t ch = c - ' ';
-                    uint8_t *p = &font[fontSize * ch];
+                    const uint8_t *p = &font[fontSize * ch];
                     for (int y_ = 0; y_ < fontSize; y_++) {
                         for (int x_ = x0; x_ < x0 + 8; x_++) {
                             buf[fontWidth * str_len * y_ + x_] = ((p[y_] >> (7 - (x_ - x0))) & 1) ? fg : bg;

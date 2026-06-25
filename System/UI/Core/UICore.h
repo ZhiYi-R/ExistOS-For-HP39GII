@@ -7,10 +7,7 @@
 
 #include "UI_Config.h"
 #include "UI_Language.h"
-
-extern const unsigned char VGA_Ascii_5x8[];
-extern const unsigned char VGA_Ascii_6x12[];
-extern const unsigned char VGA_Ascii_8x16[];
+#include "font_ascii.h"
 
 #ifdef __cplusplus
 

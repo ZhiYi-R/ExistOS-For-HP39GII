@@ -18,10 +18,7 @@
 
 #include "keyboard_gii39.h"
 
-extern const unsigned char VGA_Ascii_5x8[];
-extern const unsigned char VGA_Ascii_6x12[];
-extern const unsigned char VGA_Ascii_8x16[];
-extern const unsigned char VGA_Ascii_7x14[];
+#include "font_ascii.h"
 
 // extern "C" {
 char *virtual_screen=0;

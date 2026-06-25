@@ -21,9 +21,7 @@
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define abs(x) (((int32_t)x) < 0 ? (-x) : (x))
 
-extern const unsigned char VGA_Ascii_5x8[];
-extern const unsigned char VGA_Ascii_6x12[];
-extern const unsigned char VGA_Ascii_8x16[];
+#include "font_ascii.h"
 
 static uint8_t *svram = NULL; 
 void api_vram_initialize(uint8_t *vram_addr)
