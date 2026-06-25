@@ -126,8 +126,8 @@ void khicasTask(void *_) {
 
     SystemUISuspend();
 
-    void testcpp();
-    testcpp();
+    void khicasLaunch();
+    khicasLaunch();
 
     SystemUIResume();
 

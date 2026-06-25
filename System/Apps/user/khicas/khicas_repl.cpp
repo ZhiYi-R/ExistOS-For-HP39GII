@@ -14,7 +14,7 @@
  * same NULL correctly, as a clean exit. We cannot patch the prebuilt blob from
  * our CMake build, so this file re-implements kcas_main's setup verbatim but
  * exits cleanly on NULL (save session -> free console -> release globals ->
- * return). test.cpp calls khicas_repl() instead of kcas_main().
+ * return). khicas_launch.cpp calls khicas_repl() instead of kcas_main().
  *
  * This translation unit pulls in the giac headers directly, so it must be built
  * with -DKHICAS -DHAVE_CONFIG_H (and libtommath on the include path), matching

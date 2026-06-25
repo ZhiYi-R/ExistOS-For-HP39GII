@@ -60,13 +60,13 @@ int rshift = 0;
 void (*XcasExitCb)(void) = NULL;
 
 // Stop the KhiCAS helper tasks and flush key state. Called on the Home/menu "Quit"
-// path: khicas_repl() returns up through testcpp() (unlike the ON-key quit, which
+// path: khicas_repl() returns up through khicasLaunch() (unlike the ON-key quit, which
 // tears down inline and vTaskDelete()s itself). Three tasks gate on khicasRunning
 // and self-delete when it clears -- vGL_flushTask (50ms), vGL_consoleTask (500ms)
 // and kcas_timer (100ms). Without this, those tasks outlive the quit: the orphaned
 // flush task keeps painting the KhiCAS framebuffer over the resumed system UI (the
 // "flicker between desktop and KhiCAS") and the stale tasks swallow input. The delay
-// lets all three notice and exit before testcpp() frees the framebuffers in
+// lets all three notice and exit before khicasLaunch() frees the framebuffers in
 // vGL_Release(); keyStatus is cleared so the resumed UI doesn't re-trigger on a
 // still-pending key. Mirrors the ON-key teardown in GetKey() above.
 void khicasStopHelpers(void)
