@@ -29,8 +29,8 @@ uint32_t swi_saved_context[32]; //{SPSR , R0-R15}
 extern volatile void *volatile pxCurrentTCB;
 extern volatile uint32_t ulCriticalNesting;
 
-//volatile void IRQ_ISR(uint32_t IRQNum, uint32_t par1, uint32_t par2, uint32_t par3) __attribute__((naked));
-volatile void IRQ_ISR(uint32_t IRQNum, uint32_t par1, uint32_t par2, uint32_t par3) {
+//void IRQ_ISR(uint32_t IRQNum, uint32_t par1, uint32_t par2, uint32_t par3) __attribute__((naked));
+void IRQ_ISR(uint32_t IRQNum, uint32_t par1, uint32_t par2, uint32_t par3) {
     
     asm volatile("mov r0,r0");
     asm volatile("mov r0,r0");
@@ -81,8 +81,8 @@ volatile void IRQ_ISR(uint32_t IRQNum, uint32_t par1, uint32_t par2, uint32_t pa
         ;
 }
 
-volatile void SWI_ISR() __attribute__((naked));
-volatile void SWI_ISR() {
+void SWI_ISR(void) __attribute__((naked));
+void SWI_ISR(void) {
     asm volatile("mov r0,r0");
     asm volatile("mov r0,r0");
     asm volatile("mov r0,r0");

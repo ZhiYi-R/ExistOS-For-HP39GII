@@ -127,7 +127,7 @@ static void enableUSBClock(bool enable) {
     }
 }
 
-void volatile portCLKCtrlInit(void) {
+void portCLKCtrlInit(void) {
     //BF_SETV(POWER_VDDDCTRL, TRG, 26); // Set voltage = 1.45 V
     //BF_SETV(POWER_VDDACTRL, TRG, 18); // Set voltage = 1.95 V  val = (TAG_v - 1.5v)/0.025v
 
