@@ -488,9 +488,12 @@ void parseCDCCommand(char *cmd) {
     }
 
     if (memcmp(cmd, "MKNCB", 5) == 0) {
-        uint32_t stblock;
-        uint32_t pages;
-        sscanf(cmd, "MKNCB:%d,%d", &stblock, &pages);
+        uint32_t stblock = 0;
+        uint32_t pages = 0;
+        if (sscanf(cmd, "MKNCB:%u,%u", &stblock, &pages) != 2) {
+            MscSetCmd("MKERR\n");
+            return;
+        }
         printf("MKNCB:%u,%u\n", stblock, pages);
         mkSTMPNandStructure(stblock, pages);
         MscSetCmd("MKOK\n");
@@ -986,7 +989,7 @@ void TaskUSBLog(void *_) {
         vTaskDelay(pdMS_TO_TICKS(200));
     }
 }
-extern bool g_slowdown_enable;
+extern int g_slowdown_enable;
 #include "regsclkctrl.h"
 void waitIRQ(int r) {
 

@@ -31,7 +31,7 @@ QueueHandle_t LLIRQ_Queue;
 QueueHandle_t LLAPI_KBDQueue;
 
 extern uint32_t g_CDC_TransTo;
-extern uint32_t g_latest_key_status;
+extern volatile uint32_t g_latest_key_status;
 
 uint32_t vm_irq_stack_address, vm_svc_stack_address;
 uint32_t vm_irq_vector_address, vm_svc_vector_address;
@@ -40,7 +40,7 @@ bool vm_enable_irq = false;
 bool vm_in_exception = false;
 bool vm_key_input_enable = false;
 bool vm_serial_enable = false;
-bool g_vm_in_pagefault = false;
+volatile bool g_vm_in_pagefault = false;
 
 
 TimerHandle_t vm_timer = NULL;

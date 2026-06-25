@@ -137,7 +137,7 @@ extern bool upSystemInException;
 uint32_t g_page_vram_fault_cnt = 0;
 uint32_t g_page_vrom_fault_cnt = 0;
 
-extern bool g_vm_in_pagefault;
+extern volatile bool g_vm_in_pagefault;
 
 //tlsf_t tlsf_pool;
 

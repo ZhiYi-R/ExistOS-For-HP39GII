@@ -78,7 +78,7 @@ void printRegs() {
 
 uint32_t vm_temp_storage[16];
 void waitIRQ(int r);
-extern uint32_t g_latest_key_status;
+extern volatile uint32_t g_latest_key_status;
 extern uint32_t g_core_temp, g_batt_volt, g_core_cur_freq_mhz;
 extern bool vm_in_exception, g_chargeEnable;
 
