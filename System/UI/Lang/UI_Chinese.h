@@ -33,6 +33,8 @@
 #define UI_LANGUAGE_CN               "语言"
 #define UI_LANGUAGE_CHINESE_CN       "中文"
 
+#define UI_ABOUT_PROJECT_CN          "HP39GII开源固件项目"
+
 
 #define UI_Hours_CN                  "时"
 #define UI_Minutes_CN                "分"
