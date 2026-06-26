@@ -307,7 +307,7 @@ namespace giac {
 #endif
     clip_pasted=false;
     if (status){
-      DefineStatusMessage((char*)((lang==1)?"Selection copiee vers presse-papiers.":"Selection copied to clipboard"), 1, 0, 0);
+      DefineStatusMessage((char*)((lang==1)?"Selection copiee vers presse-papiers.":"选区已复制到剪贴板"), 1, 0, 0);
       DisplayStatusArea();
     }
   }
@@ -355,9 +355,9 @@ namespace giac {
   
   bool do_confirm(const char * s){
 #ifdef NSPIRE_NEWLIB
-    return confirm(s,((lang==1)?"enter: oui,  esc:annuler":"enter: yes,   esc: cancel"))==KEY_CTRL_F1;
+    return confirm(s,((lang==1)?"enter: oui,  esc:annuler":"enter: 是,   esc: 取消"))==KEY_CTRL_F1;
 #else
-    return confirm(s,((lang==1)?"OK: oui,  Back:annuler":"OK: yes,   Back: cancel"))==KEY_CTRL_F1;
+    return confirm(s,((lang==1)?"OK: oui,  Back:annuler":"OK: 是,   Back: 取消"))==KEY_CTRL_F1;
 #endif
   }
   
@@ -381,14 +381,14 @@ namespace giac {
   
   bool confirm_overwrite(){
 #ifdef NSPIRE_NEWLIB
-    return do_confirm((lang==1)?"enter: oui,  esc:annuler":"enter: yes,   esc: cancel")==KEY_CTRL_F1;
+    return do_confirm((lang==1)?"enter: oui,  esc:annuler":"enter: 是,   esc: 取消")==KEY_CTRL_F1;
 #else
-    return do_confirm((lang==1)?"OK: oui,  Back:annuler":"OK: yes,   Back: cancel")==KEY_CTRL_F1;
+    return do_confirm((lang==1)?"OK: oui,  Back:annuler":"OK: 是,   Back: 取消")==KEY_CTRL_F1;
 #endif
   }
   
   void invalid_varname(){
-    confirm((lang==1)?"Nom de variable incorrect":"Invalid variable name",
+    confirm((lang==1)?"Nom de variable incorrect":"变量名无效",
 #ifdef NSPIRE_NEWLIB
 	    (lang==1)?"enter: ok":"enter: ok"
 #else
@@ -1299,382 +1299,382 @@ namespace giac {
   };
 
 const catalogFunc completeCaten[] = { // list of all functions (including some not in any category)
-  {" loop for", "for ", "Defined loop.", "#\nfor ", 0, CAT_CATEGORY_PROG},
-  {" loop in list", "for in", "Loop on all elements of a list.", "#\nfor in", 0, CAT_CATEGORY_PROG},
-  {" loop while", "while ", "Undefined loop.", "#\nwhile ", 0, CAT_CATEGORY_PROG},
-  {" test if", "if ", "Test", "#\nif ", 0, CAT_CATEGORY_PROG},
-  {" test else", "else ", "Test false case", 0, 0, CAT_CATEGORY_PROG},
-  {" function def", "f(x):=", "Definition of function.", "#\nf(x):=", 0, CAT_CATEGORY_PROG},
-  {" local j,k;", "local ", "Local variables declaration (Xcas)", 0, 0, CAT_CATEGORY_PROG},
-  {" range(a,b)", 0, "In range [a,b) (a included, b excluded)", "# in range(1,10)", 0, CAT_CATEGORY_PROG},
-  {" return res", "return ", "Leaves current function and returns res.", 0, 0, CAT_CATEGORY_PROG},
-  {" edit list ", "list ", "List creation wizzard.", 0, 0, CAT_CATEGORY_LIST},
-  {" edit matrix ", "matrix ", "Matrix creation wizzard.", 0, 0, CAT_CATEGORY_MATRIX},
-    {" mksa(x)", 0, "Conversion to MKSA units", 0, 0, CAT_CATEGORY_PHYS | (CAT_CATEGORY_UNIT << 8) | XCAS_ONLY},
-    {" ufactor(a,b)", 0, "Factorize unit b in a", "100_J,1_kW", 0, CAT_CATEGORY_PHYS | (CAT_CATEGORY_UNIT << 8) | XCAS_ONLY},
-    {" usimplify(a)", 0, "Simplify unit", "100_l/10_cm^2", 0, CAT_CATEGORY_PHYS | (CAT_CATEGORY_UNIT << 8) | XCAS_ONLY},
-  {"!", "!", "Logical not (prefix) or factorial of n (suffix).", "#7!", "~!b", CAT_CATEGORY_PROGCMD},
-  {"#", "#", "Python comment, for Xcas comment type //. Shortcut ALPHA F2", 0, 0, CAT_CATEGORY_PROG},
-  {"%", "%", "a % b means a modulo b", 0, 0, CAT_CATEGORY_ARIT | (CAT_CATEGORY_PROGCMD << 8)},
-  {"&", "&", "Logical and or +", "#1&2", 0, CAT_CATEGORY_PROGCMD},
-  {":=", ":=", "Set variable value. Shortcut SHIFT F1", "#a:=3", 0, CAT_CATEGORY_PROGCMD|(CAT_CATEGORY_SOFUS<<8)|XCAS_ONLY},
-  {"<", "<", "Shortcut SHIFT F2", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"=>", "=>", "Store value in variable or conversion (touche ->). For example 5=>a or x^4-1=>* or (x+1)^2=>+ or sin(x)^2=>cos.", "#5=>a", "#15_ft=>_cm", CAT_CATEGORY_PROGCMD | (CAT_CATEGORY_PHYS <<8) | (CAT_CATEGORY_UNIT << 16) | XCAS_ONLY},
-  {">", ">", "Shortcut F2.", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"\\", "\\", "\\ char", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"_", "_", "_ char, shortcut (-).", 0, 0, CAT_CATEGORY_PROGCMD},
-    {"_(km/h)", "_(km/h)", "Speed kilometer per hour", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_(m/s)", "_(m/s)", "Speed meter/second", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_(m/s^2)", "_(m/s^2)", "Acceleration", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_(m^2/s)", "_(m^2/s)", "Viscosity", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_A", 0, "Ampere", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_Bq", 0, "Becquerel", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_C", 0, "Coulomb", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_Ci", 0, "Curie", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_F", 0, "Farad", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_F_", 0, "Faraday constant", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_G_", 0, "Gravitation force=_G_*m1*m2/r^2", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_H", 0, "Henry", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_Hz", 0, "Hertz", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_J", 0, "Joule=kg*m^2/s^2", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_K", 0, "Temperature in Kelvin", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_Kcal", 0, "Energy kilo-calorie", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_MeV", 0, "Energy mega-electron-Volt", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_N", 0, "Force Newton=kg*m/s^2", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_NA_", 0, "Avogadro constant", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_Ohm", 0, "Ohm", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_PSun_", 0, "Sun power", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_Pa", 0, "Pressure in Pascal=kg/m/s^2", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_REarth_", 0, "Earth radius", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_RSun_", 0, "Sun radius", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_R_", 0, "Boltzmann constant (per mol)", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+  {" loop for", "for ","定数循环.", "#\nfor ", 0, CAT_CATEGORY_PROG},
+  {" loop in list", "for in","遍历列表所有元素的循环.", "#\nfor in", 0, CAT_CATEGORY_PROG},
+  {" loop while", "while ","不定循环.", "#\nwhile ", 0, CAT_CATEGORY_PROG},
+  {" test if", "if ","条件判断", "#\nif ", 0, CAT_CATEGORY_PROG},
+  {" test else", "else ","条件为假的分支", 0, 0, CAT_CATEGORY_PROG},
+  {" function def", "f(x):=","函数定义.", "#\nf(x):=", 0, CAT_CATEGORY_PROG},
+  {" local j,k;", "local ","局部变量声明 (Xcas)", 0, 0, CAT_CATEGORY_PROG},
+  {" range(a,b)", 0,"区间 [a,b) (含 a, 不含 b)", "# in range(1,10)", 0, CAT_CATEGORY_PROG},
+  {" return res", "return ","退出当前函数并返回 res.", 0, 0, CAT_CATEGORY_PROG},
+  {" edit list ", "list ","列表创建向导.", 0, 0, CAT_CATEGORY_LIST},
+  {" edit matrix ", "matrix ","矩阵创建向导.", 0, 0, CAT_CATEGORY_MATRIX},
+    {" mksa(x)", 0,"转换为 MKSA 单位", 0, 0, CAT_CATEGORY_PHYS | (CAT_CATEGORY_UNIT << 8) | XCAS_ONLY},
+    {" ufactor(a,b)", 0,"在 a 中分解出单位 b", "100_J,1_kW", 0, CAT_CATEGORY_PHYS | (CAT_CATEGORY_UNIT << 8) | XCAS_ONLY},
+    {" usimplify(a)", 0,"化简单位", "100_l/10_cm^2", 0, CAT_CATEGORY_PHYS | (CAT_CATEGORY_UNIT << 8) | XCAS_ONLY},
+  {"!", "!","逻辑非 (前缀) 或 n 的阶乘 (后缀).", "#7!", "~!b", CAT_CATEGORY_PROGCMD},
+  {"#", "#","Python 注释; Xcas 注释用 //. 快捷键 ALPHA F2", 0, 0, CAT_CATEGORY_PROG},
+  {"%", "%","a % b 表示 a 模 b", 0, 0, CAT_CATEGORY_ARIT | (CAT_CATEGORY_PROGCMD << 8)},
+  {"&", "&","逻辑与, 或加法 +", "#1&2", 0, CAT_CATEGORY_PROGCMD},
+  {":=", ":=","为变量赋值. 快捷键 SHIFT F1", "#a:=3", 0, CAT_CATEGORY_PROGCMD|(CAT_CATEGORY_SOFUS<<8)|XCAS_ONLY},
+  {"<", "<","快捷键 SHIFT F2", 0, 0, CAT_CATEGORY_PROGCMD},
+  {"=>", "=>","将值存入变量或进行转换 (-> 键). 例如 5=>a, x^4-1=>*, (x+1)^2=>+ 或 sin(x)^2=>cos.", "#5=>a", "#15_ft=>_cm", CAT_CATEGORY_PROGCMD | (CAT_CATEGORY_PHYS <<8) | (CAT_CATEGORY_UNIT << 16) | XCAS_ONLY},
+  {">", ">","快捷键 F2.", 0, 0, CAT_CATEGORY_PROGCMD},
+  {"\\", "\\","反斜杠字符", 0, 0, CAT_CATEGORY_PROGCMD},
+  {"_", "_","下划线字符, 快捷键 (-).", 0, 0, CAT_CATEGORY_PROGCMD},
+    {"_(km/h)", "_(km/h)","速度, 千米每小时", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_(m/s)", "_(m/s)","速度, 米每秒", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_(m/s^2)", "_(m/s^2)","加速度", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_(m^2/s)", "_(m^2/s)","黏度", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_A", 0,"安培", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_Bq", 0,"贝可勒尔", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_C", 0,"库仑", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_Ci", 0,"居里", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_F", 0,"法拉", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_F_", 0,"法拉第常数", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_G_", 0,"万有引力=_G_*m1*m2/r^2", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_H", 0,"亨利", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_Hz", 0,"赫兹", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_J", 0,"焦耳=kg*m^2/s^2", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_K", 0,"开尔文温度", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_Kcal", 0,"能量, 千卡", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_MeV", 0,"能量, 兆电子伏特", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_N", 0,"力, 牛顿=kg*m/s^2", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_NA_", 0,"阿伏伽德罗常数", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_Ohm", 0,"欧姆", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_PSun_", 0,"太阳辐射功率", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_Pa", 0,"压强, 帕斯卡=kg/m/s^2", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_REarth_", 0,"地球半径", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_RSun_", 0,"太阳半径", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_R_", 0,"玻尔兹曼常数 (每摩尔)", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
     {"_S", 0, "", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_StdP_", 0, "Standard pressure", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_StdT_", 0, "Standard temperature (0 degre Celsius in Kelvins)", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_Sv", 0, "Sievert", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_T", 0, "Tesla", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_V", 0, "Volt", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_Vm_", 0, "Volume molaire", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_W", 0, "Watt=kg*m^2/s^3", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_Wb", 0, "Weber", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_alpha_", 0, "fine structure constant", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_c_", 0, "speed of light", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_cd", 0, "candela", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-  {"_cdf", "_cdf", "Suffix to get a cumulative distribution function. Type F2 for inverse cumulative distribution function _icdf suffix.", "#_icdf", 0, CAT_CATEGORY_PROBA|XCAS_ONLY},
-    {"_d", 0, "day", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_deg", 0, "degree", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_eV", 0, "electron-Volt", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_epsilon0_", 0, "vacuum permittivity", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_ft", 0, "feet", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_g_", 0, "Earth gravity (ground)", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_grad", 0, "grades (angle unit(", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_h", 0, "Hour", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_h_", 0, "Planck constant", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_ha", 0, "hectare", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_hbar_", 0, "Planck constant/(2*pi)", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_inch", 0, "inches", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_kWh", 0, "kWh", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_k_", 0, "Boltzmann constant", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_kg", 0, "kilogram", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_l", 0, "liter", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_m", 0, "meter", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_mEarth_", 0, "Earth mass", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_m^2", 0, "Area in m^2", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_m^3", 0, "Volume in m^3", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_me_", 0, "electron mass", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_miUS", 0, "US miles", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_mn", 0, "minute", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_mp_", 0, "proton mass", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_mpme_", 0, "proton/electron mass-ratio", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_StdP_", 0,"标准大气压", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_StdT_", 0,"标准温度 (0 摄氏度对应的开尔文)", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_Sv", 0,"希沃特", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_T", 0,"特斯拉", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_V", 0,"伏特", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_Vm_", 0,"摩尔体积", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_W", 0,"瓦特=kg*m^2/s^3", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_Wb", 0,"韦伯", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_alpha_", 0,"精细结构常数", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_c_", 0,"光速", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_cd", 0,"坎德拉", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+  {"_cdf", "_cdf","用于取累积分布函数的后缀. 按 F2 得到逆累积分布函数后缀 _icdf.", "#_icdf", 0, CAT_CATEGORY_PROBA|XCAS_ONLY},
+    {"_d", 0,"天", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_deg", 0,"度", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_eV", 0,"电子伏特", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_epsilon0_", 0,"真空介电常数", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_ft", 0,"英尺", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_g_", 0,"地表重力加速度", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_grad", 0,"百分度 (角度单位)", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_h", 0,"小时", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_h_", 0,"普朗克常数", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_ha", 0,"公顷", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_hbar_", 0,"普朗克常数/(2*pi)", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_inch", 0,"英寸", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_kWh", 0,"千瓦时", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_k_", 0,"玻尔兹曼常数", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_kg", 0,"千克", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_l", 0,"升", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_m", 0,"米", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_mEarth_", 0,"地球质量", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_m^2", 0,"面积, 平方米", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_m^3", 0,"体积, 立方米", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_me_", 0,"电子质量", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_miUS", 0,"美制英里", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_mn", 0,"分钟", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_mp_", 0,"质子质量", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_mpme_", 0,"质子/电子质量比", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
     {"_mu0_", 0, "", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_phi_", 0, "magnetic flux quantum", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_plot", "_plot", "Suffix for a regression graph.", "#X,Y:=[1,2,3,4,5],[0,1,3,4,4];polynomial_regression_plot(X,Y,2);scatterplot(X,Y)", 0, CAT_CATEGORY_STATS},
-    {"_qe_", 0, "electron charge", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_phi_", 0,"磁通量子", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_plot", "_plot","回归图的后缀.", "#X,Y:=[1,2,3,4,5],[0,1,3,4,4];polynomial_regression_plot(X,Y,2);scatterplot(X,Y)", 0, CAT_CATEGORY_STATS},
+    {"_qe_", 0,"电子电荷", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
     {"_qme_", 0, "_q_/_me_", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_rad", 0, "radians", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_rem", 0, "rem", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_s", 0, "second", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_sd_", 0, "Sideral day", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_syr_", 0, "Siderale year", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
-    {"_tr", 0, "tour (angle unit)", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-    {"_yd", 0, "yards", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
-  {"a and b", " and ", "Logical and", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"a or b", " or ", "Logical or", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"abcuv(a,b,c)", 0, "Find 2 polynomial u,v such that a*u+b*v=c","x+1,x^2-2,x", 0, CAT_CATEGORY_POLYNOMIAL},
-  {"abs(x)", 0, "Absolute value or norm of x x", "-3", "[1,2,3]", CAT_CATEGORY_COMPLEXNUM | (CAT_CATEGORY_REAL<<8)},
-  {"altitude(A,B,C)", 0, "Altitude in triangle ABC from A", "1,i,2+i", 0,CAT_CATEGORY_2D},
-  {"append", 0, "Adds an element at the end of a list","#l.append(x)", 0, CAT_CATEGORY_LIST},
-  {"approx(x)", 0, "Approx. value x. Shortcut S-D", "pi", 0, CAT_CATEGORY_REAL},
-  {"area(objet)", 0, "Algebric area", "circle(0,1)", "triangle(-1,1+i,3)", CAT_CATEGORY_2D  },
-  {"arg(z)", 0, "Angle of complex z.", "1+i", 0, CAT_CATEGORY_COMPLEXNUM},
-  {"asc(string)", 0, "List of ASCII codes os a string", "\"Hello\"", 0, CAT_CATEGORY_ARIT},
-  {"assume(hyp)", 0, "Assumption on variable.", "x>1", "x>-1 and x<1", CAT_CATEGORY_PROGCMD|(CAT_CATEGORY_SOFUS<<8)},
-  {"avance n", "avance ", "Turtle forward n steps, default n=10", "#avance 30", 0, CAT_CATEGORY_LOGO},
-  {"axes", "axes", "Axes visible or not axes=1 or 0", "#axes=0", 0, CAT_CATEGORY_PROGCMD << 8|XCAS_ONLY},
-  {"baisse_crayon ", "baisse_crayon ", "Turtle moves with the pen writing.", 0, 0, CAT_CATEGORY_LOGO},
-  {"barplot(list)", 0, "Bar plot of 1-d statistic series data in list.", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_STATS},
-  {"barycenter([pnt,coeff],...)", 0, "Barycenter of a sequence of [point,coefficient]. Run isobarycenter if all coefficients are equal", "[1,1],[i,1],[2,3]", 0, CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
-  {"binomial(n,p,k)", 0, "binomial(n,p,k) probability to get k success with n trials where p is the probability of success of 1 trial. binomial_cdf(n,p,k) is the probability to get at most k successes. binomial_icdf(n,p,t) returns the smallest k such that binomial_cdf(n,p,k)>=t", "10,.5,4", 0, CAT_CATEGORY_PROBA},
-    {"bisector(A,B,C)", 0, "Bisector of angle AB,AC", "1,i,2+i", 0,CAT_CATEGORY_2D},
-  {"bitxor", "bitxor", "Exclusive or", "#bitxor(1,2)", 0, CAT_CATEGORY_PROGCMD},
-  {"black", "black", "Display option", "#display=black", 0, CAT_CATEGORY_PROGCMD},
-  {"blue", "blue", "Display option", "#display=blue", 0, CAT_CATEGORY_PROGCMD},
-  {"camembert(list)", 0, "Camembert pie-chart of a 1-d statistical series.", "[[\"France\",6],[\"Germany\",12],[\"Switzerland\",5]]", 0, CAT_CATEGORY_STATS},
-  {"cache_tortue ", "cache_tortue ", "Hide turtle (once the picture has been drawn).", 0, 0, CAT_CATEGORY_LOGO},
-  {"ceil(x)", 0, "Smallest integer not less than x", "1.2", 0, CAT_CATEGORY_REAL},
-  {"center(objet)", 0, "Circle or sphere center. For ellipse or hyperbola, returns center, one focus and a point on the conic. For a parabola, returns focus and vertex.", "circle(0,1)", "sphere([0,0,0],[1,1,1])", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
-  {"cfactor(p)", 0, "Factorization over C.", "x^4-1", 0, CAT_CATEGORY_ALGEBRA | (CAT_CATEGORY_COMPLEXNUM << 8)},
-  {"char(liste)", 0, "Converts a list of ASCII codes to a string.", "[97,98,99]", 0, CAT_CATEGORY_ARIT},
-  {"charpoly(M,x)", 0, "Characteristic polynomial of matrix M in variable x.", "[[1,2],[3,4]],x", 0, CAT_CATEGORY_MATRIX},
-  {"circle(center,radius)", 0, "Circle", "2+i,3", "1-i,1+i", CAT_CATEGORY_PROGCMD | (CAT_CATEGORY_2D << 8)},
-  {"circumcircle(A,B,C)", 0, "Circumcircle", "-1,2+i,3", 0, CAT_CATEGORY_PROGCMD | (CAT_CATEGORY_2D << 8) | XCAS_ONLY},
-  {"clearscreen()", "clearscreen()", "Clear screen.", 0, 0, CAT_CATEGORY_PROGCMD|XCAS_ONLY},
-  {"coeff(p,x,n)", 0, "Coefficient of x^n in polynomial p.", 0, 0, CAT_CATEGORY_POLYNOMIAL},
-  {"comb(n,k)", 0, "Returns nCk", "10,4", 0, CAT_CATEGORY_PROBA},
-  {"cond(A,[1,2,inf])", 0, "Nombre de condition d'une matrice par rapport a la norme specifiee (par defaut 1)", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
-  {"cone(A,v,theta,[h])", 0, " cone with vertex A, direction v, and with half_angle t [and with altitudes h and -h]", "[0,0,0],[0,0,1],pi/6", "[0,0,0],[0,0,1],pi/6,4", CAT_CATEGORY_3D},
-  {"conic(expression)", 0, "Conic given by a polynomial equation of degree 2 or by 5 vertices", "x^2+x*y+y^2=5", "1,i,2+i,3-i,4+2i", CAT_CATEGORY_2D},
-  {"coordinates(object)", 0, "Coordonnees (cartesian))", "point(1,2)", "point(1,2,3)", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
-  {"conj(z)", 0, "Complex conjugate of z.", "1+i", 0, CAT_CATEGORY_COMPLEXNUM},
-  {"correlation(l1,l2)", 0, "Correlation of lists l1 and l2", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
-  {"covariance(l1,l2)", 0, "Covariance of lists l1 and l2", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
-  {"cpartfrac(p,x)", 0, "Partial fraction decomposition over C.", "1/(x^4-1)", 0, CAT_CATEGORY_ALGEBRA | (CAT_CATEGORY_COMPLEXNUM << 8)},
-  {"crayon ", "crayon ", "Turtle drawing color", "#crayon red", 0, CAT_CATEGORY_LOGO},
-  {"cross(u,v)", 0, "Cross product of vectors u and v.","[1,2,3],[0,1,3]", 0, CAT_CATEGORY_LINALG},
-  {"csolve(equation,x)", 0, "Solve equation (or polynomial system) in exact mode over the complex numbers.","x^2+x+1=0", 0, CAT_CATEGORY_SOLVE| (CAT_CATEGORY_COMPLEXNUM << 8)},
-  {"cube(A,B,C)", 0, "Cube of edge AB with one face in plane ABC", "[0,0,0],[1,0,0],[0,1,0]","[0,0,0],[0,2,sqrt(5)/2+3/2],[0,0,1]", CAT_CATEGORY_3D},
-  {"curl(u,vars)", 0, "Curl of vector u.", "[2*x*y,x*z,y*z],[x,y,z]", 0, CAT_CATEGORY_LINALG},
-  {"cyan", "cyan", "Display option", "#display=cyan", 0, CAT_CATEGORY_PROGCMD},
-  {"cylinder(A,v,r,[h])", 0, "Cylinder of axis A,v and radius r [and optional altitude h]", "[0,0,0],[0,1,0],2", "[0,0,0],[0,1,0],2,3", CAT_CATEGORY_3D},
-  {"debug(f(args))", 0, "Runs user function f in step by step mode.", 0, 0, CAT_CATEGORY_PROG},
-  {"degree(p,x)", 0, "Degre of polynomial p in x.", "x^4-1", 0, CAT_CATEGORY_POLYNOMIAL},
-  {"denom(x)", 0, "Denominator of expression x.", "3/4", 0, CAT_CATEGORY_POLYNOMIAL},
-  {"desolve(equation,t,y)", 0, "Exact differential equation solving.", "desolve([y'+y=exp(x),y(0)=1])", "[y'=[[1,2],[2,1]]*y+[x,x+1],y(0)=[1,2]]", CAT_CATEGORY_SOLVE | (CAT_CATEGORY_CALCULUS << 8)},
-  {"det(A)", 0, "Determinant of matrix A.", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
-  {"diff(f,var,[n])", 0, "Derivative of expression f with respect to var (order n, n=1 by default), for example diff(sin(x),x) or diff(x^3,x,2). For derivation with respect to x, run f' (shortcut F3). For the gradient of f, var is the list of variables.", "sin(x),x", "sin(x^2),x,3", CAT_CATEGORY_CALCULUS},
-  {"display", "display", "Display option", "#display=red", 0, CAT_CATEGORY_PROGCMD},
-  {"disque n", "disque ", "Filled circle tangent to the turtle, radius n. Run disque n,theta for a filled arc of circle, theta in degrees, or disque n,theta,segment for a segment of circle.", "#disque 30", "#disque(30,90)", CAT_CATEGORY_LOGO},
-  {"dodecahedron(A,B,C)", 0, "Dodecahedron of edge AB with one face in plane ABC", "[0,0,0],[0,2,sqrt(5)/2+3/2],[0,0,1]", 0, CAT_CATEGORY_3D},
-  {"dot(a,b)", 0, "Dot product of 2 vectors. Shortcut: *", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_LINALG},
-  {"draw_arc(x1,y1,rx,ry,theta1,theta2,c)", 0, "Pixelised arc of ellipse.", "100,100,60,80,0,pi,magenta", 0, CAT_CATEGORY_PROGCMD},
-  {"draw_circle(x1,y1,r,c)", 0, "Pixelised circle. Option: filled", "100,100,60,cyan+filled", 0, CAT_CATEGORY_PROGCMD},
-  {"draw_line(x1,y1,x2,y2,c)", 0, "Pixelised line.", "100,50,300,200,blue", 0, CAT_CATEGORY_PROGCMD},
-  {"draw_pixel(x,y,color)", 0, "Colors pixel x,y. Run draw_pixel() to synchronise screen.", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"draw_polygon([[x1,y1],...],c)", 0, "Pixelised polygon.", "[[100,50],[30,20],[60,70]],red+filled", 0, CAT_CATEGORY_PROGCMD},
-  {"draw_rectangle(x,y,w,h,c)", 0, "Rectangle.", "100,50,30,20,red+filled", 0, CAT_CATEGORY_PROGCMD},
-  {"draw_string(s,x,y,c)", 0, "Draw string s at pixel x,y", "\"Bonjour\",80,60", 0, CAT_CATEGORY_PROGCMD},
+    {"_rad", 0,"弧度", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_rem", 0,"雷姆", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_s", 0,"秒", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_sd_", 0,"恒星日", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_syr_", 0,"恒星年", 0, 0, CAT_CATEGORY_PHYS | XCAS_ONLY},
+    {"_tr", 0,"圈 (角度单位)", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+    {"_yd", 0,"码", 0, 0, CAT_CATEGORY_UNIT | XCAS_ONLY},
+  {"a and b", " and ","逻辑与", 0, 0, CAT_CATEGORY_PROGCMD},
+  {"a or b", " or ","逻辑或", 0, 0, CAT_CATEGORY_PROGCMD},
+  {"abcuv(a,b,c)", 0,"求多项式 u,v 使 a*u+b*v=c","x+1,x^2-2,x", 0, CAT_CATEGORY_POLYNOMIAL},
+  {"abs(x)", 0,"x 的绝对值或范数", "-3", "[1,2,3]", CAT_CATEGORY_COMPLEXNUM | (CAT_CATEGORY_REAL<<8)},
+  {"altitude(A,B,C)", 0,"三角形 ABC 中过 A 的高", "1,i,2+i", 0,CAT_CATEGORY_2D},
+  {"append", 0,"在列表末尾添加一个元素","#l.append(x)", 0, CAT_CATEGORY_LIST},
+  {"approx(x)", 0,"x 的近似值. 快捷键 S-D", "pi", 0, CAT_CATEGORY_REAL},
+  {"area(objet)", 0,"代数面积", "circle(0,1)", "triangle(-1,1+i,3)", CAT_CATEGORY_2D  },
+  {"arg(z)", 0,"复数 z 的辐角.", "1+i", 0, CAT_CATEGORY_COMPLEXNUM},
+  {"asc(string)", 0,"字符串的 ASCII 码列表", "\"Hello\"", 0, CAT_CATEGORY_ARIT},
+  {"assume(hyp)", 0,"对变量作假设.", "x>1", "x>-1 and x<1", CAT_CATEGORY_PROGCMD|(CAT_CATEGORY_SOFUS<<8)},
+  {"avance n", "avance ","海龟前进 n 步, 默认 n=10", "#avance 30", 0, CAT_CATEGORY_LOGO},
+  {"axes", "axes","坐标轴是否可见, axes=1 或 0", "#axes=0", 0, CAT_CATEGORY_PROGCMD << 8|XCAS_ONLY},
+  {"baisse_crayon ", "baisse_crayon ","海龟落笔移动 (留下笔迹).", 0, 0, CAT_CATEGORY_LOGO},
+  {"barplot(list)", 0,"列表中一维统计数据的条形图.", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_STATS},
+  {"barycenter([pnt,coeff],...)", 0,"一列 [点,系数] 的重心. 系数全相等时用 isobarycenter", "[1,1],[i,1],[2,3]", 0, CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
+  {"binomial(n,p,k)", 0,"binomial(n,p,k): n 次试验中成功 k 次的概率, p 为单次成功概率. binomial_cdf(n,p,k): 至多成功 k 次的概率. binomial_icdf(n,p,t): 返回使 binomial_cdf(n,p,k)>=t 的最小 k", "10,.5,4", 0, CAT_CATEGORY_PROBA},
+    {"bisector(A,B,C)", 0,"角 (AB,AC) 的角平分线", "1,i,2+i", 0,CAT_CATEGORY_2D},
+  {"bitxor", "bitxor","按位异或", "#bitxor(1,2)", 0, CAT_CATEGORY_PROGCMD},
+  {"black", "black","显示选项", "#display=black", 0, CAT_CATEGORY_PROGCMD},
+  {"blue", "blue","显示选项", "#display=blue", 0, CAT_CATEGORY_PROGCMD},
+  {"camembert(list)", 0,"一维统计序列的饼图.", "[[\"France\",6],[\"Germany\",12],[\"Switzerland\",5]]", 0, CAT_CATEGORY_STATS},
+  {"cache_tortue ", "cache_tortue ","隐藏海龟 (绘制完成后).", 0, 0, CAT_CATEGORY_LOGO},
+  {"ceil(x)", 0,"不小于 x 的最小整数", "1.2", 0, CAT_CATEGORY_REAL},
+  {"center(objet)", 0,"圆或球的圆心. 对椭圆或双曲线, 返回中心, 一个焦点及圆锥曲线上一点. 对抛物线, 返回焦点与顶点.", "circle(0,1)", "sphere([0,0,0],[1,1,1])", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
+  {"cfactor(p)", 0,"在复数域 C 上因式分解.", "x^4-1", 0, CAT_CATEGORY_ALGEBRA | (CAT_CATEGORY_COMPLEXNUM << 8)},
+  {"char(liste)", 0,"将 ASCII 码列表转换为字符串.", "[97,98,99]", 0, CAT_CATEGORY_ARIT},
+  {"charpoly(M,x)", 0,"矩阵 M 关于变量 x 的特征多项式.", "[[1,2],[3,4]],x", 0, CAT_CATEGORY_MATRIX},
+  {"circle(center,radius)", 0,"圆", "2+i,3", "1-i,1+i", CAT_CATEGORY_PROGCMD | (CAT_CATEGORY_2D << 8)},
+  {"circumcircle(A,B,C)", 0,"外接圆", "-1,2+i,3", 0, CAT_CATEGORY_PROGCMD | (CAT_CATEGORY_2D << 8) | XCAS_ONLY},
+  {"clearscreen()", "clearscreen()","清屏.", 0, 0, CAT_CATEGORY_PROGCMD|XCAS_ONLY},
+  {"coeff(p,x,n)", 0,"多项式 p 中 x^n 的系数.", 0, 0, CAT_CATEGORY_POLYNOMIAL},
+  {"comb(n,k)", 0,"返回 nCk (组合数)", "10,4", 0, CAT_CATEGORY_PROBA},
+  {"cond(A,[1,2,inf])", 0,"矩阵关于指定范数的条件数 (默认 1)", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
+  {"cone(A,v,theta,[h])", 0,"以 A 为顶点, 方向 v, 半顶角 t 的圆锥 [可选高度 h 与 -h]", "[0,0,0],[0,0,1],pi/6", "[0,0,0],[0,0,1],pi/6,4", CAT_CATEGORY_3D},
+  {"conic(expression)", 0,"由二次多项式方程或 5 个点确定的圆锥曲线", "x^2+x*y+y^2=5", "1,i,2+i,3-i,4+2i", CAT_CATEGORY_2D},
+  {"coordinates(object)", 0,"坐标 (笛卡尔)", "point(1,2)", "point(1,2,3)", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
+  {"conj(z)", 0,"z 的复共轭.", "1+i", 0, CAT_CATEGORY_COMPLEXNUM},
+  {"correlation(l1,l2)", 0,"列表 l1 与 l2 的相关系数", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
+  {"covariance(l1,l2)", 0,"列表 l1 与 l2 的协方差", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
+  {"cpartfrac(p,x)", 0,"在复数域 C 上的部分分式分解.", "1/(x^4-1)", 0, CAT_CATEGORY_ALGEBRA | (CAT_CATEGORY_COMPLEXNUM << 8)},
+  {"crayon ", "crayon ","海龟画笔颜色", "#crayon red", 0, CAT_CATEGORY_LOGO},
+  {"cross(u,v)", 0,"向量 u 与 v 的叉积.","[1,2,3],[0,1,3]", 0, CAT_CATEGORY_LINALG},
+  {"csolve(equation,x)", 0,"在复数域上精确求解方程 (或多项式方程组).","x^2+x+1=0", 0, CAT_CATEGORY_SOLVE| (CAT_CATEGORY_COMPLEXNUM << 8)},
+  {"cube(A,B,C)", 0,"以 AB 为棱, 一面在平面 ABC 内的正方体", "[0,0,0],[1,0,0],[0,1,0]","[0,0,0],[0,2,sqrt(5)/2+3/2],[0,0,1]", CAT_CATEGORY_3D},
+  {"curl(u,vars)", 0,"向量 u 的旋度.", "[2*x*y,x*z,y*z],[x,y,z]", 0, CAT_CATEGORY_LINALG},
+  {"cyan", "cyan","显示选项", "#display=cyan", 0, CAT_CATEGORY_PROGCMD},
+  {"cylinder(A,v,r,[h])", 0,"轴为 A,v, 半径 r 的圆柱 [可选高度 h]", "[0,0,0],[0,1,0],2", "[0,0,0],[0,1,0],2,3", CAT_CATEGORY_3D},
+  {"debug(f(args))", 0,"以单步模式运行用户函数 f.", 0, 0, CAT_CATEGORY_PROG},
+  {"degree(p,x)", 0,"多项式 p 关于 x 的次数.", "x^4-1", 0, CAT_CATEGORY_POLYNOMIAL},
+  {"denom(x)", 0,"表达式 x 的分母.", "3/4", 0, CAT_CATEGORY_POLYNOMIAL},
+  {"desolve(equation,t,y)", 0,"精确求解微分方程.", "desolve([y'+y=exp(x),y(0)=1])", "[y'=[[1,2],[2,1]]*y+[x,x+1],y(0)=[1,2]]", CAT_CATEGORY_SOLVE | (CAT_CATEGORY_CALCULUS << 8)},
+  {"det(A)", 0,"矩阵 A 的行列式.", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
+  {"diff(f,var,[n])", 0,"表达式 f 关于 var 的导数 (n 阶, 默认 n=1), 例如 diff(sin(x),x) 或 diff(x^3,x,2). 对 x 求导可用 f' (快捷键 F3). 求 f 的梯度时, var 为变量列表.", "sin(x),x", "sin(x^2),x,3", CAT_CATEGORY_CALCULUS},
+  {"display", "display","显示选项", "#display=red", 0, CAT_CATEGORY_PROGCMD},
+  {"disque n", "disque ","与海龟相切, 半径 n 的实心圆. disque n,theta 画实心扇形 (theta 为度), disque n,theta,segment 画弓形.", "#disque 30", "#disque(30,90)", CAT_CATEGORY_LOGO},
+  {"dodecahedron(A,B,C)", 0,"以 AB 为棱, 一面在平面 ABC 内的正十二面体", "[0,0,0],[0,2,sqrt(5)/2+3/2],[0,0,1]", 0, CAT_CATEGORY_3D},
+  {"dot(a,b)", 0,"两向量的点积. 快捷键: *", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_LINALG},
+  {"draw_arc(x1,y1,rx,ry,theta1,theta2,c)", 0,"像素化椭圆弧.", "100,100,60,80,0,pi,magenta", 0, CAT_CATEGORY_PROGCMD},
+  {"draw_circle(x1,y1,r,c)", 0,"像素化圆. 选项: filled", "100,100,60,cyan+filled", 0, CAT_CATEGORY_PROGCMD},
+  {"draw_line(x1,y1,x2,y2,c)", 0,"像素化直线.", "100,50,300,200,blue", 0, CAT_CATEGORY_PROGCMD},
+  {"draw_pixel(x,y,color)", 0,"给像素 x,y 着色. draw_pixel() 用于刷新屏幕.", 0, 0, CAT_CATEGORY_PROGCMD},
+  {"draw_polygon([[x1,y1],...],c)", 0,"像素化多边形.", "[[100,50],[30,20],[60,70]],red+filled", 0, CAT_CATEGORY_PROGCMD},
+  {"draw_rectangle(x,y,w,h,c)", 0,"矩形.", "100,50,30,20,red+filled", 0, CAT_CATEGORY_PROGCMD},
+  {"draw_string(s,x,y,c)", 0,"在像素 x,y 处绘制字符串 s", "\"Bonjour\",80,60", 0, CAT_CATEGORY_PROGCMD},
 #ifndef TURTLETAB
-  {"ecris ", "ecris ", "Write at turtle position", "#ecris \"hello\"", 0, CAT_CATEGORY_LOGO},
+  {"ecris ", "ecris ","在海龟位置书写", "#ecris \"hello\"", 0, CAT_CATEGORY_LOGO},
 #endif
-  {"efface", "efface", "Reset turtle", 0, 0, CAT_CATEGORY_LOGO},
-  {"egcd(A,B)", 0, "Find polynomials U,V,D such that A*U+B*V=D=gcd(A,B)","x^2+3x+1,x^2-5x-1", 0, CAT_CATEGORY_POLYNOMIAL},
-  {"elif test", "elif ", "Test cascade", 0, 0, CAT_CATEGORY_PROG},
-  {"ellipse(F1,F2,M)", 0, "Ellipse given by 2 focus and one point", "-1,1,2", 0, CAT_CATEGORY_2D},
-  {"eigenvals(A)", 0, "Eigenvalues of matrix  A.", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX |XCAS_ONLY},
-  {"eigenvects(A)", 0, "Eigenvectors of matrix A.", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
-  {"equation(object)", 0, "Cartesian equation. Run parameq for parametric equation", "circle(0,1)", "ellipse(-1,1,3)", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
-  {"erf(x)", 0, "Error function of x.", "1.2", 0, CAT_CATEGORY_PROBA},
-  {"erfc(x)", 0, "Complementary error function of x.", "1.2", 0, CAT_CATEGORY_PROBA},
-  {"euler(n)",0,"Euler indicatrix: number of integers < n coprime with n","25",0,CAT_CATEGORY_ARIT},
-  {"eval(f)", 0, "Evals f.", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"evalc(z)", 0, "Write z=x+i*y.", "1/(1+i*sqrt(3))", 0, CAT_CATEGORY_COMPLEXNUM},
-  {"exact(x)", 0, "Converts x to a rational. Shortcut shift S-D", "1.2", 0, CAT_CATEGORY_REAL},
-  {"exp2trig(expr)", 0, "Convert complex exponentials to sin/cos", "exp(i*x)", 0, CAT_CATEGORY_TRIG},
-  {"exponential_regression(Xlist,Ylist)", 0, "Exponential regression.", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
-  {"exponential_regression_plot(Xlist,Ylist)", 0, "Exponential regression plot.", "#X,Y:=[1,2,3,4,5],[0,1,3,4,4];exponential_regression_plot(X,Y);scatterplot(X,Y)", 0, CAT_CATEGORY_STATS},
-  {"exponentiald(lambda,x)", 0, "Exponential distribution law of  parameter lambda. exponentiald_cdf(lambda,x) probability that \"exponential distribution <=x\" e.g. exponentiald_cdf(2,3). exponentiald_icdf(lambda,t) returns x such that \"exponential distribution <=x\" has probability t, e.g, exponentiald_icdf(2,0.95) ", "5.1,3.4", 0, CAT_CATEGORY_PROBA},
-  {"extend", 0, "Merge 2 lists. Note that + does not merge lists, it adds vectors","#l1.extend(l2)", 0, CAT_CATEGORY_LIST},
-  {"factor(p,[x])", 0, "Factors polynomial p (run ifactor for an integer). Shortcut: p=>*", "x^4-1", "x^6+1,sqrt(3)", CAT_CATEGORY_ALGEBRA| (CAT_CATEGORY_POLYNOMIAL << 8)},
-  {"filled", "filled", "Display option", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"float(x)", 0, "Converts x to a floating point value.", "pi", 0, CAT_CATEGORY_REAL},
-  {"floor(x)", 0, "Largest integer not greater than x", "pi", 0, CAT_CATEGORY_REAL},
-  {"fourier_an(f,x,T,n,a)", 0, "Cosine Fourier coefficients of f", "x^2,x,2*pi,n,-pi", 0, CAT_CATEGORY_CALCULUS},
-  {"fourier_bn(f,x,T,n,a)", 0, "Sine Fourier coefficients of f", "x^2,x,2*pi,n,-pi", 0, CAT_CATEGORY_CALCULUS},
-  {"fourier_cn(f,x,T,n,a)", 0, "Exponential Fourier coefficients of f", "x^2,x,2*pi,n,-pi", 0, CAT_CATEGORY_CALCULUS},
-  {"from math/... import *", "from math import *", "Access to math or to random functions ([random]) or turtle with English commandnames [turtle]. Math import is not required in KhiCAS", "#from random import *", "#from turtle import *", CAT_CATEGORY_PROG},
-  {"fsolve(equation,x=a..b)", 0, "Approx equation solving in interval a..b.","cos(x)=x,x=0..1", "cos(x)-x,x=0.0", CAT_CATEGORY_SOLVE},
+  {"efface", "efface","重置海龟", 0, 0, CAT_CATEGORY_LOGO},
+  {"egcd(A,B)", 0,"求多项式 U,V,D 使 A*U+B*V=D=gcd(A,B)","x^2+3x+1,x^2-5x-1", 0, CAT_CATEGORY_POLYNOMIAL},
+  {"elif test", "elif ","级联条件判断", 0, 0, CAT_CATEGORY_PROG},
+  {"ellipse(F1,F2,M)", 0,"由两焦点与一点确定的椭圆", "-1,1,2", 0, CAT_CATEGORY_2D},
+  {"eigenvals(A)", 0,"矩阵 A 的特征值.", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX |XCAS_ONLY},
+  {"eigenvects(A)", 0,"矩阵 A 的特征向量.", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
+  {"equation(object)", 0,"笛卡尔方程. 参数方程用 parameq", "circle(0,1)", "ellipse(-1,1,3)", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
+  {"erf(x)", 0,"x 的误差函数.", "1.2", 0, CAT_CATEGORY_PROBA},
+  {"erfc(x)", 0,"x 的余误差函数.", "1.2", 0, CAT_CATEGORY_PROBA},
+  {"euler(n)",0,"欧拉函数: 小于 n 且与 n 互素的整数个数","25",0,CAT_CATEGORY_ARIT},
+  {"eval(f)", 0,"对 f 求值.", 0, 0, CAT_CATEGORY_PROGCMD},
+  {"evalc(z)", 0,"将 z 写成 x+i*y 形式.", "1/(1+i*sqrt(3))", 0, CAT_CATEGORY_COMPLEXNUM},
+  {"exact(x)", 0,"将 x 转换为有理数. 快捷键 shift S-D", "1.2", 0, CAT_CATEGORY_REAL},
+  {"exp2trig(expr)", 0,"将复指数转换为 sin/cos", "exp(i*x)", 0, CAT_CATEGORY_TRIG},
+  {"exponential_regression(Xlist,Ylist)", 0,"指数回归.", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
+  {"exponential_regression_plot(Xlist,Ylist)", 0,"指数回归图.", "#X,Y:=[1,2,3,4,5],[0,1,3,4,4];exponential_regression_plot(X,Y);scatterplot(X,Y)", 0, CAT_CATEGORY_STATS},
+  {"exponentiald(lambda,x)", 0,"参数为 lambda 的指数分布. exponentiald_cdf(lambda,x): \"指数分布 <=x\" 的概率, 如 exponentiald_cdf(2,3). exponentiald_icdf(lambda,t): 返回使 \"指数分布 <=x\" 概率为 t 的 x, 如 exponentiald_icdf(2,0.95)", "5.1,3.4", 0, CAT_CATEGORY_PROBA},
+  {"extend", 0,"合并两个列表. 注意 + 不合并列表, 而是按向量相加","#l1.extend(l2)", 0, CAT_CATEGORY_LIST},
+  {"factor(p,[x])", 0,"对多项式 p 因式分解 (整数用 ifactor). 快捷键: p=>*", "x^4-1", "x^6+1,sqrt(3)", CAT_CATEGORY_ALGEBRA| (CAT_CATEGORY_POLYNOMIAL << 8)},
+  {"filled", "filled","显示选项", 0, 0, CAT_CATEGORY_PROGCMD},
+  {"float(x)", 0,"将 x 转换为浮点数.", "pi", 0, CAT_CATEGORY_REAL},
+  {"floor(x)", 0,"不大于 x 的最大整数", "pi", 0, CAT_CATEGORY_REAL},
+  {"fourier_an(f,x,T,n,a)", 0,"f 的傅里叶余弦系数", "x^2,x,2*pi,n,-pi", 0, CAT_CATEGORY_CALCULUS},
+  {"fourier_bn(f,x,T,n,a)", 0,"f 的傅里叶正弦系数", "x^2,x,2*pi,n,-pi", 0, CAT_CATEGORY_CALCULUS},
+  {"fourier_cn(f,x,T,n,a)", 0,"f 的傅里叶指数系数", "x^2,x,2*pi,n,-pi", 0, CAT_CATEGORY_CALCULUS},
+  {"from math/... import *", "from math import *","访问 math, random ([random]) 或英文命令名的 turtle ([turtle]) 函数. KhiCAS 中无需 import math", "#from random import *", "#from turtle import *", CAT_CATEGORY_PROG},
+  {"fsolve(equation,x=a..b)", 0,"在区间 a..b 上近似求解方程.","cos(x)=x,x=0..1", "cos(x)-x,x=0.0", CAT_CATEGORY_SOLVE},
   // {"function f(x):...", "function f(x) local y;   ffunction:;", "Function definition.", "#function f(x) local y; y:=x^2; return y; ffunction:;", 0, CAT_CATEGORY_PROG},
-  {"gauss(q)", 0, "Quadratic form reduction", "x^2+x*y+x*z+y^2+z^2,[x,y,z]", 0, CAT_CATEGORY_LINALG},
-  {"gcd(a,b,...)", 0, "Greatest common divisor. See also iegcd and egcd for extended GCD.", "23,13", "x^2-1,x^3-1", CAT_CATEGORY_ARIT | (CAT_CATEGORY_POLYNOMIAL << 8)},
-  {"gl_x", "gl_x", "Display settings X gl_x=xmin..xmax", "#gl_x=0..2", 0, CAT_CATEGORY_PROGCMD},
-  {"gl_y", "gl_y", "Display settings Y gl_y=ymin..ymax", "#gl_y=-1..1", 0, CAT_CATEGORY_PROGCMD},
-  {"gramschmidt(M)", 0, "Gram-Schmidt orthonormalization (line vectors or linearly independent set of vectors)", "[[1,2,3],[4,5,6]]", "[1,1+x],(p,q)->integrate(p*q,x,-1,1)", CAT_CATEGORY_LINALG},
-  {"green", "green", "Display option", "#display=green", 0, CAT_CATEGORY_PROGCMD},
-  {"halftan(expr)", 0, "Convert cos, sin, tan with tan(angle/2).","cos(x)", 0, CAT_CATEGORY_TRIG},
-  {"hermite(n)", 0, "n-th Hermite polynomial", "10", 0, CAT_CATEGORY_POLYNOMIAL},
-  {"hilbert(n)", 0, "Hilbert matrix of order n.", "4", 0, CAT_CATEGORY_MATRIX},
-  {"histogram(list,min,size)", 0, "Histogram of data in list, classes begin at min of size size.","ranv(100,uniformd,0,1),0,0.1", 0, CAT_CATEGORY_STATS},
-  {"homothety(center,ratio,object)", 0, "Image of object by homothety of ratio", "0,2,circle(1,1)", 0, CAT_CATEGORY_2D },
-  {"hyperbola(F1,F2,M)", 0, "Hyperbola given by 2 focus and one point", "-2-i,2+i,1", 0, CAT_CATEGORY_2D},
-  {"iabcuv(a,b,c)", 0, "Find 2 integers u,v such that a*u+b*v=c","23,13,15", 0, CAT_CATEGORY_ARIT},
-  {"ichinrem([a,m],[b,n])", 0,"Integer chinese remainder of a mod m and b mod n.", "[3,13],[2,7]", 0, CAT_CATEGORY_ARIT},
-  {"icosahedron(A,B,C)", 0, "Icosahedron with center A, vertex B and such that the plane ABC contains one vertex among the 5 nearest vertices from B ", "[0,0,0],[sqrt(5),0,0],[1,2,0]", 0, CAT_CATEGORY_3D},
-   {"idivis(n)", 0, "Returns the list of divisors of an integer n.", "10", 0, CAT_CATEGORY_ARIT},
-  {"idn(n)", 0, "Identity matrix of order n", "4", 0, CAT_CATEGORY_MATRIX},
-  {"iegcd(a,b)", 0, "Find integers u,v,d such that a*u+b*v=d=gcd(a,b)","23,13", 0, CAT_CATEGORY_ARIT},
-  {"ifactor(n)", 0, "Factorization of an integer (not too large!). Shortcut n=>*", 0, 0, CAT_CATEGORY_ARIT},
-  {"ilaplace(f,s,x)", 0, "Inverse Laplace transform of f", "s/(s^2+1),s,x", 0, CAT_CATEGORY_CALCULUS},
-  {"im(z)", 0, "Imaginary part.", "1+i", 0, CAT_CATEGORY_COMPLEXNUM},
-  {"incircle(A,B,C)", 0, "Incircle", "-1,2+i,3", 0, CAT_CATEGORY_PROGCMD | (CAT_CATEGORY_2D << 8) | XCAS_ONLY},
-  {"inf", "inf", "Plus infinity. -inf for minus infinity and infinity for unsigned/complex infinity. Shortcut shift INS.", "oo", 0, CAT_CATEGORY_CALCULUS},
-  {"input()", "input()", "Read a string from keyboard", 0, 0, CAT_CATEGORY_PROG},
-  {"integrate(f,x,[a,b])", 0, "Antiderivative of f with respect to x, like integrate(x*sin(x),x). For definite integral enter optional arguments a and b, like integrate(x*sin(x),x,0,pi). Shortcut SHIFT F3.", "x*sin(x),x", "cos(x)/(1+x^4),x,0,inf", CAT_CATEGORY_CALCULUS},
-  {"interp(X,Y)", 0, "Lagrange interpolation at points (xi,yi) where X is the list of xi and Y of yi. If interp is passed as 3rd argument, returns the divided differences list.", "[1,2,3,4,5],[0,1,3,4,4]", "[1,2,3,4,5],[0,1,3,4,4],interp", CAT_CATEGORY_POLYNOMIAL},
-  {"inter(A,B)", 0, "Intersections list. Run single_inter if intersection is unique.", "line(y=x),circle(0,1)", 0, CAT_CATEGORY_3D | (CAT_CATEGORY_2D << 8) | XCAS_ONLY},
-  {"inv(A)", 0, "Inverse of A.", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
-  {"iquo(a,b)", 0, "Integer quotient of a and b.", "23,13", 0, CAT_CATEGORY_ARIT},
-  {"irem(a,b)", 0,"Integer remainder of a and b.", "23,13", 0, CAT_CATEGORY_ARIT},
-  {"isprime(n)", 0, "Returns 1 if n is prime, 0 otherwise.", "11", "10", CAT_CATEGORY_ARIT},
-  {"is_collinear(A,B,C)", 0, "Returns 1 if A, B, C are collinear, 0 otherwise", "1,i,-1", "i,0,-i", CAT_CATEGORY_2D | XCAS_ONLY },
-  {"is_concyclic(A,B,C,D)", 0, "Returns 1 if A, B, C, D are concyclic, 0 otherwise", "1,i,-1,-i", "1,i,0,-i", CAT_CATEGORY_2D | XCAS_ONLY },
-  {"is_element(A,G)", 0, "Returns 1 if A belongs to G, 0 otherwise.", "point(0),circle(0,1)", "point(i),square(0,1)", CAT_CATEGORY_2D | XCAS_ONLY },
-  {"is_parallel(D,E)", 0, "Returns 1 if D and E are parallel, 0 otherwise", "line(y=x),line(y=-x)", "line(y=x),line(y=x+1)", CAT_CATEGORY_2D | XCAS_ONLY },
-  {"is_perpendicular(D,E)", 0, "Returns 1 if D and E are perpendicular, 0 otherwise", "line(y=x),line(y=-x)", "line(y=x),line(y=x+1)", CAT_CATEGORY_2D | XCAS_ONLY },
-  {"jordan(A)", 0, "Jordan normal form of matrix A, returns P and D such that P^-1*A*P=D", "[[1,2],[3,4]]", "[[1,1,-1,2,-1],[2,0,1,-4,-1],[0,1,1,1,1],[0,1,2,0,1],[0,0,-3,3,-1]]", CAT_CATEGORY_MATRIX},
-  {"laguerre(n,a,x)", 0, "n-ieme Laguerre polynomial (default a=0).", "10", 0, CAT_CATEGORY_POLYNOMIAL},
-  {"laplace(f,x,s)", 0, "Laplace transform of f","sin(x),x,s", 0, CAT_CATEGORY_CALCULUS},
-  {"lcm(a,b,...)", 0, "Least common multiple.", "23,13", "x^2-1,x^3-1", CAT_CATEGORY_ARIT | (CAT_CATEGORY_POLYNOMIAL << 8)},
-  {"lcoeff(p,x)", 0, "Leading coefficient of polynomial p in x.", "x^4-1", 0, CAT_CATEGORY_POLYNOMIAL},
-  {"legendre(n)", 0, "n-the Legendre polynomial.", "10", "10,t", CAT_CATEGORY_POLYNOMIAL},
+  {"gauss(q)", 0,"二次型化简", "x^2+x*y+x*z+y^2+z^2,[x,y,z]", 0, CAT_CATEGORY_LINALG},
+  {"gcd(a,b,...)", 0,"最大公约数. 扩展 GCD 见 iegcd 与 egcd.", "23,13", "x^2-1,x^3-1", CAT_CATEGORY_ARIT | (CAT_CATEGORY_POLYNOMIAL << 8)},
+  {"gl_x", "gl_x","显示范围 X, gl_x=xmin..xmax", "#gl_x=0..2", 0, CAT_CATEGORY_PROGCMD},
+  {"gl_y", "gl_y","显示范围 Y, gl_y=ymin..ymax", "#gl_y=-1..1", 0, CAT_CATEGORY_PROGCMD},
+  {"gramschmidt(M)", 0,"Gram-Schmidt 正交归一化 (行向量或线性无关向量组)", "[[1,2,3],[4,5,6]]", "[1,1+x],(p,q)->integrate(p*q,x,-1,1)", CAT_CATEGORY_LINALG},
+  {"green", "green","显示选项", "#display=green", 0, CAT_CATEGORY_PROGCMD},
+  {"halftan(expr)", 0,"用 tan(角/2) 表示 cos, sin, tan.","cos(x)", 0, CAT_CATEGORY_TRIG},
+  {"hermite(n)", 0,"第 n 个埃尔米特多项式", "10", 0, CAT_CATEGORY_POLYNOMIAL},
+  {"hilbert(n)", 0,"n 阶希尔伯特矩阵.", "4", 0, CAT_CATEGORY_MATRIX},
+  {"histogram(list,min,size)", 0,"列表数据的直方图, 组距为 size, 从 min 开始分组.","ranv(100,uniformd,0,1),0,0.1", 0, CAT_CATEGORY_STATS},
+  {"homothety(center,ratio,object)", 0,"物体经位似 (比例 ratio) 的像", "0,2,circle(1,1)", 0, CAT_CATEGORY_2D },
+  {"hyperbola(F1,F2,M)", 0,"由两焦点与一点确定的双曲线", "-2-i,2+i,1", 0, CAT_CATEGORY_2D},
+  {"iabcuv(a,b,c)", 0,"求整数 u,v 使 a*u+b*v=c","23,13,15", 0, CAT_CATEGORY_ARIT},
+  {"ichinrem([a,m],[b,n])", 0,"整数中国剩余定理: a mod m 与 b mod n.", "[3,13],[2,7]", 0, CAT_CATEGORY_ARIT},
+  {"icosahedron(A,B,C)", 0,"以 A 为中心, B 为顶点的正二十面体, 平面 ABC 含 B 最近的 5 个顶点之一", "[0,0,0],[sqrt(5),0,0],[1,2,0]", 0, CAT_CATEGORY_3D},
+   {"idivis(n)", 0,"返回整数 n 的所有因数列表.", "10", 0, CAT_CATEGORY_ARIT},
+  {"idn(n)", 0,"n 阶单位矩阵", "4", 0, CAT_CATEGORY_MATRIX},
+  {"iegcd(a,b)", 0,"求整数 u,v,d 使 a*u+b*v=d=gcd(a,b)","23,13", 0, CAT_CATEGORY_ARIT},
+  {"ifactor(n)", 0,"整数因式分解 (不宜过大!). 快捷键 n=>*", 0, 0, CAT_CATEGORY_ARIT},
+  {"ilaplace(f,s,x)", 0,"f 的拉普拉斯逆变换", "s/(s^2+1),s,x", 0, CAT_CATEGORY_CALCULUS},
+  {"im(z)", 0,"虚部.", "1+i", 0, CAT_CATEGORY_COMPLEXNUM},
+  {"incircle(A,B,C)", 0,"内切圆", "-1,2+i,3", 0, CAT_CATEGORY_PROGCMD | (CAT_CATEGORY_2D << 8) | XCAS_ONLY},
+  {"inf", "inf","正无穷. -inf 为负无穷, infinity 为无符号/复无穷. 快捷键 shift INS.", "oo", 0, CAT_CATEGORY_CALCULUS},
+  {"input()", "input()","从键盘读取一个字符串", 0, 0, CAT_CATEGORY_PROG},
+  {"integrate(f,x,[a,b])", 0,"f 关于 x 的不定积分, 如 integrate(x*sin(x),x). 定积分加可选参数 a, b, 如 integrate(x*sin(x),x,0,pi). 快捷键 SHIFT F3.", "x*sin(x),x", "cos(x)/(1+x^4),x,0,inf", CAT_CATEGORY_CALCULUS},
+  {"interp(X,Y)", 0,"在点 (xi,yi) 上的拉格朗日插值, X 为 xi 列表, Y 为 yi 列表. 第 3 个参数传 interp 时返回差商列表.", "[1,2,3,4,5],[0,1,3,4,4]", "[1,2,3,4,5],[0,1,3,4,4],interp", CAT_CATEGORY_POLYNOMIAL},
+  {"inter(A,B)", 0,"交点列表. 唯一交点用 single_inter.", "line(y=x),circle(0,1)", 0, CAT_CATEGORY_3D | (CAT_CATEGORY_2D << 8) | XCAS_ONLY},
+  {"inv(A)", 0,"A 的逆.", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
+  {"iquo(a,b)", 0,"a 与 b 的整数商.", "23,13", 0, CAT_CATEGORY_ARIT},
+  {"irem(a,b)", 0,"a 与 b 的整数余数.", "23,13", 0, CAT_CATEGORY_ARIT},
+  {"isprime(n)", 0,"n 为素数返回 1, 否则返回 0.", "11", "10", CAT_CATEGORY_ARIT},
+  {"is_collinear(A,B,C)", 0,"A, B, C 共线返回 1, 否则返回 0", "1,i,-1", "i,0,-i", CAT_CATEGORY_2D | XCAS_ONLY },
+  {"is_concyclic(A,B,C,D)", 0,"A, B, C, D 共圆返回 1, 否则返回 0", "1,i,-1,-i", "1,i,0,-i", CAT_CATEGORY_2D | XCAS_ONLY },
+  {"is_element(A,G)", 0,"A 属于 G 返回 1, 否则返回 0.", "point(0),circle(0,1)", "point(i),square(0,1)", CAT_CATEGORY_2D | XCAS_ONLY },
+  {"is_parallel(D,E)", 0,"D 与 E 平行返回 1, 否则返回 0", "line(y=x),line(y=-x)", "line(y=x),line(y=x+1)", CAT_CATEGORY_2D | XCAS_ONLY },
+  {"is_perpendicular(D,E)", 0,"D 与 E 垂直返回 1, 否则返回 0", "line(y=x),line(y=-x)", "line(y=x),line(y=x+1)", CAT_CATEGORY_2D | XCAS_ONLY },
+  {"jordan(A)", 0,"矩阵 A 的若尔当标准形, 返回 P 与 D 使 P^-1*A*P=D", "[[1,2],[3,4]]", "[[1,1,-1,2,-1],[2,0,1,-4,-1],[0,1,1,1,1],[0,1,2,0,1],[0,0,-3,3,-1]]", CAT_CATEGORY_MATRIX},
+  {"laguerre(n,a,x)", 0,"第 n 个拉盖尔多项式 (默认 a=0).", "10", 0, CAT_CATEGORY_POLYNOMIAL},
+  {"laplace(f,x,s)", 0,"f 的拉普拉斯变换","sin(x),x,s", 0, CAT_CATEGORY_CALCULUS},
+  {"lcm(a,b,...)", 0,"最小公倍数.", "23,13", "x^2-1,x^3-1", CAT_CATEGORY_ARIT | (CAT_CATEGORY_POLYNOMIAL << 8)},
+  {"lcoeff(p,x)", 0,"多项式 p 关于 x 的首项系数.", "x^4-1", 0, CAT_CATEGORY_POLYNOMIAL},
+  {"legendre(n)", 0,"第 n 个勒让德多项式.", "10", "10,t", CAT_CATEGORY_POLYNOMIAL},
 #ifdef RELEASE
-  {"len(l)", 0, "Size of a list.", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_LIST},
+  {"len(l)", 0,"列表的长度.", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_LIST},
 #endif
-  {"leve_crayon ", "leve_crayon ", "Turtle moves without trace.", 0, 0, CAT_CATEGORY_LOGO},
-  {"limit(f,x=a)", 0, "Limit of f at x = a. Add 1 or -1 for unidirectional limits, e.g. limit(sin(x)/x,x=0) or limit(abs(x)/x,x=0,1). Shortcut: SHIFT MIXEDFRAC", "sin(x)/x,x=0", "exp(-1/x),x=0,1", CAT_CATEGORY_CALCULUS},
-  {"line(equation)", 0, "Line of equation", "y=2x+1", "[0,0,0],[1,-2,3]", CAT_CATEGORY_PROGCMD |(CAT_CATEGORY_2D << 8)|(CAT_CATEGORY_2D << 16)},
-  {"line_width_", "line_width_", "Width prefix (2 to 8)", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"linear_regression(Xlist,Ylist)", 0, "Linear regression.", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
-  {"linear_regression_plot(Xlist,Ylist)", 0, "Linear regression plot.", "#X,Y:=[1,2,3,4,5],[0,1,3,4,4];linear_regression_plot(X,Y);scatterplot(X,Y)", 0, CAT_CATEGORY_STATS},
-  {"linetan(expr,x,x0)", 0, "Tangent to the graph at x=x0.", "sin(x),x,pi/2", 0, CAT_CATEGORY_PLOT},
-  {"linsolve([eq1,eq2,..],[x,y,..])", 0, "Linear system solving. May use the output of lu for O(n^2) solving (see example 2).","[x+y=1,x-y=2],[x,y]", "#p,l,u:=lu([[1,2],[3,4]]); linsolve(p,l,u,[5,6])", CAT_CATEGORY_SOLVE | (CAT_CATEGORY_LINALG <<8) | (CAT_CATEGORY_MATRIX << 16)},
-  {"logarithmic_regression(Xlist,Ylist)", 0, "Logarithmic egression.", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
-  {"logarithmic_regression_plot(Xlist,Ylist)", 0, "Logarithmic regression plot.", "#X,Y:=[1,2,3,4,5],[0,1,3,4,4];logarithmic_regression_plot(X,Y);scatterplot(X,Y)", 0, CAT_CATEGORY_STATS},
-  {"lu(A)", 0, "LU decomposition LU of matrix A, P*A=L*U", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
-  {"magenta", "magenta", "Display option", "#display=magenta", 0, CAT_CATEGORY_PROGCMD},
-  {"map(f,l)", 0, "Maps f on element of list l.","lambda x:x*x,[1,2,3]", 0, CAT_CATEGORY_LIST},
-  {"matpow(A,n)", 0, "Returns matrix A^n", "[[1,2],[3,4]],n","#assume(n>=1);matpow([[0,2],[0,4]],n)",  CAT_CATEGORY_MATRIX},
-  {"matrix(r,c,func)", 0, "Matrix from a defining function.", "2,3,(j,k)->j^k", 0, CAT_CATEGORY_MATRIX},
-  {"mean(l)", 0, "Arithmetic mean of list l", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_STATS},
-  {"median(l)", 0, "Median", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_STATS},
-  {"median_line(A,B,C)", 0, "Median line of triangle ABC from vertex A", "1,i,2+i", 0,CAT_CATEGORY_2D},
-  {"midpoint(A,B)", 0, "Midpoint of segment AB", "1,i", 0,CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8)},
-  {"montre_tortue ", "montre_tortue ", "Displays the turtle", 0, 0, CAT_CATEGORY_LOGO},
-  {"mult_c_conjugate", 0, "Multiplier par le conjugue complexe.", "1+2*i", 0,  (CAT_CATEGORY_COMPLEXNUM << 8)},
-  {"mult_conjugate", 0, "Multiplier par le conjugue (sqrt).", "sqrt(2)-sqrt(3)", 0, CAT_CATEGORY_ALGEBRA},
-  {"normald([mu,sigma],x)", 0, "Normal distribution probability density, by default mu=0 and sigma=1. normald_cdf([mu,sigma],x) probability that \"normal distribution <=x\" e.g. normald_cdf(1.96). normald_icdf([mu,sigma],t) returns x such that \"normal distribution <=x\" has probability t, e.g. normald_icdf(0.975) ", "1.2", 0, CAT_CATEGORY_PROBA},
-  {"not(x)", 0, "Logical not.", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"numer(x)", 0, "Numerator of x.", "3/4", 0, CAT_CATEGORY_POLYNOMIAL},
-  {"octahedron(A,B,C)", 0, "Octahedron of edge AB with one face in plane ABC", "[0,0,0],[3,0,0],[0,1,0]", 0, CAT_CATEGORY_3D},
-  {"odesolve(f(t,y),[t,y],[t0,y0],t1)", 0, "Approx. solution of differential equation y'=f(t,y) and y(t0)=y0, value for t=t1 (add curve to get intermediate values of y)", "sin(t*y),[t,y],[0,1],2", "0..pi,(t,v)->{[-v[1],v[0]]},[0,1]", CAT_CATEGORY_SOLVE},
-  {"parabola(F,A)", 0, "Parabola given by focus and vertex", "-2-i,2+i", 0, CAT_CATEGORY_2D},
-  {"parameq(object)", 0, "Parametric equations. Run equation for cartesian equation", "circle(0,1)", "ellipse(-1,1,3)", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
-  {"partfrac(p,x)", 0, "Partial fraction expansion. Shortcut p=>+", "1/(x^4-1)", 0, CAT_CATEGORY_ALGEBRA},
-  {"pas_de_cote n", "pas_de_cote ", "Turtle side jump from n steps, by default n=10", "#pas_de_cote 30", 0, CAT_CATEGORY_LOGO},
-  {"perpen_bisector(A,B)", 0, "Perpendicular bisector of segment AB", "1,i", 0,CAT_CATEGORY_2D},
-  {"plane(equation)", 0, "Plane given by equation or by 3 points", "z=x+y-1", "[0,0,0],[1,0,0],[0,1,0]", CAT_CATEGORY_3D | XCAS_ONLY},
-  {"plot(expr,x)", 0, "Plot an expression. For example plot(sin(x)), plot(ln(x),x.0,5), plot(x^2-y^2), plot(x^2-y^2<1), plot(x^2-y^2=1)", "ln(x),x,0,5", "1/x,x=1..5,xstep=1", (CAT_CATEGORY_PLOT << 8) | (CAT_CATEGORY_3D)},
+  {"leve_crayon ", "leve_crayon ","海龟移动而不留笔迹.", 0, 0, CAT_CATEGORY_LOGO},
+  {"limit(f,x=a)", 0,"f 在 x=a 处的极限. 加 1 或 -1 求单侧极限, 如 limit(sin(x)/x,x=0) 或 limit(abs(x)/x,x=0,1). 快捷键: SHIFT MIXEDFRAC", "sin(x)/x,x=0", "exp(-1/x),x=0,1", CAT_CATEGORY_CALCULUS},
+  {"line(equation)", 0,"由方程确定的直线", "y=2x+1", "[0,0,0],[1,-2,3]", CAT_CATEGORY_PROGCMD |(CAT_CATEGORY_2D << 8)|(CAT_CATEGORY_2D << 16)},
+  {"line_width_", "line_width_","线宽前缀 (2 到 8)", 0, 0, CAT_CATEGORY_PROGCMD},
+  {"linear_regression(Xlist,Ylist)", 0,"线性回归.", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
+  {"linear_regression_plot(Xlist,Ylist)", 0,"线性回归图.", "#X,Y:=[1,2,3,4,5],[0,1,3,4,4];linear_regression_plot(X,Y);scatterplot(X,Y)", 0, CAT_CATEGORY_STATS},
+  {"linetan(expr,x,x0)", 0,"图像在 x=x0 处的切线.", "sin(x),x,pi/2", 0, CAT_CATEGORY_PLOT},
+  {"linsolve([eq1,eq2,..],[x,y,..])", 0,"线性方程组求解. 可用 lu 的输出以 O(n^2) 求解 (见示例 2).","[x+y=1,x-y=2],[x,y]", "#p,l,u:=lu([[1,2],[3,4]]); linsolve(p,l,u,[5,6])", CAT_CATEGORY_SOLVE | (CAT_CATEGORY_LINALG <<8) | (CAT_CATEGORY_MATRIX << 16)},
+  {"logarithmic_regression(Xlist,Ylist)", 0,"对数回归.", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
+  {"logarithmic_regression_plot(Xlist,Ylist)", 0,"对数回归图.", "#X,Y:=[1,2,3,4,5],[0,1,3,4,4];logarithmic_regression_plot(X,Y);scatterplot(X,Y)", 0, CAT_CATEGORY_STATS},
+  {"lu(A)", 0,"矩阵 A 的 LU 分解, P*A=L*U", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
+  {"magenta", "magenta","显示选项", "#display=magenta", 0, CAT_CATEGORY_PROGCMD},
+  {"map(f,l)", 0,"将 f 作用于列表 l 的每个元素.","lambda x:x*x,[1,2,3]", 0, CAT_CATEGORY_LIST},
+  {"matpow(A,n)", 0,"返回矩阵 A^n", "[[1,2],[3,4]],n","#assume(n>=1);matpow([[0,2],[0,4]],n)",  CAT_CATEGORY_MATRIX},
+  {"matrix(r,c,func)", 0,"由定义函数生成矩阵.", "2,3,(j,k)->j^k", 0, CAT_CATEGORY_MATRIX},
+  {"mean(l)", 0,"列表 l 的算术平均值", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_STATS},
+  {"median(l)", 0,"中位数", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_STATS},
+  {"median_line(A,B,C)", 0,"三角形 ABC 中过顶点 A 的中线", "1,i,2+i", 0,CAT_CATEGORY_2D},
+  {"midpoint(A,B)", 0,"线段 AB 的中点", "1,i", 0,CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8)},
+  {"montre_tortue ", "montre_tortue ","显示海龟", 0, 0, CAT_CATEGORY_LOGO},
+  {"mult_c_conjugate", 0,"乘以复共轭.", "1+2*i", 0,  (CAT_CATEGORY_COMPLEXNUM << 8)},
+  {"mult_conjugate", 0,"乘以共轭 (根式).", "sqrt(2)-sqrt(3)", 0, CAT_CATEGORY_ALGEBRA},
+  {"normald([mu,sigma],x)", 0,"正态分布概率密度, 默认 mu=0, sigma=1. normald_cdf([mu,sigma],x): \"正态分布 <=x\" 的概率, 如 normald_cdf(1.96). normald_icdf([mu,sigma],t): 返回使 \"正态分布 <=x\" 概率为 t 的 x, 如 normald_icdf(0.975)", "1.2", 0, CAT_CATEGORY_PROBA},
+  {"not(x)", 0,"逻辑非.", 0, 0, CAT_CATEGORY_PROGCMD},
+  {"numer(x)", 0,"x 的分子.", "3/4", 0, CAT_CATEGORY_POLYNOMIAL},
+  {"octahedron(A,B,C)", 0,"以 AB 为棱, 一面在平面 ABC 内的正八面体", "[0,0,0],[3,0,0],[0,1,0]", 0, CAT_CATEGORY_3D},
+  {"odesolve(f(t,y),[t,y],[t0,y0],t1)", 0,"微分方程 y'=f(t,y), y(t0)=y0 在 t=t1 的近似解 (加 curve 可得 y 的中间值)", "sin(t*y),[t,y],[0,1],2", "0..pi,(t,v)->{[-v[1],v[0]]},[0,1]", CAT_CATEGORY_SOLVE},
+  {"parabola(F,A)", 0,"由焦点与顶点确定的抛物线", "-2-i,2+i", 0, CAT_CATEGORY_2D},
+  {"parameq(object)", 0,"参数方程. 笛卡尔方程用 equation", "circle(0,1)", "ellipse(-1,1,3)", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
+  {"partfrac(p,x)", 0,"部分分式展开. 快捷键 p=>+", "1/(x^4-1)", 0, CAT_CATEGORY_ALGEBRA},
+  {"pas_de_cote n", "pas_de_cote ","海龟侧向跳 n 步, 默认 n=10", "#pas_de_cote 30", 0, CAT_CATEGORY_LOGO},
+  {"perpen_bisector(A,B)", 0,"线段 AB 的中垂线", "1,i", 0,CAT_CATEGORY_2D},
+  {"plane(equation)", 0,"由方程或 3 点确定的平面", "z=x+y-1", "[0,0,0],[1,0,0],[0,1,0]", CAT_CATEGORY_3D | XCAS_ONLY},
+  {"plot(expr,x)", 0,"绘制表达式. 例如 plot(sin(x)), plot(ln(x),x.0,5), plot(x^2-y^2), plot(x^2-y^2<1), plot(x^2-y^2=1)", "ln(x),x,0,5", "1/x,x=1..5,xstep=1", (CAT_CATEGORY_PLOT << 8) | (CAT_CATEGORY_3D)},
 #ifdef RELEASE
-  {"plotarea(expr,x=a..b,[n,meth])", 0, "Area under curve with specified quadrature.", "1/x,x=1..3,2,trapezoid", 0, CAT_CATEGORY_PLOT},
+  {"plotarea(expr,x=a..b,[n,meth])", 0,"用指定数值积分法求曲线下面积.", "1/x,x=1..3,2,trapezoid", 0, CAT_CATEGORY_PLOT},
 #endif
-  {"plotcontour(expr,[x=xm..xM,y=ym..yM],levels)", 0, "Levels of expr.", "x^2+2y^2,[x=-2..2,y=-2..2],[1,2]", 0, CAT_CATEGORY_PLOT},
-  {"plotfield(f(t,y),[t=tmin..tmax,y=ymin..ymax])", 0, "Plot field of differential equation y'=f(t,y), an optionally one solution by adding plotode=[t0,y0]", "sin(t*y),[t=-3..3,y=-3..3],plotode=[0,1]", 0, CAT_CATEGORY_PLOT},
-  {"plotfunc(expr,[x,y])", 0, "Xcas: graph of a 3d function", "x^2-y^2,[x,y]","x^2-y^2,[x=-2..2,y=-2..2],nstep=700", CAT_CATEGORY_PLOT | (CAT_CATEGORY_3D << 8) | XCAS_ONLY },
-  {"plotlist(list)", 0, "Plot a list", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_PLOT},
-  {"plotode(f(t,y),[t=tmin..tmax,y],[t0,y0])", 0, "Plot solution of differential equation y'=f(t,y), y(t0)=y0.", "sin(t*y),[t=-3..3,y],[0,1]", 0, CAT_CATEGORY_PLOT},
-  {"plotparam([x,y],t)", 0, "Parametric plot. For example plotparam([sin(3t),cos(2t)],t,0,pi) or plotparam(exp(i*t),t,0,pi)", "[sin(3t),cos(2t)],t,0,pi", "[t^2,t^3],t=-1..1,tstep=0.1", CAT_CATEGORY_PLOT},
-  {"plotpolar(r,theta)", 0, "Polar plot.","cos(3*x),x,0,pi", "1/(1+cos(x)),x=0..pi,xstep=0.05", CAT_CATEGORY_PLOT},
-  {"plotseq(f(x),x=[u0,m,M],n)", 0, "Plot f(x) on [m,M] and n terms of the sequence defined by u_{n+1}=f(u_n) and u0.","sqrt(2+x),x=[6,0,7],5", 0, CAT_CATEGORY_PLOT},
-  {"plus_point", "plus_point", "Display option", "#display=blue+plus_point", 0, CAT_CATEGORY_PROGCMD},
-  {"point(x,y[,z])", 0, "Point", "1,2", "1,2,3", CAT_CATEGORY_PLOT | (CAT_CATEGORY_2D << 8)},
-  {"polygon(list)", 0, "Closed polygon given by a list of vertices.", "1-i,2+i,3,3-2i", 0, CAT_CATEGORY_PROGCMD | (CAT_CATEGORY_2D << 8) },
-  {"polygonscatterplot(Xlist,Ylist)", 0, "Plot points and polygonal line.", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
-  {"polyhedron(A,B,C,D,...)", 0, "Convex polyhedron of vertices in A,B,C,D,...", "[0,0,0],[0,5,0],[0,0,5],[1,2,6]", 0, CAT_CATEGORY_3D},
-  {"polynomial_regression(Xlist,Ylist,n)", 0, "Polynomial regression, degree <= n.", "[1,2,3,4,5],[0,1,3,4,4],2", 0, CAT_CATEGORY_STATS},
-  {"polynomial_regression_plot(Xlist,Ylist,n)", 0, "Polynomial regression plot, degree <= n.", "#X,Y:=[1,2,3,4,5],[0,1,3,4,4];polynomial_regression_plot(X,Y,2);scatterplot(X,Y)", 0, CAT_CATEGORY_STATS},
+  {"plotcontour(expr,[x=xm..xM,y=ym..yM],levels)", 0,"expr 的等值线.", "x^2+2y^2,[x=-2..2,y=-2..2],[1,2]", 0, CAT_CATEGORY_PLOT},
+  {"plotfield(f(t,y),[t=tmin..tmax,y=ymin..ymax])", 0,"绘制微分方程 y'=f(t,y) 的方向场, 加 plotode=[t0,y0] 可选画一条解曲线", "sin(t*y),[t=-3..3,y=-3..3],plotode=[0,1]", 0, CAT_CATEGORY_PLOT},
+  {"plotfunc(expr,[x,y])", 0,"Xcas: 三维函数图像", "x^2-y^2,[x,y]","x^2-y^2,[x=-2..2,y=-2..2],nstep=700", CAT_CATEGORY_PLOT | (CAT_CATEGORY_3D << 8) | XCAS_ONLY },
+  {"plotlist(list)", 0,"绘制列表", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_PLOT},
+  {"plotode(f(t,y),[t=tmin..tmax,y],[t0,y0])", 0,"绘制微分方程 y'=f(t,y), y(t0)=y0 的解曲线.", "sin(t*y),[t=-3..3,y],[0,1]", 0, CAT_CATEGORY_PLOT},
+  {"plotparam([x,y],t)", 0,"参数曲线绘制. 例如 plotparam([sin(3t),cos(2t)],t,0,pi) 或 plotparam(exp(i*t),t,0,pi)", "[sin(3t),cos(2t)],t,0,pi", "[t^2,t^3],t=-1..1,tstep=0.1", CAT_CATEGORY_PLOT},
+  {"plotpolar(r,theta)", 0,"极坐标曲线绘制.","cos(3*x),x,0,pi", "1/(1+cos(x)),x=0..pi,xstep=0.05", CAT_CATEGORY_PLOT},
+  {"plotseq(f(x),x=[u0,m,M],n)", 0,"在 [m,M] 上绘制 f(x), 并画出由 u_{n+1}=f(u_n) 和 u0 定义的数列前 n 项.","sqrt(2+x),x=[6,0,7],5", 0, CAT_CATEGORY_PLOT},
+  {"plus_point", "plus_point","显示选项", "#display=blue+plus_point", 0, CAT_CATEGORY_PROGCMD},
+  {"point(x,y[,z])", 0,"点", "1,2", "1,2,3", CAT_CATEGORY_PLOT | (CAT_CATEGORY_2D << 8)},
+  {"polygon(list)", 0,"由顶点列表确定的闭合多边形.", "1-i,2+i,3,3-2i", 0, CAT_CATEGORY_PROGCMD | (CAT_CATEGORY_2D << 8) },
+  {"polygonscatterplot(Xlist,Ylist)", 0,"绘制点及折线.", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
+  {"polyhedron(A,B,C,D,...)", 0,"以 A,B,C,D,... 为顶点的凸多面体", "[0,0,0],[0,5,0],[0,0,5],[1,2,6]", 0, CAT_CATEGORY_3D},
+  {"polynomial_regression(Xlist,Ylist,n)", 0,"多项式回归, 次数 <= n.", "[1,2,3,4,5],[0,1,3,4,4],2", 0, CAT_CATEGORY_STATS},
+  {"polynomial_regression_plot(Xlist,Ylist,n)", 0,"多项式回归图, 次数 <= n.", "#X,Y:=[1,2,3,4,5],[0,1,3,4,4];polynomial_regression_plot(X,Y,2);scatterplot(X,Y)", 0, CAT_CATEGORY_STATS},
   //{"pour", "pour j de 1 jusque  faire  fpour;", "For loop.","#pour j de 1 jusque 10 faire print(j,j^2); fpour;", 0, CAT_CATEGORY_PROG},
-  {"power_regression(Xlist,Ylist,n)", 0, "Power regression.", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
-  {"power_regression_plot(Xlist,Ylist,n)", 0, "Power regression graph", "#X,Y:=[1,2,3,4,5],[0,1,3,4,4];power_regression_plot(X,Y);scatterplot(X,Y)", 0, CAT_CATEGORY_STATS},
-  {"powmod(a,n,p)", 0, "Returns a^n mod p.","123,456,789", 0, CAT_CATEGORY_ARIT},
-  {"print(expr)", 0, "Print expr in console", 0, 0, CAT_CATEGORY_PROG},
-  {"projection(obj1,obj2)", 0, "Projection on obj1 of obj2", "line(y=x),point(2,3)", 0, CAT_CATEGORY_2D },
-  {"proot(p)", 0, "Returns real and complex roots, of polynomial p. Exemple proot([1,2.1,3,4.2]) or proot(x^3+2.1*x^2+3x+4.2)", "x^3+2.1*x^2+3x+4.2", 0, CAT_CATEGORY_POLYNOMIAL},
-  {"purge(x)", 0, "Clear assigned variable x. Shortcut SHIFT-FORMAT", 0, 0, CAT_CATEGORY_PROGCMD|(CAT_CATEGORY_SOFUS<<8)},
-  {"python(f)", 0, "Displays f in Python syntax.", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"python_compat(0|1|2)", 0, "python_compat(0) Xcas syntax, python_compat(1) Python syntax with ^ interpreted as power, python_compat(2) ^ as bit xor", "0", "1", CAT_CATEGORY_PROG},
-  {"qr(A)", 0, "A=Q*R factorization with Q orthogonal and R upper triangular", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
-  {"quadric(equation)", 0, "Quadric given by equation (or 9 points)", "x^2-y^2+z^2", "x^2+x*y+y^2+z^2-3", CAT_CATEGORY_3D},
-  {"quartile1(l)", 0, "1st quartile", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_STATS},
-  {"quartile3(l)", 0, "3rd quartile", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_STATS},
-  {"quo(p,q,x)", 0, "Quotient of synthetic division of polynomials p and q (variable x).", 0, 0, CAT_CATEGORY_POLYNOMIAL},
-  {"quote(x)", 0, "Returns expression x unevaluated.", 0, 0, CAT_CATEGORY_ALGEBRA},
-  {"radius(objet)", 0, "Radius of a circle or sphere", "circle(0,1)", "sphere([0,0,0],[1,1,1])", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
-  {"rand()", "rand()", "Random real between 0 and 1", 0, 0, CAT_CATEGORY_PROBA},
-  {"randint(a,b)", 0, "Random integer between a and b. With 1 argument in Xcas, random integer between 1 and n.", "5,25", "6", CAT_CATEGORY_PROBA},
-  {"ranm(n,m,[loi,parametres])", 0, "Random matrix with integer coefficients or according to a probability law (ranv for a vector). Examples ranm(2,3), ranm(3,2,binomial,20,.3), ranm(4,2,normald,0,1)", "3,3","4,2,normald,0,1",  CAT_CATEGORY_MATRIX},
-  {"ranv(n,[loi,parametres])", 0, "Random vector.", "10","4,normald,0,1", CAT_CATEGORY_LINALG},
-  {"ratnormal(x)", 0, "Puts everything over a common denominator.", 0, 0, CAT_CATEGORY_ALGEBRA},
-  {"re(z)", 0, "Real part.", "1+i", 0, CAT_CATEGORY_COMPLEXNUM},
-  {"read(\"filename\")", "read(\"", "Read a file.", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"rectangle_plein a,b", "rectangle_plein ", "Direct filled rectangle from turtle position, if b is omitted b==a", "#rectangle_plein 30","#rectangle_plein 20,40", CAT_CATEGORY_LOGO},
-  {"recule n", "recule ", "Turtle backward n steps, n=10 by default", "#recule 30", 0, CAT_CATEGORY_LOGO},
-  {"red", "red", "Display option", "#display=red", 0, CAT_CATEGORY_PROGCMD},
-  {"reflection(obj1,obj2)", 0, "Reflection or symmetrical of obj2", "line(y=x),cercle(1,1)", 0, CAT_CATEGORY_2D },
-  {"rem(p,q,x)", 0, "Remainder of synthetic division of polynomials p and q (variable x)", 0, 0, CAT_CATEGORY_POLYNOMIAL},
+  {"power_regression(Xlist,Ylist,n)", 0,"幂回归.", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
+  {"power_regression_plot(Xlist,Ylist,n)", 0,"幂回归图", "#X,Y:=[1,2,3,4,5],[0,1,3,4,4];power_regression_plot(X,Y);scatterplot(X,Y)", 0, CAT_CATEGORY_STATS},
+  {"powmod(a,n,p)", 0,"返回 a^n mod p.","123,456,789", 0, CAT_CATEGORY_ARIT},
+  {"print(expr)", 0,"在控制台打印 expr", 0, 0, CAT_CATEGORY_PROG},
+  {"projection(obj1,obj2)", 0,"obj2 在 obj1 上的投影", "line(y=x),point(2,3)", 0, CAT_CATEGORY_2D },
+  {"proot(p)", 0,"返回多项式 p 的实根与复根. 例如 proot([1,2.1,3,4.2]) 或 proot(x^3+2.1*x^2+3x+4.2)", "x^3+2.1*x^2+3x+4.2", 0, CAT_CATEGORY_POLYNOMIAL},
+  {"purge(x)", 0,"清除已赋值变量 x. 快捷键 SHIFT-FORMAT", 0, 0, CAT_CATEGORY_PROGCMD|(CAT_CATEGORY_SOFUS<<8)},
+  {"python(f)", 0,"以 Python 语法显示 f.", 0, 0, CAT_CATEGORY_PROGCMD},
+  {"python_compat(0|1|2)", 0,"python_compat(0): Xcas 语法; python_compat(1): Python 语法, ^ 解释为幂; python_compat(2): ^ 为按位异或", "0", "1", CAT_CATEGORY_PROG},
+  {"qr(A)", 0,"A=Q*R 分解, Q 正交, R 上三角", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
+  {"quadric(equation)", 0,"由方程 (或 9 点) 确定的二次曲面", "x^2-y^2+z^2", "x^2+x*y+y^2+z^2-3", CAT_CATEGORY_3D},
+  {"quartile1(l)", 0,"第一四分位数", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_STATS},
+  {"quartile3(l)", 0,"第三四分位数", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_STATS},
+  {"quo(p,q,x)", 0,"多项式 p 除以 q 的商 (变量 x).", 0, 0, CAT_CATEGORY_POLYNOMIAL},
+  {"quote(x)", 0,"返回未求值的表达式 x.", 0, 0, CAT_CATEGORY_ALGEBRA},
+  {"radius(objet)", 0,"圆或球的半径", "circle(0,1)", "sphere([0,0,0],[1,1,1])", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
+  {"rand()", "rand()","0 到 1 之间的随机实数", 0, 0, CAT_CATEGORY_PROBA},
+  {"randint(a,b)", 0,"a 与 b 之间的随机整数. Xcas 中只给 1 个参数时, 返回 1 到 n 之间的随机整数.", "5,25", "6", CAT_CATEGORY_PROBA},
+  {"ranm(n,m,[loi,parametres])", 0,"整数系数或按概率分布的随机矩阵 (向量用 ranv). 例如 ranm(2,3), ranm(3,2,binomial,20,.3), ranm(4,2,normald,0,1)", "3,3","4,2,normald,0,1",  CAT_CATEGORY_MATRIX},
+  {"ranv(n,[loi,parametres])", 0,"随机向量.", "10","4,normald,0,1", CAT_CATEGORY_LINALG},
+  {"ratnormal(x)", 0,"通分为单一分式.", 0, 0, CAT_CATEGORY_ALGEBRA},
+  {"re(z)", 0,"实部.", "1+i", 0, CAT_CATEGORY_COMPLEXNUM},
+  {"read(\"filename\")", "read(\"","读取文件.", 0, 0, CAT_CATEGORY_PROGCMD},
+  {"rectangle_plein a,b", "rectangle_plein ","从海龟位置画实心矩形, 省略 b 时 b==a", "#rectangle_plein 30","#rectangle_plein 20,40", CAT_CATEGORY_LOGO},
+  {"recule n", "recule ","海龟后退 n 步, 默认 n=10", "#recule 30", 0, CAT_CATEGORY_LOGO},
+  {"red", "red","显示选项", "#display=red", 0, CAT_CATEGORY_PROGCMD},
+  {"reflection(obj1,obj2)", 0,"obj2 的反射 (对称)", "line(y=x),cercle(1,1)", 0, CAT_CATEGORY_2D },
+  {"rem(p,q,x)", 0,"多项式 p 除以 q 的余数 (变量 x)", 0, 0, CAT_CATEGORY_POLYNOMIAL},
 #ifdef RELEASE
-  {"residue(f(z),z,z0)", 0, "Residue of an expression at z0.", "1/(x^2+1),x,i", 0, CAT_CATEGORY_COMPLEXNUM},
+  {"residue(f(z),z,z0)", 0,"表达式在 z0 处的留数.", "1/(x^2+1),x,i", 0, CAT_CATEGORY_COMPLEXNUM},
 #endif
-  {"resultant(p,q,x)", 0, "Resultant in x of polynomials p and q.", "#P:=x^3+p*x+q;resultant(P,P',x);", 0, CAT_CATEGORY_POLYNOMIAL},
-  {"revert(p[,x])", 0, "Revert Taylor series","x+x^2+x^4", 0, CAT_CATEGORY_CALCULUS},
-  {"rgb(r,g,b)", 0, "color defined from red, green, blue from 0 to 255", "255,0,255", 0, CAT_CATEGORY_PROGCMD},
-  {"rhombus_point", "rhombus_point", "Display option", "#display=magenta+rhombus_point", 0, CAT_CATEGORY_PROGCMD},
-  {"rond n", "rond ", "Circle tangent to the turtle, radius n. Run rond n,theta for an arc of circle of theta degrees", 0, 0, CAT_CATEGORY_LOGO},
-  {"rotation(center,angle,objcet)", 0, "Image of object by rotation", "2-i,pi/2,circle(0,1)", "sphere([0,0,0],[1,1,1])", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
-  {"rsolve(equation,u(n),[init])", 0, "Solve a recurrence relation.","u(n+1)=2*u(n)+3,u(n),u(0)=1", "([u(n+1)=3*v(n)+u(n),v(n+1)=v(n)+u(n)],[u(n),v(n)],[u(0)=1,v(0)=2]", CAT_CATEGORY_SOLVE},
-  {"saute n", "saute ", "Turtle jumps n steps, by default n=10", "#saute 30", 0, CAT_CATEGORY_LOGO},
-  {"scatterplot(Xlist,Ylist)", 0, "Draws points", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
-  {"segment(A,B)", 0, "Segment", "1,2+i", "[1,2,1],[-1,3,2]", CAT_CATEGORY_PROGCMD | (CAT_CATEGORY_2D << 8) | XCAS_ONLY},
-  {"seq(expr,var,a,b)", 0, "Generates a list from an expression.","j^2,j,1,10", 0, CAT_CATEGORY_PROGCMD},
+  {"resultant(p,q,x)", 0,"多项式 p 与 q 关于 x 的结式.", "#P:=x^3+p*x+q;resultant(P,P',x);", 0, CAT_CATEGORY_POLYNOMIAL},
+  {"revert(p[,x])", 0,"泰勒级数反演","x+x^2+x^4", 0, CAT_CATEGORY_CALCULUS},
+  {"rgb(r,g,b)", 0,"由红, 绿, 蓝 (0 到 255) 定义的颜色", "255,0,255", 0, CAT_CATEGORY_PROGCMD},
+  {"rhombus_point", "rhombus_point","显示选项", "#display=magenta+rhombus_point", 0, CAT_CATEGORY_PROGCMD},
+  {"rond n", "rond ","与海龟相切, 半径 n 的圆. rond n,theta 画 theta 度的圆弧", 0, 0, CAT_CATEGORY_LOGO},
+  {"rotation(center,angle,objcet)", 0,"物体经旋转的像", "2-i,pi/2,circle(0,1)", "sphere([0,0,0],[1,1,1])", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
+  {"rsolve(equation,u(n),[init])", 0,"求解递推关系.","u(n+1)=2*u(n)+3,u(n),u(0)=1", "([u(n+1)=3*v(n)+u(n),v(n+1)=v(n)+u(n)],[u(n),v(n)],[u(0)=1,v(0)=2]", CAT_CATEGORY_SOLVE},
+  {"saute n", "saute ","海龟跳 n 步, 默认 n=10", "#saute 30", 0, CAT_CATEGORY_LOGO},
+  {"scatterplot(Xlist,Ylist)", 0,"绘制散点", "[1,2,3,4,5],[0,1,3,4,4]", 0, CAT_CATEGORY_STATS},
+  {"segment(A,B)", 0,"线段", "1,2+i", "[1,2,1],[-1,3,2]", CAT_CATEGORY_PROGCMD | (CAT_CATEGORY_2D << 8) | XCAS_ONLY},
+  {"seq(expr,var,a,b)", 0,"由表达式生成列表.","j^2,j,1,10", 0, CAT_CATEGORY_PROGCMD},
   //{"si", "si  alors  sinon  fsi;", "Test.", "#f(x):=si x>0 alors x; sinon -x; fsi;// valeur absolue", 0, CAT_CATEGORY_PROG},
-  {"sign(x)", 0, "Returns -1 if x is negative, 0 if x is zero and 1 if x is positive.", 0, 0, CAT_CATEGORY_REAL|XCAS_ONLY},
-  {"similarity(center,ratio,angle,object)", 0, "Image of object by similarity", "0,2,pi/2,circle(1,1)", 0, CAT_CATEGORY_2D },
-  {"simplify(expr)", 0, "Returns x in a simpler form. Shortcut expr=>/", "sin(3x)/sin(x)", 0, CAT_CATEGORY_ALGEBRA},
-  {"single_inter(A,B)", 0, "First intersection. Run inter for a list of intersections.", "line(y=x),line(x+y=3)", 0, CAT_CATEGORY_3D | (CAT_CATEGORY_2D << 8) | XCAS_ONLY},
-  {"solve(equation,x)", 0, "Exact solving of equation w.r.t. x (or of a polynomial system). Run csolve for complex solutions, linsolve for a linear system. Shortcut SHIFT XthetaT", "x^2-x-1=0,x", "[x^2-y^2=0,x^2-z^2=0],[x,y,z]", CAT_CATEGORY_SOLVE},
-  {"sorted(l)", 0, "Sorts a list.","[3/2,2,1,1/2,3,2,3/2]", "[[1,2],[2,3],[4,3]],(x,y)->when(x[1]==y[1],x[0]>y[0],x[1]>y[1]", CAT_CATEGORY_LIST},
-  {"sphere(A,r)", 0, "Sphere of center A and radius r or diameter AB", "[0,0,0],1", "[0,0,0],[1,1,1]", CAT_CATEGORY_3D},
-  {"square_point", "square_point", "Display option", "#display=cyan+square_point", 0, CAT_CATEGORY_PROGCMD},
-  {"star_point", "star_point", "Display option", "#display=magenta+star_point", 0, CAT_CATEGORY_PROGCMD},
-  {"stddev(l)", 0, "Standard deviation of list l", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_STATS},
-  {"subst(a,b=c)", 0, "Substitutes b for c in a. Shortcut a(b=c).", "x^2,x=3", 0, CAT_CATEGORY_ALGEBRA},
-  {"sum(f,k,m,M)", 0, "Summation of expression f for k from m to M. Exemple sum(k^2,k,1,n)=>*. Shortcut ALPHA F3", "k,k,1,n", 0, CAT_CATEGORY_CALCULUS},
-  {"svd(A)", 0, "Singular Value Decomposition, returns U orthogonal, S vector of singular values, Q orthogonal such that A=U*diag(S)*tran(Q).", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
-  {"tabvar(f,[x=a..b])", 0, "Table of variations of expression f, optional arguments variable x in interval a..b", "sqrt(x^2+x+1)",  "[cos(t),sin(3t)],t", CAT_CATEGORY_CALCULUS},
+  {"sign(x)", 0,"x 为负返回 -1, 为零返回 0, 为正返回 1.", 0, 0, CAT_CATEGORY_REAL|XCAS_ONLY},
+  {"similarity(center,ratio,angle,object)", 0,"物体经相似变换的像", "0,2,pi/2,circle(1,1)", 0, CAT_CATEGORY_2D },
+  {"simplify(expr)", 0,"返回 x 的更简形式. 快捷键 expr=>/", "sin(3x)/sin(x)", 0, CAT_CATEGORY_ALGEBRA},
+  {"single_inter(A,B)", 0,"第一个交点. 交点列表用 inter.", "line(y=x),line(x+y=3)", 0, CAT_CATEGORY_3D | (CAT_CATEGORY_2D << 8) | XCAS_ONLY},
+  {"solve(equation,x)", 0,"关于 x 精确求解方程 (或多项式方程组). 复数解用 csolve, 线性方程组用 linsolve. 快捷键 SHIFT XthetaT", "x^2-x-1=0,x", "[x^2-y^2=0,x^2-z^2=0],[x,y,z]", CAT_CATEGORY_SOLVE},
+  {"sorted(l)", 0,"对列表排序.","[3/2,2,1,1/2,3,2,3/2]", "[[1,2],[2,3],[4,3]],(x,y)->when(x[1]==y[1],x[0]>y[0],x[1]>y[1]", CAT_CATEGORY_LIST},
+  {"sphere(A,r)", 0,"以 A 为球心, 半径 r 或直径 AB 的球", "[0,0,0],1", "[0,0,0],[1,1,1]", CAT_CATEGORY_3D},
+  {"square_point", "square_point","显示选项", "#display=cyan+square_point", 0, CAT_CATEGORY_PROGCMD},
+  {"star_point", "star_point","显示选项", "#display=magenta+star_point", 0, CAT_CATEGORY_PROGCMD},
+  {"stddev(l)", 0,"列表 l 的标准差", "[3/2,2,1,1/2,3,2,3/2]", 0, CAT_CATEGORY_STATS},
+  {"subst(a,b=c)", 0,"在 a 中把 b 替换为 c. 快捷键 a(b=c).", "x^2,x=3", 0, CAT_CATEGORY_ALGEBRA},
+  {"sum(f,k,m,M)", 0,"表达式 f 对 k 从 m 到 M 求和. 例如 sum(k^2,k,1,n)=>*. 快捷键 ALPHA F3", "k,k,1,n", 0, CAT_CATEGORY_CALCULUS},
+  {"svd(A)", 0,"奇异值分解, 返回正交矩阵 U, 奇异值向量 S, 正交矩阵 Q, 使 A=U*diag(S)*tran(Q).", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
+  {"tabvar(f,[x=a..b])", 0,"表达式 f 的变化表, 可选参数: 变量 x 在区间 a..b", "sqrt(x^2+x+1)",  "[cos(t),sin(3t)],t", CAT_CATEGORY_CALCULUS},
   //{"tantque", "tantque  faire   ftantque;", "While loop.", "#j:=13; tantque j!=1 faire j:=when(even(j),j/2,3j+1); print(j); ftantque;", 0, CAT_CATEGORY_PROG},
-  {"taylor(f,x=a,n,[polynom])", 0, "Taylor expansion of f of x at a order n, add parameter polynom to remove remainder term.","sin(x),x=0,5", "sin(x),x=0,5,polynom", CAT_CATEGORY_CALCULUS},
-  {"tchebyshev1(n)", 0, "Tchebyshev polynomial 1st kind: cos(n*x)=T_n(cos(x))", "10", 0, CAT_CATEGORY_POLYNOMIAL},
-  {"tchebyshev2(n)", 0, "Tchebyshev polynomial 2nd kind: sin((n+1)*x)=sin(x)*U_n(cos(x))", "10", 0, CAT_CATEGORY_POLYNOMIAL},
-  {"tcollect(expr)", 0, "Linearize and collect trig functions.","sin(x)+cos(x)", 0, CAT_CATEGORY_TRIG},
-  {"texpand(expr)", 0, "Expand trigonometric, exp and ln functions.","sin(3x)", 0, CAT_CATEGORY_TRIG},
-  {"time(cmd)", 0, "Time to run a command or set the clock","int(1/(x^4+1),x)","8,0", CAT_CATEGORY_PROG},
-  {"tlin(expr)", 0, "Trigonometric linearization of expr.","sin(x)^3", 0, CAT_CATEGORY_TRIG},
-  {"tourne_droite n", "tourne_droite ", "Turtle turns right n degrees, n=90 by default", 0, 0, CAT_CATEGORY_LOGO},
-  {"tourne_gauche n", "tourne_gauche ", "Turtle turns left n degrees, n=90 by default", 0, 0, CAT_CATEGORY_LOGO},
-  {"trace(A)", 0, "Trace of the matrix A.", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
-  {"transpose(A)", 0, "Transposes matrix A. Transconjugate command is trn(A) or A^*.", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
-  {"translation(vect,obj)", 0, "Translate by vect obj", "[1,2],cercle(0,1)", 0, CAT_CATEGORY_2D },
-  {"triangle(A,B,C)", 0, "Triangle given by 3 vertices", "1+i,1-i,-1", "A,B,C", CAT_CATEGORY_2D},
-  {"triangle_point", "triangle_point", "Display option", "#display=yellow+triangle_point", 0, CAT_CATEGORY_PROGCMD},
-  {"trig2exp(expr)", 0, "Convert complex exponentials to trigonometric functions","cos(x)^3", 0, CAT_CATEGORY_TRIG},
-  {"trigcos(expr)", 0, "Convert sin^2 and tan^2 to cos^2.","sin(x)^4", 0, CAT_CATEGORY_TRIG},
-  {"trigsin(expr)", 0, "Convert cos^2 and tan^2 to sin^2.","cos(x)^4", 0, CAT_CATEGORY_TRIG},
-  {"trigtan(expr)", 0, "Convert cos^2 and sin^2 to tan^2.","cos(x)^4", 0, CAT_CATEGORY_TRIG},
-  {"uniformd(a,b,x)", "uniformd", "uniform law on [a,b] of density 1/(b-a)", 0, 0, CAT_CATEGORY_PROBA},
-  {"vertices(objet)", 0, "List of vertices of a polygon or polyhedra", "triangle(1,i,2)", "cube([0,0,0],[1,0,0],[0,1,0])", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
+  {"taylor(f,x=a,n,[polynom])", 0,"f 关于 x 在 a 处的 n 阶泰勒展开, 加参数 polynom 可去掉余项.","sin(x),x=0,5", "sin(x),x=0,5,polynom", CAT_CATEGORY_CALCULUS},
+  {"tchebyshev1(n)", 0,"第一类切比雪夫多项式: cos(n*x)=T_n(cos(x))", "10", 0, CAT_CATEGORY_POLYNOMIAL},
+  {"tchebyshev2(n)", 0,"第二类切比雪夫多项式: sin((n+1)*x)=sin(x)*U_n(cos(x))", "10", 0, CAT_CATEGORY_POLYNOMIAL},
+  {"tcollect(expr)", 0,"三角函数线性化并合并.","sin(x)+cos(x)", 0, CAT_CATEGORY_TRIG},
+  {"texpand(expr)", 0,"展开三角, exp 与 ln 函数.","sin(3x)", 0, CAT_CATEGORY_TRIG},
+  {"time(cmd)", 0,"测量命令运行时间或设置时钟","int(1/(x^4+1),x)","8,0", CAT_CATEGORY_PROG},
+  {"tlin(expr)", 0,"expr 的三角线性化.","sin(x)^3", 0, CAT_CATEGORY_TRIG},
+  {"tourne_droite n", "tourne_droite ","海龟右转 n 度, 默认 n=90", 0, 0, CAT_CATEGORY_LOGO},
+  {"tourne_gauche n", "tourne_gauche ","海龟左转 n 度, 默认 n=90", 0, 0, CAT_CATEGORY_LOGO},
+  {"trace(A)", 0,"矩阵 A 的迹.", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
+  {"transpose(A)", 0,"转置矩阵 A. 共轭转置用 trn(A) 或 A^*.", "[[1,2],[3,4]]", 0, CAT_CATEGORY_MATRIX},
+  {"translation(vect,obj)", 0,"将 obj 按向量 vect 平移", "[1,2],cercle(0,1)", 0, CAT_CATEGORY_2D },
+  {"triangle(A,B,C)", 0,"由 3 个顶点确定的三角形", "1+i,1-i,-1", "A,B,C", CAT_CATEGORY_2D},
+  {"triangle_point", "triangle_point","显示选项", "#display=yellow+triangle_point", 0, CAT_CATEGORY_PROGCMD},
+  {"trig2exp(expr)", 0,"将复指数转换为三角函数","cos(x)^3", 0, CAT_CATEGORY_TRIG},
+  {"trigcos(expr)", 0,"将 sin^2 与 tan^2 转换为 cos^2.","sin(x)^4", 0, CAT_CATEGORY_TRIG},
+  {"trigsin(expr)", 0,"将 cos^2 与 tan^2 转换为 sin^2.","cos(x)^4", 0, CAT_CATEGORY_TRIG},
+  {"trigtan(expr)", 0,"将 cos^2 与 sin^2 转换为 tan^2.","cos(x)^4", 0, CAT_CATEGORY_TRIG},
+  {"uniformd(a,b,x)", "uniformd","[a,b] 上密度为 1/(b-a) 的均匀分布", 0, 0, CAT_CATEGORY_PROBA},
+  {"vertices(objet)", 0,"多边形或多面体的顶点列表", "triangle(1,i,2)", "cube([0,0,0],[1,0,0],[0,1,0])", CAT_CATEGORY_2D | (CAT_CATEGORY_3D << 8) },
   //{"version", "version()", "Khicas 1.5.0, (c) B. Parisse et al. www-fourier.ujf-grenoble.fr/~parisse\nLicense GPL version 2. Interface adapted from Eigenmath for Casio, G. Maia, http://gbl08ma.com. Do not use if CAS calculators are forbidden.", 0, 0, CAT_CATEGORY_PROGCMD},
-  {"write(\"filename\",var)", "write(\"", "Save 1 or more variables in a file. For example f(x):=x^2; write(\"func_f\",f).",  0, 0, CAT_CATEGORY_PROGCMD},
-  {"yellow", "yellow", "Display option", "#display=yellow", 0, CAT_CATEGORY_PROGCMD},
-  {"|", "|", "Logical or", "#1|2", 0, CAT_CATEGORY_PROGCMD},
-  {"~", "~", "Complement", "#~7", 0, CAT_CATEGORY_PROGCMD},
+  {"write(\"filename\",var)", "write(\"","将一个或多个变量保存到文件. 例如 f(x):=x^2; write(\"func_f\",f).",  0, 0, CAT_CATEGORY_PROGCMD},
+  {"yellow", "yellow","显示选项", "#display=yellow", 0, CAT_CATEGORY_PROGCMD},
+  {"|", "|","逻辑或", "#1|2", 0, CAT_CATEGORY_PROGCMD},
+  {"~", "~","(按位) 取反", "#~7", 0, CAT_CATEGORY_PROGCMD},
 };
 
   const char aide_khicas_string[]="Aide Khicas";
@@ -1683,12 +1683,12 @@ const catalogFunc completeCaten[] = { // list of all functions (including some n
   const char shortcuts_en_string[]="Keyboard shortcuts (shell and editor)\nshift-/: %\nalpha shift \": '\nshift--: \\\nshift ans: completion\nshift-*: factor\nshift-+: normal\nshift-1 to 6: cf. screen bottom\nshift-7: matrices\nshift-8: complexes\nshift-9:arithmetic\nshift-0: proba\nshift-.: reals\nshift-10^: polynomials\nvar: variables list\nans: turtle screen (editor)\n\nshift-x^y (sto) returns =>\n=>+: partfrac\n=>*: factor\n=>sin/cos/tan\n=>=>: solve\n\nShell:\nshift-5: 2d editor or graph or text\nshift-6: text edit\n+ ou - modifies selected slider\n\nExpressions editor\nshift-cut: undo/redo (1 fois)\nkeypad: move selection inside expression tree\nshift-right/left exchange selection with right or left argument\nalpha-right/left: inside a sum or product: increase selection with right or left argument\nshift-4: Edit selection, shift-5: change fontsize\nEXE: eval selection\nshift-6: approx value\nBackspace: suppress selection's rootnode operator\n\nScript Editor\nEXE: newline\nshift-CUT: documentation\nshift-COPY: marks selection begin, move the cursor to the end, then hit Backspace to erase or shift-COPY to copy (no erase). shift-PASTE to paste.\nHome-6 search: enter a word then EXE then again EXE. Type EXE for next occurence, Back to cancel.\nHome-6 replace: enter a word then EXE then replacement word then EXE. Type EXE or Back to replace or ignore and go to next occurence, AC to cancel\nOK: test syntax\n\nGraph shortcuts:\n+ - zoom\n(-): zoomout along y\n*: autoscale\n/: orthonormalization\nOPTN: axes on/off";
 #else
   const char shortcuts_fr_string[]="Raccourcis clavier (shell et editeur)\nlivre: aide/complete\ntab: complete (shell)/indente (editeur)\nshift-/: %\nshift *: '\nctrl-/: \\\nshift-1 a 6: selon bandeau en bas\nshift-7: matrices\nshift-8: complexes\nshift-9:arithmetique\nshift-0: probas\nshift-.: reels\nctrl P: programme\nvar: liste des variables\nans (shift (-)): figure tortue (editeur)\n\nctrl-var (sto) renvoie =>\n=>+: partfrac\n=>*: factor\n=>sin/cos/tan\n=>=>: solve\n\nShell:\nshift-5: Editeur 2d ou graphique ou texte selon objet\nshift-4: editeur texte\n+ ou - modifie un parametre en surbrillance\n\nEditeur d'expressions\nctrl z: defaire/refaire (1 fois)\npave directionnel: deplace la selection dans l'arborescence de l'expression\nshift-droit/gauche echange selection avec argument a droite ou a gauche\nctrl droit/gauche dans une somme ou un produit: augmente la selection avec argument droit ou gauche\nshift-4: Editer selection, shift-5: taille police + ou - grande\nenter: evaluer la selection\nshift-6: valeur approchee\nDel: supprime l'operateur racine de la selection\n\nEditeur de scripts\nenter: passage a la ligne\nctrl z: defaire/refaire (1 fois)\nctrl c ou shift et touche curseur simultanement: marque le debut de la selection, deplacer le curseur vers la fin puis Del pour effacer ou ctrl c pour copier sans effacer. ctrl v pour coller.\ndoc-6 recherche seule: entrer un mot puis enter puis enter. Taper enter pour l'occurence suivante, esc pour annuler.\ndoc-6 remplacer: entrer un mot puis enter puis le remplacement et enter. Taper enter ou esc pour remplacer ou non et passer a l'occurence suivante, ctrl del pour annuler\nvalidation (a droite de U): tester syntaxe\n\nRaccourcis Graphes:\n+ - zoom\n(-): zoomout selon y\n*: autoscale\n/: orthonormalisation\nOPTN: axes on/off";
-  const char shortcuts_en_string[]="Keyboard shortcuts (shell and editor)\nbook: help or completion\ntab: completion (shell), indent (editor)\nshift-/: %\nalpha shift *: '\nctrl-/: \\\nshift-1 a 6: see at bottom\nshift-7: matrices\nshift-8: complexes\nshift-9:arithmetic\nshift-0: probas\nshift-.: reals\nctrl P: program\nvar: variables list\n ans (shift (-)): turtle screen (editor)\n\nctrl var (sto) returns =>\n=>+: partfrac\n=>*: factor\n=>sin/cos/tan\n=>=>: solve\n\nShell:\nshift-5: 2d editor or graph or text\nshift-4: text edit\n+ ou - modifies selected slider\n\nExpressions editor\nctrl z: undo/redo (1 fois)\nkeypad: move selection inside expression tree\nshift-right/left exchange selection with right or left argument\nalpha-right/left: inside a sum or product: increase selection with right or left argument\nshift-4: Edit selection, shift-5: change fontsize\nenter: eval selection\nshift-6: approx value\nDel: suppress selection's rootnode operator\n\nScript Editor\nenter: newline\nctrl z: undo/redo (1 time)\nctrl c or shift + cursor key simultaneously: marks selection begin, move the cursor to the end, then hit Del to erase or ctrl c to copy (no erase). ctrl v to paste.\ndoc-6 search: enter a word then enter then again enter. Type enter for next occurence, esc to cancel.\ndoc-6 replace: enter a word then enter then replacement word then enter. Type enter or esc to replace or ignore and go to next occurence, AC to cancel\nOK: test syntax\n\nGraph shortcuts:\n+ - zoom\n(-): zoomout along y\n*: autoscale\n/: orthonormalization\nOPTN: axes on/off";
+  const char shortcuts_en_string[]="键盘快捷键 (shell 与编辑器)\nbook: 帮助或补全\ntab: 补全 (shell), 缩进 (编辑器)\nshift-/: %\nalpha shift *: '\nctrl-/: \\\nshift-1 到 6: 见底部菜单\nshift-7: 矩阵\nshift-8: 复数\nshift-9: 算术\nshift-0: 概率\nshift-.: 实数\nctrl P: 程序\nvar: 变量列表\n ans (shift (-)): 海龟绘图屏 (编辑器)\n\nctrl var (sto) 返回 =>\n=>+: partfrac\n=>*: factor\n=>sin/cos/tan\n=>=>: solve\n\nShell:\nshift-5: 2d 编辑器/图形/文本\nshift-4: 文本编辑\n+ 或 - 调整选中的滑块\n\n表达式编辑器\nctrl z: 撤销/重做 (1 次)\nkeypad: 在表达式树中移动选区\nshift-右/左: 将选区与右侧或左侧参数交换\nalpha-右/左: 在和或积中, 向右或向左扩展选区\nshift-4: 编辑选区, shift-5: 改变字号\nenter: 求值选区\nshift-6: 近似值\nDel: 删除选区根节点运算符\n\n脚本编辑器\nenter: 换行\nctrl z: 撤销/重做 (1 次)\nctrl c 或 shift 与方向键同时按: 标记选区起点, 把光标移到末尾, 然后按 Del 删除, 或按 ctrl c 复制 (不删除). ctrl v 粘贴.\ndoc-6 查找: 输入一个词然后 enter 再 enter. 按 enter 跳到下一处, esc 取消.\ndoc-6 替换: 输入一个词然后 enter, 再输入替换词然后 enter. 按 enter 或 esc 替换或跳过并到下一处, AC 取消\nOK: 测试语法\n\n图形快捷键:\n+ - 缩放\n(-): 沿 y 缩小\n*: 自动缩放\n/: 正交归一化\nOPTN: 坐标轴开/关";
 #endif
   
   const char apropos_fr_string[]="Giac/Xcas 1.6.0, (c) 2020 B. Parisse et R. De Graeve, www-fourier.univ-grenoble-alpes.fr/~parisse.\nKhicas, interface pour calculatrices par B. Parisse, license GPL version 2, adaptee de l'interface d'Eigenmath pour Casio, G. Maia (http://gbl08ma.com), Mike Smith, Nemhardy, LePhenixNoir, ...\nPortage sur Numworks par Damien Nicolet. Remerciements a Jean-Baptiste Boric et Maxime Friess\nPortage sur Nspire grace a Fabian Vogt (firebird-emu, ndless...).\nTable periodique d'apres Maxime Friess\nRemerciements au site tiplanet, en particulier Xavier Andreani, Adrien Bertrand, Lionel Debroux";
 
-  const char apropos_en_string[]="Giac/Xcas 1.6.0, (c) 2020 B. Parisse et R. De Graeve, www-fourier.univ-grenoble-alpes.fr/~parisse.\nKhicas, calculators interface by B. Parisse, GPL license version 2, adapted from Eigenmath for Casio, G. Maia (http://gbl08ma.com), Mike Smith, Nemhardy, LePhenixNoir, ...\nPorted on Numworks by Damien Nicolet. Thanks to Jean-Baptiste Boric and Maxime Friess\nPorted on Nspire thanks to Fabian Vogt (firebird-emu, ndless...)\nPeriodic table by Maxime Friess\nThanks to tiplanet, especially Xavier Andreani, Adrien Bertrand, Lionel Debroux";
+  const char apropos_en_string[]="Giac/Xcas 1.6.0, (c) 2020 B. Parisse et R. De Graeve, www-fourier.univ-grenoble-alpes.fr/~parisse.\nKhicas, 计算器界面, 作者 B. Parisse, GPL license version 2, 改编自 Casio 版 Eigenmath, G. Maia (http://gbl08ma.com), Mike Smith, Nemhardy, LePhenixNoir, ...\n移植到 Numworks: Damien Nicolet. 感谢 Jean-Baptiste Boric 与 Maxime Friess\n移植到 Nspire: 感谢 Fabian Vogt (firebird-emu, ndless...)\n元素周期表: Maxime Friess\n感谢 tiplanet, 特别是 Xavier Andreani, Adrien Bertrand, Lionel Debroux";
 
   const int CAT_COMPLETE_COUNT_FR=sizeof(completeCatfr)/sizeof(catalogFunc);
   const int CAT_COMPLETE_COUNT_EN=sizeof(completeCaten)/sizeof(catalogFunc);
@@ -1733,37 +1733,37 @@ const catalogFunc completeCaten[] = { // list of all functions (including some n
   int showCatalog(char* insertText,int preselect,int menupos,GIAC_CONTEXT) {
     // returns 0 on failure (user exit) and 1 on success (user chose a option)
     MenuItem menuitems[CAT_CATEGORY_LOGO+1];
-    menuitems[CAT_CATEGORY_ALL].text = (char*)((lang==1)?"Tout":"All");
-    menuitems[CAT_CATEGORY_ALGEBRA].text = (char*)((lang==1)?"Algebre":"Algebra");
-    menuitems[CAT_CATEGORY_LINALG].text = (char*)((lang==1)?"Algebre lineaire":"Linear algebra");
-    menuitems[CAT_CATEGORY_CALCULUS].text = (char*)((lang==1)?"Analyse":"Calculus");
-    menuitems[CAT_CATEGORY_ARIT].text = (char*)"Arithmetic, crypto";
-    menuitems[CAT_CATEGORY_COMPLEXNUM].text = (char*)"Complexes";
-    menuitems[CAT_CATEGORY_PLOT].text = (char*)((lang==1)?"Courbes":"Curves");
-    menuitems[CAT_CATEGORY_POLYNOMIAL].text = (char*)((lang==1)?"Polynomes":"Polynomials");
-    menuitems[CAT_CATEGORY_PROBA].text = (char*)((lang==1)?"Probabilites":"Probabilities");
-    menuitems[CAT_CATEGORY_PROGCMD].text = (char*)((lang==1)?"Programmes cmds (0)":"Program cmds (0)");
-    menuitems[CAT_CATEGORY_REAL].text = (char*)((lang==1)?"Reels (e^)":"Reals");
-    menuitems[CAT_CATEGORY_SOLVE].text = (char*)((lang==1)?"Resoudre (ln)":"Solve (ln)");
-    menuitems[CAT_CATEGORY_STATS].text = (char*)((lang==1)?"Statistiques (log)":"Statistics (log)");
-    menuitems[CAT_CATEGORY_TRIG].text = (char*)((lang==1)?"Trigonometrie (i)":"Trigonometry (i)");
-    menuitems[CAT_CATEGORY_OPTIONS].text = (char*)"Options (,)";
-    menuitems[CAT_CATEGORY_LIST].text = (char*)((lang==1)?"Listes (x^y)":"Lists (x^y)");
-    menuitems[CAT_CATEGORY_MATRIX].text = (char*)"Matrices (sin)";
-    menuitems[CAT_CATEGORY_PROG].text = (char*)((lang==1)?"Programmes (cos)":"Programs");
-    menuitems[CAT_CATEGORY_SOFUS].text = (char*)((lang==1)?"Modifier variables (tan)":"Change variables (tan)");
-    menuitems[CAT_CATEGORY_PHYS].text = (char*)((lang==1)?"Constantes physique (pi)":"Physics constants (pi)");
-    menuitems[CAT_CATEGORY_UNIT].text = (char*)((lang==1)?"Unites physiques (sqrt)":"Units (sqrt)");
-    menuitems[CAT_CATEGORY_2D].text = (char*)((lang==1)?"Geometrie (x^2)":"Geometry (x^2)");
-    menuitems[CAT_CATEGORY_3D].text = (char*)((lang==1)?"3D (()":"3D (()");
-    menuitems[CAT_CATEGORY_LOGO].text = (char*)((lang==1)?"Tortue ())":"Turtle ())");
+    menuitems[CAT_CATEGORY_ALL].text = (char*)((lang==1)?"Tout":"全部");
+    menuitems[CAT_CATEGORY_ALGEBRA].text = (char*)((lang==1)?"Algebre":"代数");
+    menuitems[CAT_CATEGORY_LINALG].text = (char*)((lang==1)?"Algebre lineaire":"线性代数");
+    menuitems[CAT_CATEGORY_CALCULUS].text = (char*)((lang==1)?"Analyse":"微积分");
+    menuitems[CAT_CATEGORY_ARIT].text = (char*)((lang==1)?"Arithmetic, crypto":"算术与加密");
+    menuitems[CAT_CATEGORY_COMPLEXNUM].text = (char*)((lang==1)?"Complexes":"复数");
+    menuitems[CAT_CATEGORY_PLOT].text = (char*)((lang==1)?"Courbes":"曲线");
+    menuitems[CAT_CATEGORY_POLYNOMIAL].text = (char*)((lang==1)?"Polynomes":"多项式");
+    menuitems[CAT_CATEGORY_PROBA].text = (char*)((lang==1)?"Probabilites":"概率");
+    menuitems[CAT_CATEGORY_PROGCMD].text = (char*)((lang==1)?"Programmes cmds (0)":"编程命令 (0)");
+    menuitems[CAT_CATEGORY_REAL].text = (char*)((lang==1)?"Reels (e^)":"实数");
+    menuitems[CAT_CATEGORY_SOLVE].text = (char*)((lang==1)?"Resoudre (ln)":"求解 (ln)");
+    menuitems[CAT_CATEGORY_STATS].text = (char*)((lang==1)?"Statistiques (log)":"统计 (log)");
+    menuitems[CAT_CATEGORY_TRIG].text = (char*)((lang==1)?"Trigonometrie (i)":"三角 (i)");
+    menuitems[CAT_CATEGORY_OPTIONS].text = (char*)((lang==1)?"Options (,)":"选项 (,)");
+    menuitems[CAT_CATEGORY_LIST].text = (char*)((lang==1)?"Listes (x^y)":"列表 (x^y)");
+    menuitems[CAT_CATEGORY_MATRIX].text = (char*)((lang==1)?"Matrices (sin)":"矩阵 (sin)");
+    menuitems[CAT_CATEGORY_PROG].text = (char*)((lang==1)?"Programmes (cos)":"程序");
+    menuitems[CAT_CATEGORY_SOFUS].text = (char*)((lang==1)?"Modifier variables (tan)":"换元 (tan)");
+    menuitems[CAT_CATEGORY_PHYS].text = (char*)((lang==1)?"Constantes physique (pi)":"物理常数 (pi)");
+    menuitems[CAT_CATEGORY_UNIT].text = (char*)((lang==1)?"Unites physiques (sqrt)":"单位 (sqrt)");
+    menuitems[CAT_CATEGORY_2D].text = (char*)((lang==1)?"Geometrie (x^2)":"几何 (x^2)");
+    menuitems[CAT_CATEGORY_3D].text = (char*)((lang==1)?"3D (()":"三维 (()");
+    menuitems[CAT_CATEGORY_LOGO].text = (char*)((lang==1)?"Tortue ())":"海龟绘图 ())");
   
     Menu menu;
     menu.items=menuitems;
     menu.numitems=sizeof(menuitems)/sizeof(MenuItem);
     menu.height=MENUHEIGHT;
     menu.scrollout=1;
-    menu.title = (char*)((lang==1)?"Liste de commandes":"Commands list");
+    menu.title = (char*)((lang==1)?"Liste de commandes":"命令列表");
     //puts("catalog 1");
     while(1) {
       if (preselect)
@@ -1917,7 +1917,7 @@ const catalogFunc completeCaten[] = { // list of all functions (including some n
       xcas::textArea text;
       text.editable=false;
       text.clipline=-1;
-      text.title = (char*)((lang==1)?"Aide sur la commande":"Help on command");
+      text.title = (char*)((lang==1)?"Aide sur la commande":"命令帮助");
       text.allowF1=true;
       text.python=false;
       std::vector<xcas::textElement> & elem=text.elements;
@@ -2174,7 +2174,7 @@ const catalogFunc completeCaten[] = { // list of all functions (including some n
 	  xcas::textArea text;
 	  text.editable=false;
 	  text.clipline=-1;
-	  text.title = (char*)((lang==1)?"Aide sur la commande":"Help on command");
+	  text.title = (char*)((lang==1)?"Aide sur la commande":"命令帮助");
 	  text.allowF1=true;
 	  text.python=python_compat(contextptr);
 	  std::vector<xcas::textElement> & elem=text.elements;
@@ -2728,7 +2728,7 @@ const catalogFunc completeCaten[] = { // list of all functions (including some n
       s1=print_INT_(di);
     else
       s1=print_DOUBLE_(d,3);
-    inputline(msg1,((lang==1)?"Nouvelle valeur? ":"New value? "),s1,false,65,contextptr);
+    inputline(msg1,((lang==1)?"Nouvelle valeur? ":"新值? "),s1,false,65,contextptr);
     return stringtodouble(s1,d);
   }
   
@@ -2739,7 +2739,7 @@ const catalogFunc completeCaten[] = { // list of all functions (including some n
       s1=print_INT_(di);
     else
       s1=print_DOUBLE_(d,3);
-    inputline(msg1,((lang==1)?"Nouvelle valeur? ":"New value? "),s1,false,ypos,contextptr);
+    inputline(msg1,((lang==1)?"Nouvelle valeur? ":"新值? "),s1,false,ypos,contextptr);
     return stringtodouble(s1,d);
   }
   
@@ -8602,7 +8602,7 @@ namespace xcas {
       if (lang==1)
 	statuslinemsg("Toolbox: aide");
       else
-	statuslinemsg("Toolbox: help");
+	statuslinemsg("Toolbox: 帮助");
       double3 A(window_xmin,window_ymin,window_zmin),
 	B(window_xmin,window_ymin,window_zmax),
 	C(window_xmax,window_ymin,window_zmin),
@@ -8944,7 +8944,7 @@ namespace xcas {
 #ifdef NSPIRE_NEWLIB
       DefineStatusMessage((char*)"menu: menu, esc: quit", 1, 0, 0);
 #else
-      DefineStatusMessage((char*)"shift-1: help, home: menu, back: quit", 1, 0, 0);
+      DefineStatusMessage((char*)"shift-1: 帮助, home: 菜单, back: 退出", 1, 0, 0);
 #endif
       DisplayStatusArea();
       if (hp || tracemode)
@@ -9936,7 +9936,7 @@ namespace xcas {
 #ifdef NUMWORKS
 	  statuslinemsg("Back: quit, up/down: move");
 #else
-	  statuslinemsg("esc: quit, up/down: move");
+	  statuslinemsg("esc: 退出, up/down: 移动");
 #endif
 	  // table of values
 	  drawRectangle(0,dy,LCD_WIDTH_PX,LCD_HEIGHT_PX-dy,_WHITE);
@@ -10667,7 +10667,7 @@ namespace xcas {
     textArea text;
     text.editable=false;
     text.clipline=-1;
-    text.title = (char*)((lang==1)?"Aide":"Help");
+    text.title = (char*)((lang==1)?"Aide":"帮助");
     text.allowF1=false;
     text.python=false;
     add(&text,lang==1?
@@ -10712,7 +10712,7 @@ namespace xcas {
 	std::string s1; double d;
 	if (paramenu.selection==2){
 	  handle_f5();
-	  if (inputline(menu_name,(lang==1)?"Nouvelle valeur?":"New value?",s1,false)==KEY_CTRL_EXE && s1.size()>0 && isalpha(s1[0])){
+	  if (inputline(menu_name,(lang==1)?"Nouvelle valeur?":"新值?",s1,false)==KEY_CTRL_EXE && s1.size()>0 && isalpha(s1[0])){
 	    if (s1.size()>10)
 	      s1=s1.substr(0,10);
 	    strcpy(menu_name,("name "+s1).c_str());
@@ -10844,7 +10844,7 @@ namespace xcas {
 #ifdef NSPIRE_NEWLIB
       DefineStatusMessage((char*)"shift-1: help, menu: menu, esc: quit", 1, 0, 0);
 #else
-      DefineStatusMessage((char*)"shift-1: help, home: menu, back: quit", 1, 0, 0);
+      DefineStatusMessage((char*)"shift-1: 帮助, home: 菜单, back: 退出", 1, 0, 0);
 #endif
       DisplayStatusArea();
       int saveprec=gr.precision;
@@ -11313,11 +11313,11 @@ namespace xcas {
 	  s="depth 3d "+print_DOUBLE_(gr.current_depth,contextptr);
 	  strcpy(menu_depth,s.c_str());
 	  //smallmenu.title = "KhiCAS";
-	  smallmenuitems[0].text = (char *) ((lang==1)?"Aide":"Help");
+	  smallmenuitems[0].text = (char *) ((lang==1)?"Aide":"帮助");
 #ifdef NUMWORKS
-	  smallmenuitems[1].text = (char*) ((lang==1)?"Etude courbe (x,n,t)":"Curve study (x,n,t)");
+	  smallmenuitems[1].text = (char*) ((lang==1)?"Etude courbe (x,n,t)":"曲线研究 (x,n,t)");
 #else
-	  smallmenuitems[1].text = (char*) ((lang==1)?"Etude courbe (tab)":"Curve study (tab)");
+	  smallmenuitems[1].text = (char*) ((lang==1)?"Etude courbe (tab)":"曲线研究 (tab)");
 #endif
 	  smallmenuitems[2].text = (char *) menu_xmin;
 	  smallmenuitems[3].text = (char *) menu_xmax;
@@ -11328,25 +11328,25 @@ namespace xcas {
 	  smallmenuitems[8].text = (char *) menu_depth;
 	  smallmenuitems[9].text = (char*) (lang==1?"Sauvegarder figure":"Save figure");
 	  smallmenuitems[10].text = (char*) (lang==1?"Sauvegarder comme":"Save as");
-	  smallmenuitems[11].text = (char*)((lang==1)?"Quitter":"Quit");
+	  smallmenuitems[11].text = (char*)((lang==1)?"Quitter":"退出");
 	  smallmenuitems[12].text = (char*) "Orthonormalize /";
 	  smallmenuitems[13].text = (char*) "Autoscale *";
 	  smallmenuitems[14].text = (char *) ("Zoom in +");
 	  smallmenuitems[15].text = (char *) ("Zoom out -");
 	  smallmenuitems[16].text = (char *) ("Y-Zoom out (-)");
-	  smallmenuitems[17].text = (char*) ((lang==1)?"Voir axes":"Show axes");
+	  smallmenuitems[17].text = (char*) ((lang==1)?"Voir axes":"显示坐标轴");
 	  smallmenuitems[17].type = MENUITEM_CHECKBOX;
 	  smallmenuitems[17].value = gr.show_axes;
-	  smallmenuitems[18].text = (char*) ((lang==1)?"Voir tangente (F3)":"Show tangent (F3)");
+	  smallmenuitems[18].text = (char*) ((lang==1)?"Voir tangente (F3)":"显示切线 (F3)");
 	  smallmenuitems[18].type = MENUITEM_CHECKBOX;
 	  smallmenuitems[18].value = (gr.tracemode & 2)!=0;
-	  smallmenuitems[19].text = (char*) ((lang==1)?"Voir normale (F4)":"Show normal (F4)");
+	  smallmenuitems[19].text = (char*) ((lang==1)?"Voir normale (F4)":"显示法线 (F4)");
 	  smallmenuitems[19].type = MENUITEM_CHECKBOX;
 	  smallmenuitems[19].value = (gr.tracemode & 4)!=0;
-	  smallmenuitems[20].text = (char*) ((lang==1)?"Voir cercle (F5)":"Show circle (F5)");
+	  smallmenuitems[20].text = (char*) ((lang==1)?"Voir cercle (F5)":"显示圆 (F5)");
 	  smallmenuitems[20].type = MENUITEM_CHECKBOX;
 	  smallmenuitems[20].value = (gr.tracemode & 8)!=0;
-	  smallmenuitems[21].text = (char*) ((lang==1)?"Effacer traces geometrie":"Clear geometry traces");
+	  smallmenuitems[21].text = (char*) ((lang==1)?"Effacer traces geometrie":"清除几何轨迹");
 	  drawRectangle(0,180,LCD_WIDTH_PX,60,_BLACK);
 	  int sres = doMenu(&smallmenu);
 	  if (sres == MENU_RETURN_EXIT)
@@ -11864,7 +11864,7 @@ namespace xcas {
 #ifdef NSPIRE_NEWLIB
     DefineStatusMessage((char*)"+-: zoom, pad: move, esc: quit", 1, 0, 0);
 #else
-    DefineStatusMessage((char*)"+-: zoom, pad: move, EXIT: quit", 1, 0, 0);
+    DefineStatusMessage((char*)"+-: 缩放, pad: 移动, EXIT: 退出", 1, 0, 0);
 #endif
     DisplayStatusArea();
     bool redraw=true;
@@ -11975,9 +11975,9 @@ namespace xcas {
 #if 1
       if (firstrun==2){
 #ifdef NSPIRE_NEWLIB
-	DefineStatusMessage((char*)((lang==1)?"ctrl enter: eval, esc: quitte, ":"ctrl enter: eval, esc: exit"), 1, 0, 0);
+	DefineStatusMessage((char*)((lang==1)?"ctrl enter: eval, esc: quitte, ":"ctrl enter: 求值, esc: 退出"), 1, 0, 0);
 #else
-	DefineStatusMessage((char*)((lang==1)?"EXE: quitte, resultat dans last":"EXE: quit, result stored in last"), 1, 0, 0);
+	DefineStatusMessage((char*)((lang==1)?"EXE: quitte, resultat dans last":"EXE: 退出, 结果存入 last"), 1, 0, 0);
 #endif
 	DisplayStatusArea();
 	firstrun=1;
@@ -12046,7 +12046,7 @@ namespace xcas {
 	os_hide_graph();
 	if (edited && xcas::do_select(eq.data,true,value) && value.type==_EQW){
 	  //cout << "ok " << value._EQWptr->g << endl;
-	  DefineStatusMessage(((lang==1)?"resultat stocke dans last":"result stored in last"), 1, 0, 0);
+	  DefineStatusMessage(((lang==1)?"resultat stocke dans last":"结果存入 last"), 1, 0, 0);
 	  //DisplayStatusArea();
 	  giac::sto(value._EQWptr->g,giac::gen("last",contextptr),contextptr);
 	  return value._EQWptr->g;
@@ -12061,9 +12061,9 @@ namespace xcas {
 	}
 	if (confirm(
 #ifdef NSPIRE_NEWLIB
-		    (lang==1)?"Vraiment abandonner?":"Really leave",(lang==1)?"esc: editeur,  enter: confirmer":"esc: editor,  enter: confirm"
+		    (lang==1)?"Vraiment abandonner?":"Really leave",(lang==1)?"esc: editeur,  enter: confirmer":"esc: 编辑器,  enter: 确认"
 #else
-		    (lang==1)?"Vraiment abandonner?":"Really leave",(lang==1)?"Back: editeur,  OK: confirmer":"Back: editor,  OK: confirm"
+		    (lang==1)?"Vraiment abandonner?":"Really leave",(lang==1)?"Back: editeur,  OK: confirmer":"Back: 编辑器,  OK: 确认"
 #endif
 		    )==KEY_CTRL_F1){
 	  os_hide_graph();
@@ -12158,7 +12158,7 @@ namespace xcas {
 	if (keyflag==0)
 	  handle_f5();
 	std::string varname;
-	if (inputline(((lang==1)?"Stocker la selection dans":"Save selection in",(lang==1)?"Nom de variable: ":"Variable name: "),0,varname,false,65,contextptr) && !varname.empty() && isalpha(varname[0])){
+	if (inputline(((lang==1)?"Stocker la selection dans":"保存选区到",(lang==1)?"Nom de variable: ":"变量名: "),0,varname,false,65,contextptr) && !varname.empty() && isalpha(varname[0])){
 	  giac::gen g(varname,contextptr);
 	  giac::gen ge(protecteval(g,1,contextptr));
 	  if (g.type!=_IDNT){
@@ -12275,7 +12275,7 @@ namespace xcas {
       if (0 && key==KEY_CTRL_EXE){
 	if (xcas::do_select(eq.data,true,value) && value.type==_EQW){
 	  //cout << "ok " << value._EQWptr->g << endl;
-	  DefineStatusMessage(((lang==1)?"resultat stocke dans last":"result stored in last"), 1, 0, 0);
+	  DefineStatusMessage(((lang==1)?"resultat stocke dans last":"结果存入 last"), 1, 0, 0);
 	  //DisplayStatusArea();
 	  giac::sto(value._EQWptr->g,giac::gen("last",contextptr),contextptr);
 	  return value._EQWptr->g;
@@ -12624,7 +12624,7 @@ namespace xcas {
     python_compat(4|p,contextptr);
     if (edptr)
       edptr->python=1;
-    if (do_confirm((lang==1)?"Effacer les variables Xcas?":"Clear Xcas variables?"))
+    if (do_confirm((lang==1)?"Effacer les variables Xcas?":"清除 Xcas 变量?"))
       do_restart(contextptr);
     *logptr(contextptr) << "Micropython interpreter\n";
     Console_FMenu_Init(contextptr);
@@ -12636,7 +12636,7 @@ namespace xcas {
     python_compat(-1,contextptr);
     if (edptr)
       edptr->python=-1;
-    if (0 && do_confirm((lang==1)?"Effacer les variables Xcas?":"Clear Xcas variables?"))
+    if (0 && do_confirm((lang==1)?"Effacer les variables Xcas?":"清除 Xcas 变量?"))
       do_restart(contextptr);
     *logptr(contextptr) << "QuickJS interpreter\n";
     Console_FMenu_Init(contextptr);
@@ -12682,11 +12682,11 @@ namespace xcas {
       if (!kbd_interrupted){
 	// clear turtle, display msg
 	clear_turtle_history(contextptr);
-	int res=confirm((lang==1)?"Memoire remplie! Purger":"Memory full. Purge",
+	int res=confirm((lang==1)?"Memoire remplie! Purger":"内存已满. 清除",
 #ifdef NSPIRE_NEWLIB
-			(lang==1)?"enter: variable, esc: tout.":"enter: variables, esc: all",
+			(lang==1)?"enter: variable, esc: tout.":"enter: 变量, esc: 全部",
 #else
-			(lang==1)?"EXE variable, Back: tout.":"EXE variables, Back: all",
+			(lang==1)?"EXE variable, Back: tout.":"EXE 变量, Back: 全部",
 #endif
 			false);
 	if (res==KEY_CTRL_F1 && select_var(contextptr).type==_IDNT){
@@ -13154,7 +13154,7 @@ namespace xcas {
 
   void warn_python(int mode,bool autochange){
     if (mode==-1){
-      confirm((lang==1)?"Interpreteur Javascript":"Javascript interpreter",
+      confirm((lang==1)?"Interpreteur Javascript":"JavaScript 解释器",
 #ifdef NSPIRE_NEWLIB
 	      (lang==1)?"enter: ok":"enter: ok"
 #else
@@ -13164,7 +13164,7 @@ namespace xcas {
       return;
     }
     if (mode==0)
-      confirm(autochange?((lang==1)?"Source en syntaxe Xcas detecte.":"Xcas syntax source code detected."):((lang==1)?"Syntaxe Xcas.":"Xcas syntax."),
+      confirm(autochange?((lang==1)?"Source en syntaxe Xcas detecte.":"检测到 Xcas 语法源码."):((lang==1)?"Syntaxe Xcas.":"Xcas 语法."),
 #ifdef NSPIRE_NEWLIB
 	      "enter: ok"
 #else
@@ -13173,32 +13173,32 @@ namespace xcas {
 	      );
     if (mode==1)
       if (autochange)
-	confirm((lang==1)?"Source en syntaxe Python. Passage":"Python syntax source detected. Setting",
+	confirm((lang==1)?"Source en syntaxe Python. Passage":"检测到 Python 语法源码. 设为",
 #ifdef NSPIRE_NEWLIB
-		(lang==1)?"en Python avec ^=**, enter: ok":"Python mode with ^=**, enter:ok"
+		(lang==1)?"en Python avec ^=**, enter: ok":"Python 模式 ^=**, enter:ok"
 #else
-		(lang==1)?"en Python avec ^=**, OK: ok":"Python mode with ^=**, OK:ok"
+		(lang==1)?"en Python avec ^=**, OK: ok":"Python 模式 ^=**, OK:ok"
 #endif
 		);
       else
-	confirm((lang==1)?"Syntaxe Python avec ^==**, tapez":"Python syntax with ^==**, type",
+	confirm((lang==1)?"Syntaxe Python avec ^==**, tapez":"Python 语法 ^==**, 输入",
 #ifdef NSPIRE_NEWLIB
-		(lang==1)?"python_compat(2) pour xor. enter: ok":"python_compat(2) for xor. enter: ok"
+		(lang==1)?"python_compat(2) pour xor. enter: ok":"python_compat(2) 用于 xor. enter: ok"
 #else
-		(lang==1)?"python_compat(2) pour xor. OK: ok":"python_compat(2) for xor. OK: ok"
+		(lang==1)?"python_compat(2) pour xor. OK: ok":"python_compat(2) 用于 xor. OK: ok"
 #endif
 		);
     if (mode==2){
-      confirm((lang==1)?"Syntaxe Python avec ^==xor":"Python syntax with ^==xor",
+      confirm((lang==1)?"Syntaxe Python avec ^==xor":"Python 语法 ^==xor",
 #ifdef NSPIRE_NEWLIB
-	      (lang==1)?"python_compat(1) pour **. enter: ok":"python_compat(1) for **. enter: ok"
+	      (lang==1)?"python_compat(1) pour **. enter: ok":"python_compat(1) 用于 **. enter: ok"
 #else
-	      (lang==1)?"python_compat(1) pour **. OK: ok":"python_compat(1) for **. OK: ok"
+	      (lang==1)?"python_compat(1) pour **. OK: ok":"python_compat(1) 用于 **. OK: ok"
 #endif	      
 	      );
     }
     if (mode & 4){
-      confirm((lang==1)?"Interpreteur MicroPython":"MicroPython interpreter",
+      confirm((lang==1)?"Interpreteur MicroPython":"MicroPython 解释器",
 #ifdef NSPIRE_NEWLIB
 	      (lang==1)?"enter: ok":"enter: ok"
 #else
@@ -13278,9 +13278,9 @@ namespace xcas {
 	tmp += (lang==1)?" a ete modifie!":" was modified!";
 	if (confirm(tmp.c_str(),
 #ifdef NSPIRE_NEWLIB
-		    (lang==1)?"enter: sauvegarder, esc: tant pis":"enter: save, esc: discard changes"
+		    (lang==1)?"enter: sauvegarder, esc: tant pis":"enter: 保存, esc: 放弃修改"
 #else
-		    (lang==1)?"OK: sauvegarder, Back: tant pis":"OK: save, Back: discard changes"
+		    (lang==1)?"OK: sauvegarder, Back: tant pis":"OK: 保存, Back: 放弃修改"
 #endif
 		    )==KEY_CTRL_F1){
 	  save_script(text->filename.c_str(),merge_area(text->elements));
@@ -13312,11 +13312,11 @@ namespace xcas {
       // should detect syntax errors here and return line number
       if (parser_errorline>0){
 	//--parser_errorline; // ?? something strange 
-	sprintf(status,(lang==1)?"Erreur ligne %i":"Error line %i",parser_errorline);	
+	sprintf(status,(lang==1)?"Erreur ligne %i":"第 %i 行错误",parser_errorline);	
       }
       else {
 	process_freeze();
-	sprintf(status,"%s",(lang==1)?"Syntaxe correcte":"Parse OK");
+	sprintf(status,"%s",(lang==1)?"Syntaxe correcte":"语法正确");
       }
       DefineStatusMessage(status,1,0,0);
       return parser_errorline;
@@ -13363,13 +13363,13 @@ namespace xcas {
       }
       else {
 	lineerr=v.size();
-	tok=(lang==1)?"la fin":"end";
+	tok=(lang==1)?"la fin":"末尾";
 	pos=0;
       }
       if (pos>=0)
-	sprintf(status,(lang==1)?"Erreur ligne %i a %s":"Error line %i at %s",lineerr,tok.c_str());
+	sprintf(status,(lang==1)?"Erreur ligne %i a %s":"第 %i 行错误, 位于 %s",lineerr,tok.c_str());
       else
-	sprintf(status,(lang==1)?"Erreur ligne %i %s":"Error line %i %s",lineerr,(pos==-2?((lang==1)?", : manquant ?":", missing :?"):""));
+	sprintf(status,(lang==1)?"Erreur ligne %i %s":"第 %i 行错误 %s",lineerr,(pos==-2?((lang==1)?", : manquant ?":", 缺少 :?"):""));
       DefineStatusMessage(status,1,0,0);
     }
     else {
@@ -13382,7 +13382,7 @@ namespace xcas {
       // define the function
       if (check_do_graph(g,gs,7,contextptr)==KEY_SHUTDOWN)
 	return KEY_SHUTDOWN;
-      DefineStatusMessage((char *)((lang==1)?"Syntaxe correcte":"Parse OK"),1,0,0);
+      DefineStatusMessage((char *)((lang==1)?"Syntaxe correcte":"语法正确"),1,0,0);
     }
     DisplayStatusArea();    
     return lineerr;
@@ -13456,21 +13456,39 @@ namespace xcas {
   }
 
   void add(textArea *edptr,const std::string & s){
+    // UTF-8 aware: 0x9c is khicas' stored-newline marker, but it is also a valid
+    // UTF-8 continuation byte (e.g. 菜 U+83DC = E8 8F 9C). Multibyte sequences are
+    // copied whole so an inner 0x9c never gets mistaken for a line separator; a
+    // standalone 0x9c (lead byte < 0xC0) is still treated as newline.
     int r=1;
-    for (size_t i=0;i<s.size();++i){
-      if (s[i]=='\n' || s[i]==char(0x9c))
+    for (size_t i=0;i<s.size();){
+      unsigned char c=(unsigned char)s[i];
+      int clen=1;
+      if (c>=0xF0) clen=4; else if (c>=0xE0) clen=3; else if (c>=0xC0) clen=2;
+      if (clen>1 && i+clen<=s.size()){ i+=clen; continue; }
+      if (c=='\n' || c==0x9c)
 	++r;
+      ++i;
     }
     edptr->elements.reserve(edptr->elements.size()+r);
     textElement cur;
     cur.lineSpacing=2;
-    for (size_t i=0;i<s.size();++i){
-      char c=s[i];
-      if (c!='\n' && c!=char(0x9c)){
-	if (c!=char(0x0d))
-	  cur.s += c;
+    for (size_t i=0;i<s.size();){
+      unsigned char c=(unsigned char)s[i];
+      int clen=1;
+      if (c>=0xF0) clen=4; else if (c>=0xE0) clen=3; else if (c>=0xC0) clen=2;
+      if (clen>1 && i+clen<=s.size()){
+	cur.s.append(s,i,clen); // multibyte UTF-8 char, copy verbatim
+	i+=clen;
 	continue;
       }
+      if (c!='\n' && c!=0x9c){
+	if (c!=0x0d)
+	  cur.s += (char)c;
+	++i;
+	continue;
+      }
+      ++i;
       string tmp=string(cur.s.begin(),cur.s.end());
       cur.s.swap(tmp);
       edptr->elements.push_back(cur);
@@ -13662,7 +13680,7 @@ namespace xcas {
 #ifdef NSPIRE_NEWLIB
     DefineStatusMessage((char *)((lang==1)?"enter: suivant, DEL: annuler":"enter: next, DEL: cancel"),1,0,0);
 #else
-    DefineStatusMessage((char *)((lang==1)?"enter: suivant, DEL: annuler":"enter: next, DEL: cancel"),1,0,0);
+    DefineStatusMessage((char *)((lang==1)?"enter: suivant, DEL: annuler":"enter: 下一处, DEL: 取消"),1,0,0);
 #endif
     DisplayStatusArea();    	    
   }  
@@ -13670,7 +13688,7 @@ namespace xcas {
 
   void show_status(textArea * text,const std::string & search,const std::string & replace){
     if (text->editable && text->clipline>=0)
-      DefineStatusMessage((char *)"PAD: select, COPY: copy, DEL: cut",1,0,0);
+      DefineStatusMessage((char *)"PAD: 选择, COPY: 复制, DEL: 剪切",1,0,0);
     else {
       std::string status("edit ");
 #ifdef GIAC_SHOWTIME
@@ -13736,7 +13754,7 @@ namespace xcas {
 #ifdef NSPIRE_NEWLIB      
       DefineStatusMessage((char *)((lang==1)?"Remplacer? enter: Oui, 8 ou N: Non":"Replace? enter: Yes, 8 or N: No"),1,0,0);
 #else
-      DefineStatusMessage((char *)((lang==1)?"Remplacer? EXE: Oui, 8 ou N: Non":"Replace? EXE: Yes, 8 or N: No"),1,0,0);
+      DefineStatusMessage((char *)((lang==1)?"Remplacer? EXE: Oui, 8 ou N: Non":"Replace? EXE: 是, 8 或 N: 否"),1,0,0);
 #endif
     }
     else
@@ -13773,11 +13791,11 @@ namespace xcas {
 	// save or cancel?
 	std::string tmp=text->filename;
 	if (strcmp(tmp.c_str(),"temp.py")==0){
-	  if (confirm((lang==1)?"Les modifications seront perdues":"Changes will be lost",
+	  if (confirm((lang==1)?"Les modifications seront perdues":"修改将丢失",
 #ifdef NSPIRE_NEWLIB
-		      (lang==1)?"enter: annuler, esc: tant pis":"enter: cancel, esc: confirm"
+		      (lang==1)?"enter: annuler, esc: tant pis":"enter: 取消, esc: 确认"
 #else
-		      (lang==1)?"OK: annuler, Back: tant pis":"OK: cancel, Back: confirm"
+		      (lang==1)?"OK: annuler, Back: tant pis":"OK: 取消, Back: 确认"
 #endif
 		      )==KEY_CTRL_F1)
 	    return 2;
@@ -13788,9 +13806,9 @@ namespace xcas {
 	tmp += (lang==1)?" a ete modifie!":" was modified!";
 	if (confirm(tmp.c_str(),
 #ifdef NSPIRE_NEWLIB
-		    (lang==1)?"enter: sauvegarder, esc: tant pis":"enter: save, esc: discard changes"
+		    (lang==1)?"enter: sauvegarder, esc: tant pis":"enter: 保存, esc: 放弃修改"
 #else
-		    (lang==1)?"OK: sauvegarder, Back: tant pis":"OK: save, Back: discard changes"
+		    (lang==1)?"OK: sauvegarder, Back: tant pis":"OK: 保存, Back: 放弃修改"
 #endif
 		    )==KEY_CTRL_F1){
 	  save_script(text->filename.c_str(),merge_area(text->elements));
@@ -13812,23 +13830,25 @@ namespace xcas {
     // if (!fake) cout << "print:" << buf << " " << strlen(buf) << " " << color << endl;
     if (!isalpha(buf[0]) && color != 2016 && color != 4)
       color = 0;
-    if (!fake){
-      if (minimini || color == 2016 || color == 4) // comment in small font
-        PrintMiniMini(X, Y, buf, revert ? 4 : 0,COLOR_BLACK,COLOR_WHITE);
-      else {
-        PrintMini(X, Y, buf, revert ? 4 : 0,COLOR_BLACK,COLOR_WHITE);
-        // overline/underline style according to color
-        if (!revert){
-          if (color == 3){ 
-            giac::draw_line(X, Y + 13, X + 8 * strlen(buf), Y + 13, 4<<22,context0); 
-          }
-          if (color == 1){ 
-            giac::draw_line(X, Y + 13, X + 8 * strlen(buf), Y + 13, COLOR_BLACK,context0); 
-          }
+    // Advance X by the *actual* drawn width (CJK = 16px, ASCII = font width),
+    // taken from PrintMini/PrintMiniMini's return value, instead of the old
+    // byte-based X += 7*strlen(buf) which over-counted every multibyte CJK char
+    // (3 bytes -> 21px vs 16px painted) and desynchronised wrap/cursor math.
+    int x0 = X;
+    if (minimini || color == 2016 || color == 4) // comment in small font
+      X = PrintMiniMini(X, Y, buf, revert ? 4 : 0, COLOR_BLACK, COLOR_WHITE, fake);
+    else {
+      X = PrintMini(X, Y, buf, revert ? 4 : 0, COLOR_BLACK, COLOR_WHITE, fake);
+      // overline/underline style according to color
+      if (!fake && !revert){
+        if (color == 3){
+          giac::draw_line(x0, Y + 13, X, Y + 13, 4<<22,context0);
+        }
+        if (color == 1){
+          giac::draw_line(x0, Y + 13, X, Y + 13, COLOR_BLACK,context0);
         }
       }
     }
-    X += ((minimini || color == 2016 || color == 4) ? 6 : 7) * strlen(buf);
   }
 
 #else
@@ -14157,11 +14177,21 @@ int strncasecmp(const char *s1, const char *s2, size_t n) {
   {
     if (src) {
       while (*src && (tokchar != *src)) {
-	if (lgh) {
-	  *token++ = *src;
+	/* UTF-8 aware: determine this character's byte length so we never
+	   cut a multibyte (e.g. CJK) char in half nor silently drop the
+	   over-length remainder.  When the char would not fit in the
+	   remaining lgh, stop on the boundary so the caller resumes here on
+	   the next call (long spaceless words then wrap instead of breaking). */
+	unsigned char c = *src;
+	int clen = 1;
+	if (c >= 0xF0) clen = 4;
+	else if (c >= 0xE0) clen = 3;
+	else if (c >= 0xC0) clen = 2;
+	if (lgh < clen) break;
+	for (int k = 0; k < clen && *src && (tokchar != *src); ++k) {
+	  *token++ = *src++;
 	  --lgh;
 	}
-	src++;
       }
       if (*src && (tokchar == *src)) src++;
     }
@@ -15079,9 +15109,9 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
     handle_f5();
     string str;
 #ifdef NSPIRE_NEWLIB
-    int res=inputline((lang==1)?"esc ou chaine vide: annulation":"esc or empty string: cancel",(lang==1)?"Nom de fichier:":"Filename:",str,false);
+    int res=inputline((lang==1)?"esc ou chaine vide: annulation":"esc 或空字符串: 取消",(lang==1)?"Nom de fichier:":"文件名:",str,false);
 #else
-    int res=inputline((lang==1)?"EXIT ou chaine vide: annulation":"EXIT or empty string: cancel",(lang==1)?"Nom de fichier:":"Filename:",str,false);
+    int res=inputline((lang==1)?"EXIT ou chaine vide: annulation":"EXIT 或空字符串: 取消",(lang==1)?"Nom de fichier:":"文件名:",str,false);
 #endif
     if (res==KEY_CTRL_EXIT || str.empty())
       return 0;
@@ -15094,9 +15124,9 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
       return 1;
     if (confirm((lang==1)?"  Le fichier existe!":"  File exists!",
 #ifdef NSPIRE_NEWLIB
-		(lang==1)?"enter: ecraser, esc: annuler":"enter:overwrite, esc: cancel"
+		(lang==1)?"enter: ecraser, esc: annuler":"enter: 覆盖, esc: 取消"
 #else
-		(lang==1)?"OK: ecraser,Back: annuler":"OK:overwrite, Back: cancel"
+		(lang==1)?"OK: ecraser,Back: annuler":"OK: 覆盖, Back: 取消"
 #endif
 		)==KEY_CTRL_F1)
       return 1;
@@ -15143,11 +15173,11 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
     }
     std::string msg;
     if (w.empty())
-      msg=(lang==1)?(list?"Creer nouvelle liste":"Creer nouvelle matrice"):(list?"Create new list":"Create new matrix");
+      msg=(lang==1)?(list?"Creer nouvelle liste":"Creer nouvelle matrice"):(list?"新建列表":"新建矩阵");
     else
-      msg=(((lang==1)?"Creer nouveau ou editer ":"Create new or edit ")+(w.size()==1?w.front():giac::gen(w,giac::_SEQ__VECT)).print(contextptr));
+      msg=(((lang==1)?"Creer nouveau ou editer ":"新建或编辑 ")+(w.size()==1?w.front():giac::gen(w,giac::_SEQ__VECT)).print(contextptr));
     handle_f5();
-    if (inputline(msg.c_str(),((lang==1)?"Nom de variable:":"Variable name:"),*sptr,false) && !sptr->empty() && isalpha((*sptr)[0])){
+    if (inputline(msg.c_str(),((lang==1)?"Nom de variable:":"变量名:"),*sptr,false) && !sptr->empty() && isalpha((*sptr)[0])){
       giac::gen g(*sptr,contextptr);
       giac::gen ge(protecteval(g,1,contextptr));
       if (g.type==giac::_IDNT){
@@ -15172,7 +15202,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 	      else {
 		std::string tmp(*sptr+((lang==1)?" lignes.":" lines."));
 		*sptr="";
-		inputline(tmp.c_str(),(lang==1)?"Colonnes:":"Columns:",*sptr,true);
+		inputline(tmp.c_str(),(lang==1)?"Colonnes:":"列:",*sptr,true);
 		c=strtol(sptr->c_str(),0,10);
 	      }
 	      if (c==0){
@@ -15201,20 +15231,20 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
     std::string search;
     handle_f5();
 #ifdef NSPIRE_NEWLIB
-    int res=inputline((lang==1)?"esc ou chaine vide: annulation":"esc or empty string: cancel",(lang==1)?"Chercher:":"Search:",search,false);
+    int res=inputline((lang==1)?"esc ou chaine vide: annulation":"esc 或空字符串: 取消",(lang==1)?"Chercher:":"查找:",search,false);
     if (search.empty() || res==KEY_CTRL_EXIT)
       return "";
     replace="";
-    std::string tmp=((lang==1)?"esc: recherche seule de ":"esc: search only ")+search;
+    std::string tmp=((lang==1)?"esc: recherche seule de ":"esc: 仅查找 ")+search;
 #else
-    int res=inputline((lang==1)?"EXIT ou chaine vide: annulation":"EXIT or empty string: cancel",(lang==1)?"Chercher:":"Search:",search,false);
+    int res=inputline((lang==1)?"EXIT ou chaine vide: annulation":"EXIT 或空字符串: 取消",(lang==1)?"Chercher:":"查找:",search,false);
     if (search.empty() || res==KEY_CTRL_EXIT)
       return "";
     replace="";
-    std::string tmp=((lang==1)?"EXIT: recherche seule de ":"EXIT: search only ")+search;
+    std::string tmp=((lang==1)?"EXIT: recherche seule de ":"EXIT: 仅查找 ")+search;
 #endif
     handle_f5();
-    res=inputline(tmp.c_str(),(lang==1)?"Remplacer par:":"Replace by:",replace,false);
+    res=inputline(tmp.c_str(),(lang==1)?"Remplacer par:":"替换为:",replace,false);
     if (res==KEY_CTRL_EXIT)
       replace="";
     return search;
@@ -15495,7 +15525,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 	  }
 #else
 	  copy_clipboard(v[textline].s,false);
-	  DefineStatusMessage((char*)"Line copied to clipboard", 1, 0, 0);
+	  DefineStatusMessage((char*)"行已复制到剪贴板", 1, 0, 0);
 	  DisplayStatusArea();
 #endif
 	  continue;
@@ -15799,15 +15829,15 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 	  smallmenu.height=MENUHEIGHT;
 	  smallmenu.scrollbar=0;
 	  //smallmenu.title = "KhiCAS";
-	  smallmenuitems[0].text = (char*)((lang==1)?"Tester syntaxe":"Check syntax");
-	  smallmenuitems[1].text = (char*)((lang==1)?"Sauvegarder":"Save");
-	  smallmenuitems[2].text = (char*)((lang==1)?"Sauvegarder comme":"Save as");
+	  smallmenuitems[0].text = (char*)((lang==1)?"Tester syntaxe":"检查语法");
+	  smallmenuitems[1].text = (char*)((lang==1)?"Sauvegarder":"保存");
+	  smallmenuitems[2].text = (char*)((lang==1)?"Sauvegarder comme":"另存为");
 	  if (nspire_exam_mode==2) smallmenuitems[1].text = (char*)(lang==1?"Sauvegarde desactivee":"Saving disabled");
 	  if (exam_mode || nspire_exam_mode==2) smallmenuitems[2].text = (char*)"";
-	  smallmenuitems[3].text = (char*)((lang==1)?"Inserer":"Insert");
-	  smallmenuitems[4].text = (char*)((lang==1)?"Effacer":"Clear");
-	  smallmenuitems[5].text = (char*)((lang==1)?"Chercher,remplacer":"Search, replace");
-	  smallmenuitems[6].text = (char*)((lang==1)?"Aller a la ligne":"Goto line");
+	  smallmenuitems[3].text = (char*)((lang==1)?"Inserer":"插入");
+	  smallmenuitems[4].text = (char*)((lang==1)?"Effacer":"清除");
+	  smallmenuitems[5].text = (char*)((lang==1)?"Chercher,remplacer":"查找, 替换");
+	  smallmenuitems[6].text = (char*)((lang==1)?"Aller a la ligne":"跳转到行");
 	  int p=python_compat(contextptr);
 	  if (p<0){
 	      smallmenuitems[7].text = (char*)"Syntax [QuickJS]";
@@ -15823,10 +15853,10 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 		smallmenuitems[7].text = (char*)"Syntax [Xcas comp Python ^=xor]";
 	    }
 	  }
-	  smallmenuitems[8].text = (char *)((lang==1)?"Changer taille caracteres":"Change fontsize");
+	  smallmenuitems[8].text = (char *)((lang==1)?"Changer taille caracteres":"改变字号");
 	  smallmenuitems[9].text = (char *)aide_khicas_string;
-	  smallmenuitems[10].text = (char *)((lang==1)?"A propos":"About");
-	  smallmenuitems[11].text = (char*)((lang==1)?"Quitter":"Quit");
+	  smallmenuitems[10].text = (char *)((lang==1)?"A propos":"关于");
+	  smallmenuitems[11].text = (char*)((lang==1)?"Quitter":"退出");
 	  int sres = doMenu(&smallmenu);
 	  if(sres == MENU_RETURN_SELECTION || sres==KEY_CTRL_EXE) {
 	    sres=smallmenu.selection;
@@ -15914,7 +15944,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 	    }
 	    if (sres==7){
 	      display(text,isFirstDraw,totalTextY,scroll,textY,contextptr);
-	      int l=get_line_number((lang==1)?"Negatif: en partant de la fin":"Negative: counted from the end",(lang==1)?"Numero de ligne:":"Line number:");
+	      int l=get_line_number((lang==1)?"Negatif: en partant de la fin":"负数: 从末尾倒数",(lang==1)?"Numero de ligne:":"行号:");
 	      if (l>0)
 		text->line=l-1;
 	      if (l<0)
@@ -15994,7 +16024,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 		if (textline>=v.size())
 		  --textline;
 	      }
-	      DefineStatusMessage((char*)"Line cut and copied to clipboard", 1, 0, 0);
+	      DefineStatusMessage((char*)"行已剪切并复制到剪贴板", 1, 0, 0);
 	      DisplayStatusArea();
 	    }
 	  }
@@ -16391,7 +16421,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
     smallmenu.height=MENUHEIGHT;
     smallmenu.scrollbar=1;
     smallmenu.scrollout=1;
-    smallmenu.title = (char *)"Config";
+    smallmenu.title = (char *)((lang==1)?"Config":"设置");
   
 #ifdef NUMWORKS
 #ifdef DEVICE
@@ -16403,35 +16433,35 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 #endif
     smallmenuitems[1].text = (char*)"Syntaxe (Xcas/Py/JS)";
     smallmenuitems[2].type = MENUITEM_CHECKBOX;
-    smallmenuitems[2].text = (char*)"Radians (in Xcas)";
+    smallmenuitems[2].text = (char*)((lang==1)?"Radians (in Xcas)":"弧度 (Xcas)");
     smallmenuitems[3].type = MENUITEM_CHECKBOX;
-    smallmenuitems[3].text = (char*)"Sqrt (in Xcas)";
+    smallmenuitems[3].text = (char*)((lang==1)?"Sqrt (in Xcas)":"根式 (Xcas)");
     smallmenuitems[4].text = (char*)"Francais";
     smallmenuitems[5].text = (char*)"English";
     smallmenuitems[6].text = (char*)"Spanish&English";
     smallmenuitems[7].text = (char*)"Greek&English";
     smallmenuitems[8].text = (char*)"Deutsch&English";
-    smallmenuitems[9].text = (char *) ((lang==1)?"Raccourcis clavier (0)":"Shortcuts (0)");
+    smallmenuitems[9].text = (char *) ((lang==1)?"Raccourcis clavier (0)":"快捷键 (0)");
 #ifdef NUMWORKS
     smallmenuitems[10].text = (char*) ((lang==1)?"Backup, mode examen (e^x)":"Backup, exam mode (e^x)");
 #else
-    smallmenuitems[10].text = (char*) ((lang==1)?"Mode examen (e^x)":"Exam mode (e^x)");
+    smallmenuitems[10].text = (char*) ((lang==1)?"Mode examen (e^x)":"考试模式 (e^x)");
     if (osok==0)
-      smallmenuitems[10].text = (char*) ((lang==1)?"Incompatible mode examen":"Exam mode incompatible");
+      smallmenuitems[10].text = (char*) ((lang==1)?"Incompatible mode examen":"考试模式不兼容");
     if (osok==-1)
-      smallmenuitems[10].text = (char*) ((lang==1)?"Avertissement mode examen":"Exam mode warning");
+      smallmenuitems[10].text = (char*) ((lang==1)?"Avertissement mode examen":"考试模式警告");
 #endif
-    smallmenuitems[11].text = (char*) ((lang==1)?"A propos":"About");
-    smallmenuitems[14].text = (char*) "Quit";
+    smallmenuitems[11].text = (char*) ((lang==1)?"A propos":"关于");
+    smallmenuitems[14].text = (char*) ((lang==1)?"Quit":"退出");
     if (exam_mode)
-      smallmenuitems[14].text = (char*)((lang==1)?"Quitter le mode examen":"Quit exam mode");
+      smallmenuitems[14].text = (char*)((lang==1)?"Quitter le mode examen":"退出考试模式");
     
     // smallmenuitems[2].text = (char*)(isRecording ? "Stop Recording" : "Record Script");
     while(1) {
 #ifdef NUMWORKS
       smallmenuitems[0].value = xthetat;
 #else
-      string dig("Digits (in Xcas): ");
+      string dig((lang==1)?"Digits (in Xcas): ":"有效数字 (Xcas): ");
       dig += print_INT_(decimal_digits(contextptr));
       smallmenuitems[0].text = (char*)dig.c_str();
 #endif
@@ -16442,17 +16472,17 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
       smallmenuitems[13].text = (char *) stacks.c_str();
       int p=python_compat(contextptr);
       if (p<0){
-	smallmenuitems[1].text = (char*)"Change syntax (QuickJS)";
+	smallmenuitems[1].text = (char*)((lang==1)?"Change syntax (QuickJS)":"切换语法 (QuickJS)");
       } else {
 	if (p&4)
-	  smallmenuitems[1].text = (char*)"Change syntax (MicroPython)";
+	  smallmenuitems[1].text = (char*)((lang==1)?"Change syntax (MicroPython)":"切换语法 (MicroPython)");
 	else {
 	  if (p==0)
-	    smallmenuitems[1].text = (char*)"Change syntax (Xcas)";
+	    smallmenuitems[1].text = (char*)((lang==1)?"Change syntax (Xcas)":"切换语法 (Xcas)");
 	  if (p==1)
-	    smallmenuitems[1].text = (char*)"Change syntax (Xcas comp Python ^=**)";
+	    smallmenuitems[1].text = (char*)((lang==1)?"Change syntax (Xcas comp Python ^=**)":"切换语法 (Xcas comp Python ^=**)");
 	  if (p==2)
-	    smallmenuitems[1].text = (char*)"Change syntax (Xcas comp Python ^=xor)";
+	    smallmenuitems[1].text = (char*)((lang==1)?"Change syntax (Xcas comp Python ^=xor)":"切换语法 (Xcas comp Python ^=xor)");
 	}
       }
       smallmenuitems[2].value = giac::angle_radian(contextptr);
@@ -16466,7 +16496,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 	  xthetat=1-xthetat;
 #else
 	  double d=decimal_digits(contextptr);
-	  if (inputdouble("Nombre de digits?",d,contextptr) && d==int(d) && d>0){
+	  if (inputdouble((lang==1)?"Nombre de digits?":"有效数字位数?",d,contextptr) && d==int(d) && d>0){
 	    decimal_digits(d,contextptr);
 	  }
 #endif
@@ -16492,11 +16522,11 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 	      edptr->python=p;
 	    if (xcas_python_eval!=old_xcas_python_eval){
 	      if (old_xcas_python_eval==0 && xcas_python_eval>0 &&
-		  do_confirm((lang==1)?"Effacer les variables Xcas?":"Clear Xcas variables?"))
+		  do_confirm((lang==1)?"Effacer les variables Xcas?":"清除 Xcas 变量?"))
 		do_restart(contextptr);
 	    }
 #ifdef MICROPY_LIB
-	    if (old_xcas_python_eval==1 && do_confirm((lang==1)?"Effacer le tas MicroPython?":"Clear MicroPython heap?"))
+	    if (old_xcas_python_eval==1 && do_confirm((lang==1)?"Effacer le tas MicroPython?":"清除 MicroPython 堆?"))
 	      python_free();
 #endif
 #ifdef QUICKKS
@@ -16805,7 +16835,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
       if (edptr)
 	edptr->python=p>0?p&3:0;
 #ifdef MICROPY_LIB
-      if (p==4 && do_confirm((lang==1)?"Effacer le tas MicroPython?":"Clear MicroPython heap?"))
+      if (p==4 && do_confirm((lang==1)?"Effacer le tas MicroPython?":"清除 MicroPython 堆?"))
 	python_free();
 #endif
 #ifdef QUICKJS
@@ -17001,7 +17031,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
           ok=false;
       }
       if (!ok){
-        confirm((lang==1)?"Contexte trop lourd, non sauvegarde":"Context too havy, not saved.",(lang==1)?"Re-executez scripts au chargement (esc enter)":"Re-run scripts at load time (esc enter)",true,64);
+        confirm((lang==1)?"Contexte trop lourd, non sauvegarde":"上下文过大, 未保存.",(lang==1)?"Re-executez scripts au chargement (esc enter)":"加载时重新运行脚本 (esc enter)",true,64);
         buf[0]=0;
       }
     }
@@ -17905,11 +17935,11 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 
   void chk_clearscreen(GIAC_CONTEXT){
     drawRectangle(0, 24, LCD_WIDTH_PX, LCD_HEIGHT_PX-24, COLOR_WHITE);
-    if (confirm((lang==1)?"Effacer l'historique?":"Clear history?",
+    if (confirm((lang==1)?"Effacer l'historique?":"清除历史?",
 #ifdef NSPIRE_NEWLIB
 		(lang==1)?"enter: oui, esc: conserver":"enter: yes, esc: keep",
 #else
-		(lang==1)?"OK: oui, Back: conserver":"OK: yes, Back: keep",
+		(lang==1)?"OK: oui, Back: conserver":"OK: 是, Back: 保留",
 #endif
 		false)==KEY_CTRL_F1){
       Console_Init(contextptr);
@@ -18102,17 +18132,17 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
       PrintMini(x,y,"et al, License GPL 2",TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
       y += 18;
 #ifdef NSPIRE_NEWLIB
-      PrintMini(x,y,((lang==1)?"Taper menu plusieurs fois":"Type menu several times"),TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
+      PrintMini(x,y,((lang==1)?"Taper menu plusieurs fois":"多次按 menu"),TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
 #else
-      PrintMini(x,y,((lang==1)?"Taper HOME plusieurs fois":"Type HOME several times"),TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
+      PrintMini(x,y,((lang==1)?"Taper HOME plusieurs fois":"多次按 HOME"),TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
 #endif
       y += 18;
-      PrintMini(x,y,((lang==1)?"pour quitter KhiCAS.":"to leave KhiCAS."),TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
+      PrintMini(x,y,((lang==1)?"pour quitter KhiCAS.":"以退出 KhiCAS."),TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
       y += 18;
-      PrintMini(x,y,(lang==1)?"Si le calcul formel est interdit":"If CAS is forbidden!",TEXT_MODE_NORMAL, _red, COLOR_WHITE);
+      PrintMini(x,y,(lang==1)?"Si le calcul formel est interdit":"若禁用 CAS!",TEXT_MODE_NORMAL, _red, COLOR_WHITE);
       y += 18;
 #ifdef NSPIRE_NEWLIB
-      PrintMini(x,y,(lang==1)?"quittez Khicas (menu menu menu)":"Leave Khicas (menu menu menu)",TEXT_MODE_NORMAL, _red, COLOR_WHITE);
+      PrintMini(x,y,(lang==1)?"quittez Khicas (menu menu menu)":"退出 Khicas (menu menu menu)",TEXT_MODE_NORMAL, _red, COLOR_WHITE);
       if (confirm("Interpreter? enter: Xcas, esc: MicroPython",(lang==1?"Peut se modifier depuis menu configuration":"May be changed later from menu configuration"),false,130)==KEY_CTRL_F6){
 	python_compat(4,contextptr);
 	xcas_python_eval=1;
@@ -18124,7 +18154,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 	*logptr(contextptr) << "Xcas interpreter, Python compatible mode\n";
       }
 #else
-      PrintMini(x,y,(lang==1)?"quittez Khicas (HOME HOME HOME)":"Leave Khicas (HOME HOME HOME)",TEXT_MODE_NORMAL, _red, COLOR_WHITE);
+      PrintMini(x,y,(lang==1)?"quittez Khicas (HOME HOME HOME)":"退出 Khicas (HOME HOME HOME)",TEXT_MODE_NORMAL, _red, COLOR_WHITE);
       if (confirm("Interpreter? OK: Xcas, Back: MicroPython",(lang==1?"Peut se modifier depuis menu configuration":"May be changed later from menu configuration"),false,130)==KEY_CTRL_F6){
 	python_compat(4,contextptr);
 	xcas_python_eval=1;
@@ -18209,17 +18239,17 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
       PrintMini(x,y,"et al, License GPL 2",TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
       y += 18;
 #ifdef NSPIRE_NEWLIB
-      PrintMini(x,y,((lang==1)?"Taper menu plusieurs fois":"Type menu several times"),TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
+      PrintMini(x,y,((lang==1)?"Taper menu plusieurs fois":"多次按 menu"),TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
 #else
-      PrintMini(x,y,((lang==1)?"Taper HOME plusieurs fois":"Type HOME several times"),TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
+      PrintMini(x,y,((lang==1)?"Taper HOME plusieurs fois":"多次按 HOME"),TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
 #endif
       y += 18;
-      PrintMini(x,y,((lang==1)?"pour quitter KhiCAS.":"to leave KhiCAS."),TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
+      PrintMini(x,y,((lang==1)?"pour quitter KhiCAS.":"以退出 KhiCAS."),TEXT_MODE_NORMAL,COLOR_BLACK, COLOR_WHITE);
       y += 18;
-      PrintMini(x,y,(lang==1)?"Si le calcul formel est interdit":"If CAS is forbidden!",TEXT_MODE_NORMAL, _red, COLOR_WHITE);
+      PrintMini(x,y,(lang==1)?"Si le calcul formel est interdit":"若禁用 CAS!",TEXT_MODE_NORMAL, _red, COLOR_WHITE);
       y += 18;
 #ifdef NSPIRE_NEWLIB
-      PrintMini(x,y,(lang==1)?"quittez Khicas (doc doc doc)":"Leave Khicas (doc doc doc)",TEXT_MODE_NORMAL, _red, COLOR_WHITE);
+      PrintMini(x,y,(lang==1)?"quittez Khicas (doc doc doc)":"退出 Khicas (doc doc doc)",TEXT_MODE_NORMAL, _red, COLOR_WHITE);
       if (confirm("Interpreter? enter: Xcas, esc: MicroPython",(lang==1?"Peut se modifier depuis menu configuration":"May be changed later from menu configuration"),false,130)==KEY_CTRL_F6){
 	python_compat(4,contextptr);
 	xcas_python_eval=1;
@@ -18231,7 +18261,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 	*logptr(contextptr) << "Xcas interpreter, Python compatible mode\n";
       }
 #else
-      PrintMini(x,y,(lang==1)?"quittez Khicas (HOME HOME HOME)":"Leave Khicas (HOME HOME HOME)",TEXT_MODE_NORMAL, _red, COLOR_WHITE);
+      PrintMini(x,y,(lang==1)?"quittez Khicas (HOME HOME HOME)":"退出 Khicas (HOME HOME HOME)",TEXT_MODE_NORMAL, _red, COLOR_WHITE);
       if (confirm("Interpreter? OK: Xcas, Back: MicroPython",(lang==1?"Peut se modifier depuis menu configuration":"May be changed later from menu configuration"),false,130)==KEY_CTRL_F6){
 	python_compat(4,contextptr);
 	xcas_python_eval=1;
@@ -18341,7 +18371,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
   void erase_script(){
     char filename[MAX_FILENAME_SIZE+1];
     int res=giac_filebrowser(filename, "py", "Scripts");
-    if (res && do_confirm((lang==1)?"Vraiment effacer":"Really erase?")){
+    if (res && do_confirm((lang==1)?"Vraiment effacer":"确定清除?")){
       erase_file(filename);
     }
   }
@@ -18381,7 +18411,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
       string s;
       load_script(filename,s);
       if (s.empty()){
-	s=python_compat(contextptr)?((lang==1)?"Prog. Python, sinon taper":"Python prog., for Xcas"):((lang==1)?"Prog. Xcas, sinon taper":"Xcas prog., for Python");
+	s=python_compat(contextptr)?((lang==1)?"Prog. Python, sinon taper":"Python 程序, 转 Xcas"):((lang==1)?"Prog. Xcas, sinon taper":"Xcas 程序, 转 Python");
 	s += " AC F6 12";
 	int k=confirm(s.c_str(),
 #ifdef NSPIRE_NEWLIB
@@ -18432,11 +18462,11 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 
   void chk_restart(GIAC_CONTEXT){
     drawRectangle(0, 24, LCD_WIDTH_PX, LCD_HEIGHT_PX-24, COLOR_WHITE);
-    if (confirm((lang==1)?"Conserver les variables?":"Keep variables?",
+    if (confirm((lang==1)?"Conserver les variables?":"保留变量?",
 #ifdef NSPIRE_NEWLIB
 		(lang==1)?"enter: conserver, esc: effacer":"enter: keep, esc: erase"
 #else
-		(lang==1)?"OK: conserver, Back: effacer":"OK: keep, Back: erase"
+		(lang==1)?"OK: conserver, Back: effacer":"OK: 保留, Back: 清除"
 #endif
 		)==KEY_CTRL_F6)
       do_restart(contextptr);
@@ -18447,11 +18477,11 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
     if (giac_filebrowser(filename, "xw", "Sessions",2)){
       if (console_changed==0 ||
 	  strcmp(session_filename,"session")==0 ||
-	  confirm((lang==1)?"Session courante perdue?":"Current session will be lost",
+	  confirm((lang==1)?"Session courante perdue?":"当前会话将丢失",
 #ifdef NSPIRE_NEWLIB
 		  (lang==1)?"enter: ok, esc: annul":"enter: ok, esc: cancel"
 #else
-		  (lang==1)?"OK: ok, Back: annul":"OK: ok, Back: cancel"
+		  (lang==1)?"OK: ok, Back: annul":"OK: 确定, Back: 取消"
 #endif
 		  )==KEY_CTRL_F1){
 #ifndef NUMWORKS
@@ -18463,10 +18493,10 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 	static bool ctrl_r=true;
 	if (ctrl_r){
 #ifdef NSPIRE_NEWLIB
-	  confirm((lang==1)?"Taper ctrl puis r pour executer session ":"Type ctrl then r to run session","Enter: OK");
+	  confirm((lang==1)?"Taper ctrl puis r pour executer session ":"按 ctrl 再按 r 运行会话","Enter: OK");
 #endif
 #ifdef NUMWORKS
-	  confirm((lang==1)?"Taper shift EXE pour executer session ":"Type shift then EXE to run session","Enter: OK");
+	  confirm((lang==1)?"Taper shift EXE pour executer session ":"按 shift 再按 EXE 运行会话","Enter: OK");
 #endif
 	  ctrl_r=false;
 	}
@@ -18701,36 +18731,36 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 #else
 	  smallmenuitems[0].text = (char*)"Applications (shift doc)";
 #endif
-	  string sess=(lang==1)?"Enregistrer ":"Save ";
+	  string sess=(lang==1)?"Enregistrer ":"保存 ";
 	  sess += session_filename;
 	  smallmenuitems[1].text = (char *) (sess.c_str());
-	  smallmenuitems[2].text = (char *) ((lang==1)?"Enregistrer sous":"Save session as");
+	  smallmenuitems[2].text = (char *) ((lang==1)?"Enregistrer sous":"会话另存为");
 	  if (nspire_exam_mode==2) smallmenuitems[1].text = (char*)(lang==1?"Sauvegarde desactivee":"Saving disabled");
 	  if (exam_mode || nspire_exam_mode==2)
 	    smallmenuitems[2].text = (char *) "";
-	  smallmenuitems[3].text = (char*) ((lang==1)?"Charger session":"Load session");
-	  smallmenuitems[4].text = (char*)((lang==1)?"Nouvelle session":"New session");
-	  smallmenuitems[5].text = (char*)((lang==1)?"Executer session":"Run session");
-	  smallmenuitems[6].text = (char*)((lang==1)?"Editeur script":"Script editor");
-	  smallmenuitems[7].text = (char*)((lang==1)?"Ouvrir script":"Open script");
-	  smallmenuitems[8].text = (char*)((lang==1)?"Executer script":"Run script");
-	  smallmenuitems[9].text = (char*)((lang==1)?"Effacer historique (0)":"Clear history");
-	  smallmenuitems[10].text = (char*)((lang==1)?"Effacer script (e^)":"Clear script");
+	  smallmenuitems[3].text = (char*) ((lang==1)?"Charger session":"加载会话");
+	  smallmenuitems[4].text = (char*)((lang==1)?"Nouvelle session":"新建会话");
+	  smallmenuitems[5].text = (char*)((lang==1)?"Executer session":"运行会话");
+	  smallmenuitems[6].text = (char*)((lang==1)?"Editeur script":"脚本编辑器");
+	  smallmenuitems[7].text = (char*)((lang==1)?"Ouvrir script":"打开脚本");
+	  smallmenuitems[8].text = (char*)((lang==1)?"Executer script":"运行脚本");
+	  smallmenuitems[9].text = (char*)((lang==1)?"Effacer historique (0)":"清除历史");
+	  smallmenuitems[10].text = (char*)((lang==1)?"Effacer script (e^)":"清除脚本");
 	  smallmenuitems[11].text = (char*)"Configuration/examen (ln)";
-	  smallmenuitems[12].text = (char *) ((lang==1)?"Aide interface (log)":"Shortcuts");
-	  smallmenuitems[13].text = (char*)((lang==1)?"Editer matrice (i)":"Matrix editor");
-	  smallmenuitems[14].text = (char*) ((lang==1)?"Creer parametre (,)":"Create slider (,)");
-	  smallmenuitems[15].text = (char*) ((lang==1)?"A propos (x^y)":"About");
+	  smallmenuitems[12].text = (char *) ((lang==1)?"Aide interface (log)":"快捷键");
+	  smallmenuitems[13].text = (char*)((lang==1)?"Editer matrice (i)":"矩阵编辑器");
+	  smallmenuitems[14].text = (char*) ((lang==1)?"Creer parametre (,)":"创建滑块 (,)");
+	  smallmenuitems[15].text = (char*) ((lang==1)?"A propos (x^y)":"关于");
 #ifdef NSPIRE_NEWLIB
-	  smallmenuitems[16].text = (char*) ((lang==1)?"Quitter (menu)":"Quit");
+	  smallmenuitems[16].text = (char*) ((lang==1)?"Quitter (menu)":"退出");
 #else
-	  smallmenuitems[16].text = (char*) ((lang==1)?"Quitter (HOME)":"Quit");
+	  smallmenuitems[16].text = (char*) ((lang==1)?"Quitter (HOME)":"退出");
 #endif
 #if defined NUMWORKS && defined DEVICE
-	  smallmenuitems[16].text = (char*) ((lang==1)?"Reboot autre firmware":"Reboot alt. firmware");
-	  smallmenuitems[17].text = (char*) ((lang==1)?"Sauvegarde multi-firmware":"Backup multi-firmware");
-	  smallmenuitems[18].text = (char*) ((lang==1)?"Restauration multi-firmware":"Restore multi-firmware");
-	  smallmenuitems[19].text = (char*) ((lang==1)?"Quitter (HOME)":"Quit");
+	  smallmenuitems[16].text = (char*) ((lang==1)?"Reboot autre firmware":"重启到其他固件");
+	  smallmenuitems[17].text = (char*) ((lang==1)?"Sauvegarde multi-firmware":"备份多固件");
+	  smallmenuitems[18].text = (char*) ((lang==1)?"Restauration multi-firmware":"恢复多固件");
+	  smallmenuitems[19].text = (char*) ((lang==1)?"Quitter (HOME)":"退出");
 #endif
 	  if (exam_mode)
 	    smallmenuitems[16].text = (char*)((lang==1)?"Quitter le mode examen":"Quit exam mode");
@@ -18822,7 +18852,7 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 	      }
 #endif
 	      if (exam_mode){
-		if (do_confirm((lang==1)?"Tout effacer?":"Really clear?")){
+		if (do_confirm((lang==1)?"Tout effacer?":"确定清除?")){
 		  Console_Init(contextptr);
 		  Console_Clear_EditLine();
 		  giac::_restart(giac::gen(giac::vecteur(0),giac::_SEQ__VECT),contextptr);
@@ -18834,11 +18864,11 @@ static void display(textArea *text, int &isFirstDraw, int &totalTextY, int &scro
 		if (get_filename(filename,".xw")){
 		  if (console_changed==0 ||
 		      strcmp(session_filename,"session")==0 ||
-		      confirm((lang==1)?"Session courante perdue?":"Current session will be lost",
+		      confirm((lang==1)?"Session courante perdue?":"当前会话将丢失",
 #ifdef NSPIRE_NEWLIB
-			      (lang==1)?"enter: annul, esc: ok":"enter: cancel, esc: ok"
+			      (lang==1)?"enter: annul, esc: ok":"enter: 取消, esc: 确定"
 #else
-			      (lang==1)?"OK: annul, Back: ok":"OK: cancel, Back: ok"
+			      (lang==1)?"OK: annul, Back: ok":"OK: 取消, Back: 确定"
 #endif
 			      )==KEY_CTRL_F6){
 		    clip_pasted=true;
@@ -19985,9 +20015,9 @@ void PrintRev(const char *s,int color,bool colorsyntax,GIAC_CONTEXT) {
       tmp += (lang==1)?" a ete modifie!":" was modified!";
       if (confirm(tmp.c_str(),
 #ifdef NSPIRE_NEWLIB
-		  (lang==1)?"enter: sauve, esc: tant pis":"enter: save, esc: discard changes"
+		  (lang==1)?"enter: sauve, esc: tant pis":"enter: 保存, esc: 放弃修改"
 #else
-		  (lang==1)?"OK: sauve, Back: tant pis":"OK: save, Back: discard changes"
+		  (lang==1)?"OK: sauve, Back: tant pis":"OK: 保存, Back: 放弃修改"
 #endif
 		  )==KEY_CTRL_F1){
 	save(session_filename,contextptr);
@@ -20061,14 +20091,14 @@ void PrintRev(const char *s,int color,bool colorsyntax,GIAC_CONTEXT) {
 	    pos=-1;
 	}
 	else {
-	  tok=(lang==1)?"la fin":"end";
+	  tok=(lang==1)?"la fin":"末尾";
 	  pos=0;
 	}
 	if (pos>=0)
-	  sprintf(status,(lang==1)?"Erreur ligne %i a %s":"Error line %i at %s",i+1,tok.c_str());
+	  sprintf(status,(lang==1)?"Erreur ligne %i a %s":"第 %i 行错误, 位于 %s",i+1,tok.c_str());
 	else
-	  sprintf(status,(lang==1)?"Erreur ligne %i %s":"Error line %i %s",i+1,(pos==-2?((lang==1)?", : manquant ?":", missing :?"):""));
-	if (confirm(status,(lang==1)?"OK: corrige, back: continue":"OK: fix",1)==KEY_CTRL_F1){
+	  sprintf(status,(lang==1)?"Erreur ligne %i %s":"第 %i 行错误 %s",i+1,(pos==-2?((lang==1)?", : manquant ?":", 缺少 :?"):""));
+	if (confirm(status,(lang==1)?"OK: corrige, back: continue":"OK: 修正",1)==KEY_CTRL_F1){
 	  text->line=i;
 	  if (pos>=0 && pos<v[i].s.size()) text->pos=pos;
 	  return true;
@@ -20335,11 +20365,11 @@ void PrintRev(const char *s,int color,bool colorsyntax,GIAC_CONTEXT) {
 	return 0;
       }
       if (strcmp((const char *)expr,"restart")==0){
-	if (confirm((lang==1)?"Effacer variables?":"Clear variables?",
+	if (confirm((lang==1)?"Effacer variables?":"清除变量?",
 #ifdef NSPIRE_NEWLIB
-		    (lang==1)?"enter: confirmer,  esc: annuler":"enter: confirm,  esc: cancel"
+		    (lang==1)?"enter: confirmer,  esc: annuler":"enter: 确认,  esc: 取消"
 #else
-		    (lang==1)?"OK: confirmer,  Back: annuler":"OK: confirm,  Back: cancel"
+		    (lang==1)?"OK: confirmer,  Back: annuler":"OK: 确认,  Back: 取消"
 #endif
 		    )!=KEY_CTRL_F1){
 	  Console_Output(" cancelled");
@@ -22212,7 +22242,7 @@ const char * gettext(const char * s) {
 #ifdef NSPIRE_NEWLIB
 	DefineStatusMessage((char*)((lang==1)?"Ecran fige. Taper esc":"Screen frozen. Press esc."), 1, 0, 0);
 #else
-	DefineStatusMessage((char*)((lang==1)?"Ecran fige. Taper clear":"Screen frozen. Press clear."), 1, 0, 0);
+	DefineStatusMessage((char*)((lang==1)?"Ecran fige. Taper clear":"屏幕已冻结. 按 clear."), 1, 0, 0);
 #endif
 	DisplayStatusArea();
 	int key;

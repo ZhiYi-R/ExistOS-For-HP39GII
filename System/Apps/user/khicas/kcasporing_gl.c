@@ -20,6 +20,8 @@
 
 #include "font_ascii.h"
 
+#include "khicas_cjk.h"
+
 // extern "C" {
 char *virtual_screen=0;
 
@@ -346,6 +348,25 @@ static int utf8_decode(const unsigned char *s, unsigned int *cp) {
     return 0;
 }
 
+/* CJK code point range we render as full-width 16x16 cells. */
+#define CJK_FIRST 0x4E00
+#define CJK_LAST  0x9FFF
+
+/* Draw a 16x16 CJK glyph (32 bytes, 2 bytes/row, MSB-left) at (x0,y0).
+   Each pixel is set to fg (ink) or bg, matching vGL_putChar's 1bpp style. */
+static void vGL_putCJK(int x0, int y0, const unsigned char *bmp, int fg, int bg) {
+    int row = 0;
+    int col = 0;
+    for (row = 0; row < 16; row++) {
+        unsigned int bits = ((unsigned int)bmp[row * 2] << 8) | bmp[row * 2 + 1];
+        for (col = 0; col < 16; col++) {
+            if (((x0 + col) < VIR_LCD_PIX_W) && ((y0 + row) < VIR_LCD_PIX_H)) {
+                vGL_set_pixel(x0 + col, y0 + row, (bits & (0x8000U >> col)) ? fg : bg);
+            }
+        }
+    }
+}
+
 void vGL_putString(int x0, int y0, const char *s, int fg, int bg, int fontSize) {
     int font_w = 0;
     int font_h = 0;
@@ -370,6 +391,15 @@ void vGL_putString(int x0, int y0, const char *s, int fg, int bg, int fontSize) 
                 vGL_putChar((x0 * STRING_X_SCALE) + x, (y0 * STRING_Y_SCALE) + y,
                             (char)cp, fg, bg, fontSize);
                 x += font_w;
+            } else if (cp >= CJK_FIRST && cp <= CJK_LAST) {
+                const unsigned char *bmp = khicas_cjk_glyph(cp);
+                if (bmp) {
+                    vGL_putCJK((x0 * STRING_X_SCALE) + x, (y0 * STRING_Y_SCALE) + y,
+                               bmp, fg, bg);
+                    x += 16;
+                }
+                /* glyph not in table -> discard (no advance), as for other
+                   unmapped non-ASCII code points below */
             } else {
                 unsigned char glyph = utf8_to_glyph(cp);
                 if (glyph) {

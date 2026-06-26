@@ -67,14 +67,21 @@ add_custom_command(
   COMMAND ${UV} run -q --project ${CMAKE_SOURCE_DIR}/Scripts python
           ${CMAKE_SOURCE_DIR}/Scripts/gen_cjk_font.py
           --source ${CMAKE_CURRENT_SOURCE_DIR}/UI/Lang/UI_Chinese.h
+          --source ${CMAKE_CURRENT_SOURCE_DIR}/Apps/user/khicas/khicas_zh.h
+          --source ${CMAKE_SOURCE_DIR}/External/KhiCAS/khicas/kdisplay.cc
           --write ${CJK_GEN_DIR}/cjk_font_data.h
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/UI/Lang/UI_Chinese.h
+          ${CMAKE_CURRENT_SOURCE_DIR}/Apps/user/khicas/khicas_zh.h
+          ${CMAKE_SOURCE_DIR}/External/KhiCAS/khicas/kdisplay.cc
           ${CMAKE_SOURCE_DIR}/Scripts/gen_cjk_font.py
   COMMENT "Generating CJK glyph table cjk_font_data.h from UI_Chinese.h (UTF-8)"
   VERBATIM
 )
 add_custom_target(gen_cjk DEPENDS ${CJK_GEN_DIR}/cjk_font_data.h)
 add_dependencies(sys.elf gen_cjk)
+# khicas_lib compiles khicas_cjk.cpp, which includes the generated table; make it
+# wait for gen_cjk (the target is defined here, not in the khicas subdirectory).
+add_dependencies(khicas_lib gen_cjk)
 include_directories(${CJK_GEN_DIR})
 # -----------------------------------------------------------------------------
 
@@ -126,7 +133,10 @@ tjpgd
 # into the blobs (xcas::Console_*, giac::*). Single-pass link order can't satisfy a
 # cycle, so wrap them in a group the linker iterates until all refs resolve.
 -Wl,--start-group
-${CMAKE_SOURCE_DIR}/External/KhiCAS/libkcasgui.libcpp
+# libkcasgui.libcpp (kdisplay.o/kadd.o/file.o) is now compiled from source into
+# khicas_lib (see Apps/user/khicas/CMakeLists.txt) so its menus/help can be
+# localized; only the CAS engine stays prebuilt below.
+#${CMAKE_SOURCE_DIR}/External/KhiCAS/libkcasgui.libcpp
 #${CMAKE_SOURCE_DIR}/External/MicroPython/libmpy.libc
 ${CMAKE_SOURCE_DIR}/External/KhiCAS/libcas.libcpp
 #${CMAKE_SOURCE_DIR}/External/KhiCAS/libgiac.libcpp

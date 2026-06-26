@@ -23,6 +23,35 @@ set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/khicas_repl.cpp PROPERTI
 target_include_directories(khicas_lib PRIVATE
     ${CMAKE_SOURCE_DIR}/External/LibTomMath/libtommath-0.39)
 
+# --- KhiCAS GUI compiled from source (spike, 阶段 1) ------------------------
+# The prebuilt libkcasgui.libcpp held exactly three objects (kdisplay.o, kadd.o,
+# file.o). To make the menus/help translatable in place we compile those same
+# sources here instead and drop the blob from the link (System/CMakeLists.txt).
+# Build them with the flags the blob was produced with (see the khicas Makefile):
+# C++11, -fpermissive, no RTTI/exceptions. Under -DHP39 the Nspire/Numworks
+# platform headers (libndls.h, os.h, dirent.h...) are #ifdef'd out, and config.h
+# maps `ustl` -> `std`, so they need no extra SDK. The engine blobs
+# (libcas/libgiac.libcpp) stay prebuilt; the GUI calls into them as before.
+set(KHICAS_GUI_SRCS
+    ${CMAKE_SOURCE_DIR}/External/KhiCAS/khicas/kdisplay.cc
+    ${CMAKE_SOURCE_DIR}/External/KhiCAS/khicas/kadd.cc
+    ${CMAKE_SOURCE_DIR}/External/KhiCAS/khicas/file.cc
+)
+target_sources(khicas_lib PRIVATE ${KHICAS_GUI_SRCS})
+set_source_files_properties(${KHICAS_GUI_SRCS} PROPERTIES
+    COMPILE_DEFINITIONS "KHICAS;HAVE_CONFIG_H"
+    COMPILE_OPTIONS "-std=gnu++11;-fpermissive;-fno-rtti;-fno-exceptions;-fno-use-cxa-atexit;-fno-strict-aliasing;-Wno-narrowing")
+# ---------------------------------------------------------------------------
+
+# khicas_cjk.cpp bridges the C porting layer to the system's compile-time CJK
+# glyph table (System/UI/Core/cjk_font.h), which #includes the generated
+# cjk_font_data.h emitted by the gen_cjk target into System/cjk_gen. Both paths
+# must be visible here; the gen_cjk dependency is wired in System/CMakeLists.txt
+# (the target is defined there, after this subdirectory is added).
+target_include_directories(khicas_lib PRIVATE
+    ${CMAKE_SOURCE_DIR}/System/UI/Core
+    ${CMAKE_BINARY_DIR}/System/cjk_gen)
+
 # 编译选项
 target_compile_options(khicas_lib PRIVATE
     -mtune=arm926ej-s

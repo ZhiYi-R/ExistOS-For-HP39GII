@@ -5,7 +5,11 @@
 *.c text eol=lf
 *.h text eol=lf
 *.cpp text eol=lf
+*.cc text eol=lf
+*.cxx text eol=lf
 *.hpp text eol=lf
+*.hh text eol=lf
+*.hxx text eol=lf
 *.py text eol=lf
 *.cmake text eol=lf
 *.txt text eol=lf

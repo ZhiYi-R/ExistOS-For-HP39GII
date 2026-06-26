@@ -22,17 +22,42 @@ extern "C" {
 #ifdef HP39
   #include <string.h>
   void vGL_putString(int x0, int y0,const char *s, int fg, int bg, int fontSize);
+  /* Pixel advance that matches vGL_putString exactly: ASCII advances ascii_w,
+     CJK (U+4E00..U+9FFF, 3-byte UTF-8) advances 16, other non-ASCII code points
+     advance 0 (vGL_putString discards them).  Byte-based strlen()*w over-counts
+     every CJK char (3 bytes -> 21/18px vs 16px drawn), which desynchronises the
+     textArea cursor/word-wrap math from what is actually painted. */
+  static inline int khicas_str_px(const char * s, int ascii_w){
+    const unsigned char * p = (const unsigned char *)s;
+    int w = 0;
+    while (*p){
+      unsigned char ch = *p;
+      if (ch < 0x80){ w += ascii_w; p += 1; }
+      else if (ch >= 0xF0){ p += (p[1] && p[2] && p[3]) ? 4 : 1; }
+      else if (ch >= 0xE0){
+        if (p[1] && p[2]){
+          unsigned int cp = ((unsigned int)(ch & 0x0F) << 12) |
+                            ((unsigned int)(p[1] & 0x3F) << 6) |
+                            (unsigned int)(p[2] & 0x3F);
+          if (cp >= 0x4E00 && cp <= 0x9FFF) w += 16;
+          p += 3;
+        } else p += 1;
+      }
+      else { p += (p[1]) ? 2 : 1; }
+    }
+    return w;
+  }
   inline int os_draw_string(int x,int y,int c,int bg,const char * s,bool fake){
     if (!fake) vGL_putString(x,y,s,c,bg,16);
-    return strlen(s)*8+x;
+    return x + khicas_str_px(s,8);
   }
   inline int os_draw_string_medium(int x,int y,int c,int bg,const char * s,bool fake){
     if (!fake) vGL_putString(x,y,s,c,bg,14);
-    return strlen(s)*7+x;
+    return x + khicas_str_px(s,7);
   }
   inline int os_draw_string_small(int x,int y,int c,int bg,const char * s,bool fake){
     if (!fake) vGL_putString(x,y,s,c,bg,12);
-    return strlen(s)*6+x;
+    return x + khicas_str_px(s,6);
   }
 #endif
   int ext_main();
