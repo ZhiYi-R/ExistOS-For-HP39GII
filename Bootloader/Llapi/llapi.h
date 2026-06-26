@@ -58,7 +58,6 @@ extern QueueHandle_t LLAPI_KBDQueue;
 void LLAPI_init(TaskHandle_t upSys);
 void LLAPI_Task(void);
 void LLIRQ_task(void *pvParameters);
-void LLIO_ScanTask(void *pvParameters);
 
 void LLIO_NotifySerialRxAvailable();
 void LLIO_NotifySerialTxAvailable();

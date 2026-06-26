@@ -35,16 +35,12 @@ aux_source_directory(${CMAKE_SOURCE_DIR}/External/FreeRTOS/System/port          
 aux_source_directory(${CMAKE_SOURCE_DIR}/External/FreeRTOS/System/memory              SYS_SRCS)
 aux_source_directory(./Fs                                           SYS_SRCS)
 aux_source_directory(${CMAKE_SOURCE_DIR}/External/FatFs                              SYS_SRCS)
-#aux_source_directory(./filesystem/littlefs                          SYS_SRCS)
 aux_source_directory(./Crash                                         SYS_SRCS)
 
 # 添加getentropy.c文件到编译源文件
 list(APPEND SYS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Core/getentropy.c)
 
-#add_subdirectory(gb)
-#add_subdirectory(KLib)
 add_subdirectory(${CMAKE_SOURCE_DIR}/External/TJpgDec tjpgd)
-#add_subdirectory(emu48)
 add_subdirectory(Apps/user/khicas)
 
 add_executable(sys.elf ${SYS_SRCS})
@@ -95,51 +91,29 @@ set(LINKER_SCRIPT
 ${CMAKE_CURRENT_BINARY_DIR}/sys_ld.script
 )
 set(LINKER_FLAGS "SHELL:-T${LINKER_SCRIPT} -Wl,--wrap=malloc -Wl,--wrap=free")
-#-Wl,--gc-sections  
 target_link_options(sys.elf PRIVATE ${LINKER_FLAGS}) 
 
  
-#target_compile_options(gb PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -mthumb -Ofast)
-#target_compile_options(emu48 PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -mthumb -Os)
-#target_compile_options(lvgl PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -mthumb -Os)
 target_compile_options(tjpgd PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -mthumb-interwork -mthumb -Os)
 
 
-#-mthumb
 target_compile_options(sys.elf PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -marm
 -Os -pipe
 -DHP39
-# suppress KhiCAS headers C++20 deprecated warnings (C++ only)
 -Wno-deprecated-declarations
 $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>
 $<$<COMPILE_LANGUAGE:CXX>:-Wno-template-id-cdtor>
 $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>
-#-ffunction-sections -fno-strict-aliasing -fomit-frame-pointer
-#-fcommon -fno-strict-aliasing -fomit-frame-pointer
-#-fpermissive  -fdata-sections
-#-fno-exceptions
 )
-
-#set_property(TARGET lvgl PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-#set_property(TARGET gb PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 target_link_libraries(sys.elf -lm -lc -lrdimon -lgcc -lstdc++ -nostartfiles
 tjpgd
-#gb
-#emu48
-#lvgl
 # The prebuilt KhiCAS/CAS blobs and khicas_lib are mutually dependent: the GUI blob
 # calls porting stubs in khicas_lib, and khicas_repl.cpp (in khicas_lib) calls back
 # into the blobs (xcas::Console_*, giac::*). Single-pass link order can't satisfy a
 # cycle, so wrap them in a group the linker iterates until all refs resolve.
 -Wl,--start-group
-# libkcasgui.libcpp (kdisplay.o/kadd.o/file.o) is now compiled from source into
-# khicas_lib (see Apps/user/khicas/CMakeLists.txt) so its menus/help can be
-# localized; only the CAS engine stays prebuilt below.
-#${CMAKE_SOURCE_DIR}/External/KhiCAS/libkcasgui.libcpp
-#${CMAKE_SOURCE_DIR}/External/MicroPython/libmpy.libc
 ${CMAKE_SOURCE_DIR}/External/KhiCAS/libcas.libcpp
-#${CMAKE_SOURCE_DIR}/External/KhiCAS/libgiac.libcpp
 ${CMAKE_SOURCE_DIR}/External/LibTomMath/libtommath.libcpp
 ${CMAKE_SOURCE_DIR}/External/GMP/libgmp.libcpp
 khicas_lib

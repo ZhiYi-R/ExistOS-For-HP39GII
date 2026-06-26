@@ -153,27 +153,6 @@ void tickTimer(TimerHandle_t xTimer) {
         }
     }
 }
-/**
-void LLIO_ScanTask(void *pvParameters) {
-    uint32_t val;
-    LLIRQ_Info_t curIRQ;
-    key_register_notify(xTaskGetCurrentTaskHandle());
-    for (;;) {
-        if (xTaskNotifyWait(0, 0xFFFFFFFF, (uint32_t *)&val, portMAX_DELAY) == pdTRUE) {
-            // INFO("VAL:%08x\n", val);
-            // g_latest_key_status = val;
-
-            if (vm_key_input_enable && vm_enable_irq) {
-
-                curIRQ.IRQNum = LL_IRQ_KEYBOARD;
-                curIRQ.r1 = val & 0xFFFF;
-                curIRQ.r2 = val >> 16;
-                xQueueSendToFront(LLIRQ_Queue, &curIRQ, portMAX_DELAY);
-            }
-        }
-    }
-}
-*/
 void LLIO_NotifySerialRxAvailable() {
     LLIRQ_Info_t curIRQ;
     if (vm_serial_enable && vm_enable_irq) {
