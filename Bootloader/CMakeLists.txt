@@ -27,33 +27,13 @@ include_directories(${CMAKE_SOURCE_DIR}/External/FreeRTOS/Bootloader/include)
 include_directories(${CMAKE_SOURCE_DIR}/External/FreeRTOS/Bootloader/porting)
 include_directories(${CMAKE_SOURCE_DIR}/External/TinyUSB)
 include_directories(${CMAKE_SOURCE_DIR}/External/TinyUSB/device)
-include_directories(${CMAKE_SOURCE_DIR}/External/TinyUSB/class/hid)
-include_directories(${CMAKE_SOURCE_DIR}/External/TinyUSB/class/net)
-include_directories(${CMAKE_SOURCE_DIR}/External/TinyUSB/class/vendor)
 include_directories(${CMAKE_SOURCE_DIR}/External/Dhara)
 
 aux_source_directory(./Src                                  LOADER_SRCS)
-#aux_source_directory(./Scheduler                        LOADER_SRCS)
-#aux_source_directory(./Vm                            LOADER_SRCS)
 aux_source_directory(./Llapi                      LOADER_SRCS)
 aux_source_directory(./boot/core                        LOADER_SRCS)
 aux_source_directory(./boot/services                    LOADER_SRCS)
-aux_source_directory(${CMAKE_SOURCE_DIR}/fonts          LOADER_SRCS)  # VGA_Ascii_* (shared with System)
-#aux_source_directory(./Scheduler/porting                LOADER_SRCS)
-#aux_source_directory(./HAL                              LOADER_SRCS)
-#aux_source_directory(./HAL/Hardware                     LOADER_SRCS)
-
-#aux_source_directory(./Component3rd                     LOADER_SRCS)
-#aux_source_directory(./Component3rd/tinyusb             LOADER_SRCS)
-#aux_source_directory(./Component3rd/tinyusb/device      LOADER_SRCS)
-#aux_source_directory(./Component3rd/tinyusb/common      LOADER_SRCS)
-#aux_source_directory(./Component3rd/tinyusb/class/cdc   LOADER_SRCS)
-#aux_source_directory(./Component3rd/tinyusb/class/msc   LOADER_SRCS)
-#aux_source_directory(./Component3rd/tinyusb/class/hid   LOADER_SRCS)
-#aux_source_directory(./Component3rd/tinyusb/class/net   LOADER_SRCS)
-#aux_source_directory(./Component3rd/tinyusb/class/vendor   LOADER_SRCS)
-#aux_source_directory(./Component3rd/dhara               LOADER_SRCS)
-#aux_source_directory(./Component3rd/FatFs               LOADER_SRCS)
+aux_source_directory(${CMAKE_SOURCE_DIR}/fonts          LOADER_SRCS)
 
 add_subdirectory(Component3rd)
 add_subdirectory(Hal)
@@ -72,7 +52,6 @@ target_compile_options(tusb PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-
 target_compile_options(dhara PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -mthumb -Os)
 target_compile_options(vmmgr PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -mthumb -Os)
 target_compile_options(vmmgr_mmu PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -marm -Os)
-#target_compile_options(quicklz PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -marm -O3)
 target_compile_options(minilzo PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -mthumb -O3)
 target_compile_options(tlsf PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -mthumb -Os)
 
@@ -82,7 +61,6 @@ kernel
 tusb 
 hal drivers display input timer
 dhara
-#quicklz
 tlsf
 minilzo
 vmmgr_mmu
@@ -90,10 +68,6 @@ vmmgr
 -lc_nano -nostartfiles)
 
 set_property(TARGET kernel PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-#set_property(TARGET tusb PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-#set_property(TARGET hal PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-#set_property(TARGET hal_hardware PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-#set_property(TARGET dhara PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 target_compile_options(rom.elf PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -marm -Wall
 #-O2
