@@ -40,7 +40,6 @@
 #if SEPARATE_VMM_CACHE
     #define NONE     0
     #define MINILZO  1      // 2 KB Work Buffer
-    #define QUICKLZ  2      // 60 KB Work buffer
     #define MEM_COMPRESSION_ALGORITHM     (MINILZO) //algorithm
 #endif
 

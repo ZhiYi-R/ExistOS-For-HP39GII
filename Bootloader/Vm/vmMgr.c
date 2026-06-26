@@ -22,7 +22,6 @@
 #include "vmMgr.h"
 
 #include "minilzo.h"
-#include "quicklz.h"
 #include "tlsf/tlsf.h"
 
 typedef struct CachePageInfo_t {
@@ -357,16 +356,6 @@ static inline int save_cache_page(CachePageInfo_t *cache_page) {
             //
             // memcpy(mem_buffer(ZRAMAddress_Tab[ind]), (void *)cache_page->PageOnPhyAddr, PAGE_SIZE);
             // memset(workbuf_comp, 0, sizeof(workbuf_comp));
-#if MEM_COMPRESSION_ALGORITHM == QUICKLZ
-            sz = qlz_compress((void *)cache_page->PageOnPhyAddr, compress_buffer, PAGE_SIZE, (qlz_state_compress *)&comp_state);
-            g_mem_comp_rate[g_mem_comp_rate_ptr++] = sz * 100 / PAGE_SIZE;
-            if (g_mem_comp_rate_ptr >= 16) {
-                g_mem_comp_rate_ptr = 0;
-            }
-            cdmp_free(ZRAMAddress_Tab[ind]);
-            ZRAMAddress_Tab[ind] = cdmp_alloc(sz);
-            cdmp_write(ZRAMAddress_Tab[ind], 0, sz, (void *)compress_buffer);
-#endif
 #if MEM_COMPRESSION_ALGORITHM == MINILZO
             int ret = lzo1x_1_compress((void *)cache_page->PageOnPhyAddr, PAGE_SIZE, (char *)compress_buffer, &sz, comp_wrkbuffer);
             if (ret == LZO_E_OK) {
@@ -773,9 +762,6 @@ void __attribute__((optimize("-Os"))) vmMgr_task() {
 // cdmp_read(ZRAMAddress_Tab[zram_ind], 0, PAGE_SIZE, (void *)compress_buffer);
 // qlz_decompress(compress_buffer, (void *)CachePageVRAMCur->PageOnPhyAddr, &decomp_state);
 // memset(workbuf_comp, 0xFF, sizeof(workbuf_comp));
-#if MEM_COMPRESSION_ALGORITHM == QUICKLZ
-                                qlz_decompress(cdmp_get_memblock(ZRAMAddress_Tab[zram_ind]), (void *)CachePageVRAMCur->PageOnPhyAddr, (qlz_state_decompress *)&decomp_state);
-#endif
 #if MEM_COMPRESSION_ALGORITHM == MINILZO
                                 uint32_t sz;
                                 //int ret = lzo1x_decompress(cdmp_get_memblock(ZRAMAddress_Tab[zram_ind]),
