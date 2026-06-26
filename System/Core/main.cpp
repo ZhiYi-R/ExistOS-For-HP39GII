@@ -121,7 +121,6 @@ void vApplicationIdleHook(void) {
     ll_system_idle();
 }
 
-void exp_exec(void *par);
 static bool time_label_refresh = true;
 
 #define EMU_DATA_PORT ((volatile uint8_t *)0x20000000)
@@ -200,10 +199,8 @@ int main() {
 
     vTaskStartScheduler();
 
-    for (;;) {
-        void symtab_def();
-        symtab_def();
-    }
+    for (;;)
+        ;
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
@@ -251,19 +248,6 @@ void check_emulator_status() {
                 f_write(&savef, (const void *)&EMU_DATA_PORT[200], fsz, &br);
                 printf("File wrote to:%s, wsz:%d\n", fname, br);
                 f_close(&savef);
-
-                char *testname = fname + 1;
-                while (*testname) {
-                    if (
-                        (testname[0] == '.') &&
-                        (testname[1] == 'e') &&
-                        (testname[2] == 'x') &&
-                        (testname[3] == 'p') &&
-                        (testname[4] == 0)) {
-                        // xTaskCreate(exp_exec, fname + 1, configMINIMAL_STACK_SIZE, fname, configMAX_PRIORITIES - 3, NULL);
-                    }
-                    testname++;
-                }
             }
 
             EMU_DATA_PORT[0] = 0;

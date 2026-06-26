@@ -78,7 +78,7 @@ void vGL_FlushVScreen()
           *((unsigned *) &dest[4])=0;
         }
       }
-      ll_disp_put_area(tab, 0, r, VIR_LCD_PIX_W - 1, r);      
+      ll_disp_put_area(reinterpret_cast<uint8_t *>(tab), 0, r, VIR_LCD_PIX_W - 1, r);
     }
     return;
   }
@@ -100,9 +100,9 @@ void vGL_FlushVScreen()
         ydst++;
         ysrc += Y_SCALE;
     }
-    ll_disp_put_area(scale_vir_screen, 0, 0, VIR_LCD_PIX_W - 1, VIR_LCD_PIX_H - 1);
+    ll_disp_put_area(reinterpret_cast<uint8_t *>(scale_vir_screen), 0, 0, VIR_LCD_PIX_W - 1, VIR_LCD_PIX_H - 1);
 #else
-    ll_disp_put_area(virtual_screen, 0, 1, VIR_LCD_PIX_W - 1, VIR_LCD_PIX_H - 1);
+    ll_disp_put_area(reinterpret_cast<uint8_t *>(virtual_screen), 0, 1, VIR_LCD_PIX_W - 1, VIR_LCD_PIX_H - 1);
 #endif
 }
 
@@ -385,7 +385,7 @@ void vGL_putString(int x0, int y0, const char *s, int fg, int bg, int fontSize) 
         font_h = fontSize;
         while (*s) {
             unsigned int cp = 0;
-            int adv = utf8_decode(s, &cp);
+            int adv = utf8_decode(reinterpret_cast<const unsigned char *>(s), &cp);
             if (adv <= 0) { s++; continue; }
             if (cp < 0x80) {
                 vGL_putChar((x0 * STRING_X_SCALE) + x, (y0 * STRING_Y_SCALE) + y,
@@ -590,13 +590,13 @@ static void vGL_consoleTask(void *arg)
 
 int vGL_Initialize() {
   if (!screen_1bpp)
-    screen_1bpp=pvPortMalloc(VIR_LCD_PIX_H * VIR_LCD_PIX_W/8);
+    screen_1bpp=static_cast<char *>(pvPortMalloc(VIR_LCD_PIX_H * VIR_LCD_PIX_W/8));
   if (!screen_1bpp)
     return -1;
   memset(screen_1bpp, COLOR_WHITE, VIR_LCD_PIX_H * VIR_LCD_PIX_W / 8);
 
   if (!virtual_screen)
-    virtual_screen = pvPortMalloc(VIR_LCD_PIX_H * VIR_LCD_PIX_W);
+    virtual_screen = static_cast<char *>(pvPortMalloc(VIR_LCD_PIX_H * VIR_LCD_PIX_W));
   if (!virtual_screen) {
     /* screen_1bpp is a hardcoded address (0x02000000), not heap-allocated here */
     printf("Failed to alloca virtual screen memory!\n");
@@ -606,7 +606,7 @@ int vGL_Initialize() {
     memset(virtual_screen, COLOR_WHITE, VIR_LCD_PIX_H * VIR_LCD_PIX_W);
 
 #if SCALE_ENABLE
-  scale_vir_screen = pvPortMalloc(VIR_LCD_PIX_W * VIR_LCD_PIX_W);
+  scale_vir_screen = static_cast<char *>(pvPortMalloc(VIR_LCD_PIX_W * VIR_LCD_PIX_W));
   if (!scale_vir_screen) {
     printf("Failed to alloca virtual scale screen memory!\n");
     vPortFree(virtual_screen);

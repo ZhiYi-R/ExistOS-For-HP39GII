@@ -38,20 +38,6 @@ jobs:
         make
         cd ../..
     - uses: actions/cache@v3
-      id: sys_signer-cache
-      with:
-        path: |
-          tools/sys_signer
-          tools/sys_signer
-        key: ${{ runner.os }}-${{ hashFiles('tools/sys_signer/**/*') }}
-    - name: Build sys signer
-      if: steps.sys_signer-cache.outputs.cache-hit != 'true'
-      run: |
-        cmake -S tools/sys_signer -B /tmp/sys_signer_build
-        cmake --build /tmp/sys_signer_build
-        rm -rf tools/sys_signer
-        cp /tmp/sys_signer_build/sys_signer tools/sys_signer
-    - uses: actions/cache@v3
       id: mpy-cache
       with:
         path: Libs/src/micropython-master/ports/eoslib
@@ -96,7 +82,6 @@ jobs:
         files: |
           build/System/ExistOS.sys
           build/OSLoader/OSLoader.sb
-          build/System/sys_symtab.txt
     - name: Upload Build outputs
       if: github.ref_name != 'main'
       uses: actions/upload-artifact@v4
@@ -105,4 +90,3 @@ jobs:
         path: |
           build/System/ExistOS.sys
           build/OSLoader/OSLoader.sb
-          build/System/sys_symtab.txt

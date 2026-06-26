@@ -1,21 +1,16 @@
 /**
  * @file System/Apps/user/khicas/khicas_cjk.h
- * @brief C-visible bridge to the system's compile-time CJK glyph table.
+ * @brief Narrow entry point to the system's compile-time CJK glyph table.
  *
- * The KhiCAS text path (kcasporing_gl.c) is plain C, but the glyph table lives
- * in the C++20 header System/UI/Core/cjk_font.h (a consteval hash table over the
- * code points scanned by Scripts/gen_cjk_font.py). This wrapper exposes a single
- * C entry point so the porting layer can look up a Chinese glyph without pulling
- * the C++ header into a C translation unit.
+ * The glyph table lives in the C++20 header System/UI/Core/cjk_font.h (a consteval
+ * hash table over the code points scanned by Scripts/gen_cjk_font.py). This wrapper
+ * lets the KhiCAS porting layer (kcasporing_gl.cpp) look up a Chinese glyph without
+ * pulling that heavy consteval header into the rendering translation unit.
  */
 #ifndef KHICAS_CJK_H
 #define KHICAS_CJK_H
 
-#include <stdint.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cstdint>
 
 /**
  * Look up the 16x16 glyph for a Unicode code point.
@@ -25,9 +20,5 @@ extern "C" {
  *         the code point is not present in the compiled glyph table.
  */
 const uint8_t *khicas_cjk_glyph(uint32_t cp);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* KHICAS_CJK_H */
