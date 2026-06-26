@@ -13,11 +13,7 @@
 #include "SysConf.h"
 #include "kcasporing_gl.h"
 
-#if FS_TYPE == FS_FATFS
-    #include "ff.h"
-#else
-    #include "filesystem/littlefs/lfs.h"
-#endif
+#include "ff.h"
 
 
 
@@ -595,7 +591,6 @@ int Bfile_OpenFile_OS(unsigned short *pFile, int mode) {
     char *c_path = (char *)pFile;
     printf("open[%d]:%s\n", mode, (char *)c_path);
 
-    #if FS_TYPE == FS_FATFS
 
     FIL *handle = (FIL *)pvPortMalloc(sizeof(FIL));
     FRESULT fr;
@@ -611,27 +606,6 @@ int Bfile_OpenFile_OS(unsigned short *pFile, int mode) {
         return -1;
     }
     return (int)handle;
-    #else
-        lfs *fs = (lfs *)GetFsObj();
-        lfs_file_t *handle = (lfs_file_t *)pvPortMalloc(sizeof(lfs_file_t));
-        memset(handle, 0, sizeof(lfs_file_t));
-        int fr;
-        if(handle == NULL)
-        {
-            return -1;
-        }
-
-        fr = lfs_file_open(fs, handle, (const char *)c_path, _OPENMODE_READ ? (LFS_O_RDONLY) : (LFS_O_RDWR));
-        printf("open res:%d\n",fr);
-        if(fr)
-        {
-            printf("f_open:[%s]:err:%d,%d\n",c_path,fr,mode);
-            vPortFree(handle);
-            return -1;
-        }
-
-    return (int)handle;
-    #endif
 
     
 }
@@ -642,7 +616,6 @@ int Bfile_CreateFile(unsigned short *pFile, int size) {
     char *c_path = (char *)pFile;
     printf("Create[%d]:%s\n", size, (char *)c_path);
 
-    #if FS_TYPE == FS_FATFS
 
     FIL *handle = (FIL *)pvPortMalloc(sizeof(FIL));
     FRESULT fr;
@@ -669,52 +642,18 @@ int Bfile_CreateFile(unsigned short *pFile, int size) {
     f_close(handle);
     vPortFree(handle);
 
-    #else
-    lfs *fs = (lfs *)GetFsObj();
-    lfs_file_t *handle = (lfs_file_t *)pvPortMalloc(sizeof(lfs_file_t));
-    int fr;
-    if(handle == NULL)
-    {
-        return -1;
-    }
-    fr = lfs_file_open(fs, handle, (const char *)c_path, (LFS_O_RDWR | LFS_O_CREAT));
-    if(fr)
-    {
-        printf("Create 1:[%s]:err:%d,%d\n",c_path,fr,size);
-        vPortFree(handle);
-        return -1;
-    }
-    fr = lfs_file_truncate(fs, handle, size);
-    if(fr)
-    {
-        printf("Create 2:[%s]:err:%d,%d\n",c_path,fr,size);
-        vPortFree(handle);
-        return -1;
-    }
-
-    lfs_file_close(fs, handle);
-    vPortFree(handle);
-    #endif
 
     return 0;
 }
 void Bfile_CloseFile_OS(int hFile) {
-    #if FS_TYPE == FS_FATFS
     FIL *handle = (FIL *)hFile;
     f_sync(handle);
     f_close(handle);
     vPortFree(handle);
-    #else
-    lfs *fs = (lfs *)GetFsObj();
-    lfs_file_t *handle = (lfs_file_t *)hFile;
-    lfs_file_close(fs, handle);
-    vPortFree(handle);
-    #endif
 
 }
 
 void Bfile_WriteFile_OS(int hFile, const char *data, size_t len) {
-    #if FS_TYPE == FS_FATFS
     FIL *handle = (FIL *)hFile;
     UINT bw;
     FRESULT fr;
@@ -733,39 +672,16 @@ void Bfile_WriteFile_OS(int hFile, const char *data, size_t len) {
 
     f_sync(handle);
 
-    #else
-    if((len == 0))
-    {
-        return;
-    }
-    lfs *fs = (lfs *)GetFsObj();
-    lfs_file_t *handle = (lfs_file_t *)hFile;
-    int fr;
-
-    fr = lfs_file_write(fs, handle, data, len);
-    if(fr < 0)
-    {
-        printf("WR FAIL.\n");
-    }
-
-    #endif
     //printf("Bfile_WriteFile_OS\n");
 }
 
 void Bfile_DeleteEntry(unsigned short *pFile) {
-    #if FS_TYPE == FS_FATFS
     char *c_path = (char *)pFile;
     printf("delete:%s\n", c_path);
     f_unlink(c_path);
-    #else
-    lfs *fs = (lfs *)GetFsObj();
-    lfs_remove(fs, (char *)pFile);
-
-    #endif
 }
 
 int Bfile_ReadFile_OS(int HANDLE, void *buf, int size, int readpos) {
-#if FS_TYPE == FS_FATFS
     FIL *handle = (FIL *)HANDLE;
     UINT bw;
     FRESULT fr = FR_OK;
@@ -788,49 +704,6 @@ int Bfile_ReadFile_OS(int HANDLE, void *buf, int size, int readpos) {
         return -1;
     }
     return bw;
-#else
-    printf("handle:%08x\n", HANDLE);
-
-    lfs *fs = (lfs *)GetFsObj();
-    lfs_file_t *handle = (lfs_file_t *)HANDLE;
-    int fr;
-    
-
-    if(!handle)
-    {
-        printf("VOID POINTER!\n");
-    }
-
-    if(readpos < 0)
-    {
-        //fr = lfs_file_seek(fs, handle, 0 + size - 1, LFS_SEEK_END);
-        fr = 0;
-    }else
-    {
-        fr = lfs_file_seek(fs, handle, readpos, LFS_SEEK_SET);
-    }
-    printf("sz:%d,adr:%d\n",lfs_file_size(fs, handle) , lfs_file_tell(fs, handle));
-    
-    if(fr < 0)
-    {
-        printf("f_lseek failed:%d, %d\n",fr, readpos);
-        return fr;
-    }
-    fr = lfs_file_read(fs, handle, buf, size);
-    if(fr < 0){
-        printf("f_read failed:%d\n", fr);
-    }
-    printf("adr:%d\n", lfs_file_tell(fs, handle));
-    printf("RD:");
-        for(int i = 0; i < size; i ++)
-        {
-            printf("%02x ", ((char *)buf)[i]);
-        }
-        printf("\n");
-
-    return fr;
-
-#endif
 }
 
 int Bfile_ReadFile(int HANDLE, void *buf, int size, int readpos) {
@@ -838,29 +711,20 @@ int Bfile_ReadFile(int HANDLE, void *buf, int size, int readpos) {
 }
 
 size_t Bfile_GetFileSize_OS(int hFile) {
-    #if FS_TYPE == FS_FATFS
     FIL *handle = (FIL *)hFile;
     return f_size(handle);
-    #else
-    lfs *fs = (lfs *)GetFsObj();
-    lfs_file_t *handle = (lfs_file_t *)hFile;
-    return lfs_file_size(fs, handle);
-    #endif
 }
 
-#if FS_TYPE == FS_FATFS
 typedef struct findHandle_t
 {
     DIR dp;
     FILINFO finfo;
 
 }findHandle_t;
-#endif
 
 int Bfile_FindFirst(const unsigned short *pathname, int *FindHandle, const unsigned short *foundfile, void *fileinfo) {
 
     printf("findFirst:%s\n", pathname);
-    #if FS_TYPE == FS_FATFS
     FRESULT fr;
     findHandle_t *fh = (findHandle_t *)pvPortMalloc(sizeof(findHandle_t));
     FILE_INFO *foundfi = (FILE_INFO *)fileinfo;
@@ -887,15 +751,9 @@ int Bfile_FindFirst(const unsigned short *pathname, int *FindHandle, const unsig
     strcpy((char *)foundfile, fh->finfo.fname);
 
     return 0;
-    #else
-
-
-    return -1;
-    #endif
 }
 int Bfile_FindNext(int FindHandle, const unsigned short *foundfile, void *fileinfo) {
 
- #if FS_TYPE == FS_FATFS
     if(!FindHandle)
     {
         return -1;
@@ -920,14 +778,8 @@ int Bfile_FindNext(int FindHandle, const unsigned short *foundfile, void *filein
     foundfi->fsize = fh->finfo.fsize;
     strcpy((char *)foundfile, fh->finfo.fname);
     return 0;
- #else
-
-
-    return -1;
-#endif
 }
 int Bfile_FindClose(int FindHandle) {
- #if FS_TYPE == FS_FATFS    
     if(!FindHandle)
     {
         return -1;
@@ -936,11 +788,6 @@ int Bfile_FindClose(int FindHandle) {
     vPortFree(fh);
     return 0;
 
- #else
-
-
-    return -1;
-#endif
 
 }
 
@@ -948,7 +795,6 @@ char memLoad_path_buf[270];
 void *memory_load(char *address) {
     printf("memLoad:%s\n",address);
     Bfile_StrToName_ncpy((unsigned short *)memLoad_path_buf, (const unsigned char *)address, 270);
-#if FS_TYPE == FS_FATFS
     
     FRESULT fr;
     FIL *f = (FIL *)pvPortMalloc(sizeof(FIL));
@@ -977,35 +823,6 @@ void *memory_load(char *address) {
     }
     vPortFree(f);
     return NULL;
-#else
-    lfs *fs = (lfs *)GetFsObj();
-    lfs_file file;
-    int fr;
-    fr = lfs_file_open(fs, &file, memLoad_path_buf, LFS_O_RDONLY);
-    if(fr)
-    {
-        return NULL;
-    }
-
-    int fSize = lfs_file_size(fs, &file);
-    char *mem;
-    if(fSize)
-    {
-        mem = (char *)pvPortMalloc(fSize);
-        fr = lfs_file_read(fs, &file, mem, fSize);
-        if(fr < 0)
-        {
-            vPortFree(mem);
-            lfs_file_close(fs, &file);
-            return NULL;
-        }
-        lfs_file_close(fs, &file);
-        return mem;
-    }
-    lfs_file_close(fs, &file);
-    return NULL;
-
-#endif
     
 }
 

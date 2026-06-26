@@ -11,11 +11,7 @@
 #include <stdarg.h>
 #include <time.h>
 
-#if FS_TYPE == FS_FATFS
-    #include "ff.h"
-#else
-    #include "filesystem/littlefs/lfs.h"
-#endif
+#include "ff.h"
 
 // 崩溃日志存储区域
 #define CRASH_LOG_MAX_COUNT 10
@@ -46,20 +42,11 @@ void crash_log_init(void) {
     crash_log_count = 0;
     
     // 创建crash目录
-#if FS_TYPE == FS_FATFS
     FRESULT res;
     res = f_mkdir(CRASH_LOG_DIR);
     if (res != FR_OK && res != FR_EXIST) {
         printf("Failed to create crash directory: %d\n", res);
     }
-#else
-    // LittleFS 目录创建
-    lfs_t* lfs = (lfs_t*)GetFsObj();
-    int err = lfs_mkdir(lfs, CRASH_LOG_DIR);
-    if (err != LFS_ERR_OK && err != LFS_ERR_EXIST) {
-        printf("Failed to create crash directory: %d\n", err);
-    }
-#endif
     
     crash_log_initialized = true;
     printf("Crash log system initialized\n");
@@ -149,7 +136,6 @@ bool crash_log_create_file(const crash_log_t* log) {
     snprintf(filename, sizeof(filename), "%s/%s%u%s", 
              CRASH_LOG_DIR, CRASH_LOG_FILE_PREFIX, log->timestamp, CRASH_LOG_FILE_EXTENSION);
     
-#if FS_TYPE == FS_FATFS
     FIL file;
     FRESULT res = f_open(&file, filename, FA_CREATE_ALWAYS | FA_WRITE);
     if (res != FR_OK) {
@@ -216,75 +202,6 @@ bool crash_log_create_file(const crash_log_t* log) {
     }
     
     f_close(&file);
-#else
-    lfs_t* lfs = (lfs_t*)GetFsObj();
-    lfs_file_t file;
-    
-    int err = lfs_file_open(lfs, &file, filename, LFS_O_WRONLY | LFS_O_CREAT | LFS_O_TRUNC);
-    if (err != LFS_ERR_OK) {
-        printf("Failed to create crash log file: %s, error: %d\n", filename, err);
-        return false;
-    }
-    
-    // 写入崩溃日志内容
-    char buffer[512];
-    
-    // 写入头部信息
-    snprintf(buffer, sizeof(buffer), 
-             "=== ExistOS Crash Log ===\n"
-             "Timestamp: %lu\n"
-             "Type: %d\n"
-             "PC: 0x%08lX\n"
-             "LR: 0x%08lX\n"
-             "SP: 0x%08lX\n"
-             "PSR: 0x%08lX\n"
-             "Task: %s\n"
-             "File: %s\n"
-             "Line: %d\n"
-             "Description: %s\n"
-             "Stack Trace Size: %lu\n",
-             log->timestamp, log->type, log->pc, log->lr, log->sp, log->psr,
-             log->task_name, log->file, log->line, log->description, log->stack_trace_size);
-    
-    lfs_file_write(lfs, &file, buffer, strlen(buffer));
-    
-    // 写入栈跟踪数据（十六进制格式）
-    if (log->stack_trace_size > 0) {
-        lfs_file_write(lfs, &file, "Stack Trace:\n", 13);
-        
-        for (uint32_t i = 0; i < log->stack_trace_size; i += 16) {
-            int line_len = snprintf(buffer, sizeof(buffer), "%08lX: ", (uint32_t)(log->sp + i));
-            if (line_len < 0) {
-                line_len = 0;
-            }
-
-            for (uint32_t j = 0; j < 16 && (i + j) < log->stack_trace_size; j++) {
-                if (line_len >= (int)sizeof(buffer)) {
-                    break;
-                }
-                int n = snprintf(buffer + line_len, sizeof(buffer) - line_len,
-                                    "%02X ", log->stack_trace[i + j]);
-                if (n < 0) {
-                    break;
-                }
-                line_len += n;
-            }
-
-            if (line_len < (int)sizeof(buffer)) {
-                int n = snprintf(buffer + line_len, sizeof(buffer) - line_len, "\n");
-                if (n > 0) {
-                    line_len += n;
-                }
-            }
-            if (line_len > (int)sizeof(buffer)) {
-                line_len = sizeof(buffer);
-            }
-            lfs_file_write(lfs, &file, buffer, line_len);
-        }
-    }
-    
-    lfs_file_close(lfs, &file);
-#endif
     
     printf("Crash log file created: %s\n", filename);
     return true;
@@ -311,7 +228,6 @@ void crash_log_clear_all(void) {
     memset(crash_logs, 0, sizeof(crash_logs));
     
     // 删除所有崩溃日志文件
-#if FS_TYPE == FS_FATFS
     DIR dir;
     FILINFO fno;
     FRESULT res;
@@ -330,26 +246,6 @@ void crash_log_clear_all(void) {
         }
         f_closedir(&dir);
     }
-#else
-    lfs_t* lfs = (lfs_t*)GetFsObj();
-    lfs_dir_t dir;
-    struct lfs_info info;
-    
-    int err = lfs_dir_open(lfs, &dir, CRASH_LOG_DIR);
-    if (err == LFS_ERR_OK) {
-        while (true) {
-            err = lfs_dir_read(lfs, &dir, &info);
-            if (err <= 0) break;
-            
-            if (strncmp(info.name, CRASH_LOG_FILE_PREFIX, strlen(CRASH_LOG_FILE_PREFIX)) == 0) {
-                char filepath[64];
-                snprintf(filepath, sizeof(filepath), "%s/%s", CRASH_LOG_DIR, info.name);
-                lfs_remove(lfs, filepath);
-            }
-        }
-        lfs_dir_close(lfs, &dir);
-    }
-#endif
     
     printf("All crash logs cleared\n");
 }

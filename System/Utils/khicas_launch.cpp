@@ -58,7 +58,6 @@ void khicasLaunch()
         return;
     }
 
-#if FS_TYPE == FS_FATFS
     FRESULT fr = f_mkdir("/xcas");
     if (fr != FR_OK)
     {
@@ -66,14 +65,6 @@ void khicasLaunch()
             std::cout << "Failed to create dir /xcas, " << fr << std::endl;
         }
     }
-#else
-    lfs *fs = (lfs *)GetFsObj();
-    int fr = lfs_mkdir(fs, "/xcas");
-    if (fr != 0) {
-        if (fr != LFS_ERR_EXIST)
-            std::cout << "Failed to create dir /xcas, " << fr << std::endl;
-    }
-#endif
     printf("KhiCAS STACK ADDR:%08x\n", getCurStackAdr());
 
     khicas_repl(0, 0);

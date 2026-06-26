@@ -10,7 +10,6 @@
 extern "C" {
 #endif
 void SystemFSInit() ;
-void *GetFsObj();
 #ifdef __cplusplus
 }
 #endif
