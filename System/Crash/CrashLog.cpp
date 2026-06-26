@@ -13,6 +13,14 @@
 
 #include "ff.h"
 
+// 以下符号为 C 链接:ll_get_time_ms 是 LLAPI SWI 桩,xTask*/pcTask* 为 FreeRTOS
+// (均按 C 编译)。block-scope 的 extern "C" 不合法,故在文件作用域声明。
+extern "C" {
+uint32_t ll_get_time_ms(void);
+TaskHandle_t xTaskGetCurrentTaskHandle(void);
+char *pcTaskGetName(TaskHandle_t xTaskToQuery);
+}
+
 // 崩溃日志存储区域
 #define CRASH_LOG_MAX_COUNT 10
 #define CRASH_LOG_FILE_PREFIX "crash_"
@@ -27,7 +35,6 @@ static bool crash_log_initialized = false;
 // 获取当前时间戳
 static uint32_t get_timestamp(void) {
     // 这里应该从RTC获取实际时间，暂时使用系统运行时间
-    extern uint32_t ll_get_time_ms(void);
     return ll_get_time_ms() / 1000; // 转换为秒
 }
 
@@ -266,10 +273,8 @@ void crash_handler(crash_type_t type, const char* file, int line, const char* de
     
     // 获取当前任务名称
     char task_name[16] = "Unknown";
-    extern TaskHandle_t xTaskGetCurrentTaskHandle(void);
     TaskHandle_t current_task = xTaskGetCurrentTaskHandle();
     if (current_task) {
-        extern char* pcTaskGetName(TaskHandle_t xTaskToQuery);
         char* name = pcTaskGetName(current_task);
         if (name) {
             strncpy(task_name, name, sizeof(task_name) - 1);

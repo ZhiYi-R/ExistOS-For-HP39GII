@@ -7,11 +7,13 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "basic_api.h"  // declares api_* with C linkage; sym_def.c jumps here by name
 #include "SystemUI.h"
 #include "FreeRTOS.h"
 #include "task.h"
 
 #include "sys_llapi.h"
+#include "sys_llapi.hpp" // 强类型零开销门面(disp_flush 等)
 
 #include "ff.h"
 
@@ -33,7 +35,8 @@ void api_vram_flush(void)
 {
     if(svram)
     {
-        ll_disp_put_area(svram, 0, 0, 255, 126);
+        // 全屏帧缓冲 256×127;span 携带边界,always_inline 转发 → 与直接调用 ll_disp_put_area 同码。
+        ll::disp_flush(std::span<uint8_t>{svram, 256u * 127u}, {0, 0, 255, 126});
     }
 }
 

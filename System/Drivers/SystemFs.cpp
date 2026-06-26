@@ -30,7 +30,7 @@ void SystemFSInit() {
 
 
     FRESULT fres;
-    fs = pvPortMalloc(sizeof(FATFS));
+    fs = static_cast<FATFS *>(pvPortMalloc(sizeof(FATFS)));
 
 
 /*

@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "keyboard_gii39.h"
+#include "sys_llapi.hpp" // 强类型门面(ll::mem_phy_info)
 
 #include "SysConf.h"
 
@@ -279,10 +280,8 @@ void pageUpdate() {
             uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
             uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, UI_ONF5Format);
         } else if (page3Subpage == 2) {
-            uint32_t free;
-            uint32_t total;
             float mem_cmpr = ll_mem_comprate();
-            uint32_t total_phy_mem = ll_mem_phy_info(&free, &total);
+            auto [total_phy_mem, free, total] = ll::mem_phy_info();
             total_phy_mem /= 1024;
             free /= 1024;
             total /= 1024;

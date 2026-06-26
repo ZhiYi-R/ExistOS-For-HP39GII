@@ -23,6 +23,7 @@ extern "C" {
 #endif
 
 
+void SystemUIInit();
 void SystemUIRefresh() ;
 void SystemUISuspend();
 void SystemUIResume();

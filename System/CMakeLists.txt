@@ -38,7 +38,7 @@ aux_source_directory(${CMAKE_SOURCE_DIR}/External/FatFs                         
 aux_source_directory(./Crash                                         SYS_SRCS)
 
 # 添加getentropy.c文件到编译源文件
-list(APPEND SYS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Core/getentropy.c)
+list(APPEND SYS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/Core/getentropy.cpp)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/External/TJpgDec tjpgd)
 add_subdirectory(Apps/user/khicas)
@@ -104,7 +104,19 @@ target_compile_options(sys.elf PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlitt
 $<$<COMPILE_LANGUAGE:CXX>:-Wno-register>
 $<$<COMPILE_LANGUAGE:CXX>:-Wno-template-id-cdtor>
 $<$<COMPILE_LANGUAGE:CXX>:-Wno-deprecated-enum-enum-conversion>
+# Our own C++ uses zero exception/RTTI features (verified: 0 throw/try/catch/typeid/
+# dynamic_cast in first-party .cpp). Disable the machinery so our objects emit no
+# landing pads or RTTI metadata. The prebuilt giac/GMP blobs keep their own unwinder;
+# this only strips OUR overhead. -fno-use-cxa-atexit: init.c walks __ctors and runs no
+# dtors (atexit.cpp is a no-op __cxa_atexit stub). -fno-threadsafe-statics: no
+# function-local statics with non-trivial ctors exist.
+$<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions;-fno-rtti;-fno-use-cxa-atexit;-fno-threadsafe-statics>
 )
+
+# Build sys.elf's own C++ at C++23 (target-scoped so khicas_lib/tjpgd, which carry their
+# own per-file -std, are untouched; the root default stays CMAKE_CXX_STANDARD 20).
+set_property(TARGET sys.elf PROPERTY CXX_STANDARD 23)
+set_property(TARGET sys.elf PROPERTY CXX_STANDARD_REQUIRED ON)
 
 target_link_libraries(sys.elf -lm -lc -lrdimon -lgcc -lstdc++ -nostartfiles
 tjpgd

@@ -15,6 +15,7 @@
 #include "keyboard.h"
 #include "llapi_code.h"
 #include "sys_llapi.h"
+#include "sys_llapi.hpp" // 强类型门面(ll::mem_phy_info 等);须在下方 extern "C" 块之前包含
 
 #include "SysConf.h"
 
@@ -33,6 +34,12 @@
 
 #include "ff.h"
 //#include "mpy_port.h"
+
+// main.c 是 C 入口:被 startup/FreeRTOS/newlib/asm 以及 UICore 按 C 名引用
+// (enableMemSwap / StartKhiCAS / UI_OOM / khicasLaunch / IRQ_ISR / SWI_ISR /
+// symtab_def 等两端均为 C 链接)。整文件包 extern "C",迁移到 .cpp 后符号名不变。
+extern "C" {
+
 void check_emulator_status();
 
 uint32_t OnChipMemorySize = BASIC_RAM_SIZE;
@@ -69,10 +76,8 @@ void printTaskList() {
     printf("%s\n", pcWriteBuffer);
     printf("Status:  X-Running  R-Ready  B-Block  S-Suspend  D-Delete\n");
 
-    uint32_t free;
-    uint32_t total;
     float mem_cmpr = ll_mem_comprate();
-    uint32_t total_phy_mem = ll_mem_phy_info(&free, &total);
+    auto [total_phy_mem, free, total] = ll::mem_phy_info();
     total_phy_mem /= 1024;
     free /= 1024;
     total /= 1024;
@@ -138,11 +143,10 @@ void StartKhiCAS() {
     xTaskCreate(khicasTask, "KhiCAS", KhiCAS_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, (NULL));
 }
 
-void main_thread() {
+void main_thread(void *) {
 
     // printf("R13:%08x\n", get_stack());
 
-    void SystemUIInit();
     SystemUIInit();
     SystemFSInit();
     
@@ -162,7 +166,7 @@ uint32_t __attribute__((naked)) getCurStackAdr() {
     __asm volatile("mov pc,lr");
 }
 extern uint32_t SYSTEM_STACK; // in ld script
-void main() {
+int main() {
     void IRQ_ISR(uint32_t IRQNum, uint32_t par1, uint32_t par2, uint32_t par3);
     void SWI_ISR(void);
     ll_set_irq_stack((uint32_t)&SYSTEM_STACK);
@@ -173,10 +177,7 @@ void main() {
 
     ll_cpu_slowdown_enable(false);
 
-    uint32_t memsz;
-    uint32_t phy_total;
-    uint32_t phy_free;
-    memsz = ll_mem_phy_info(&phy_free, &phy_total);
+    uint32_t memsz = ll::mem_phy_info().total_compressed;
     if (memsz > OnChipMemorySize) {
         OnChipMemorySize = memsz;
     }
@@ -187,10 +188,7 @@ void main() {
 
     printf("SP:%08x\n", getCurStackAdr());
 
-    uint32_t free;
-    uint32_t total;
-    uint32_t total_comp;
-    total_comp = ll_mem_phy_info(&free, &total);
+    uint32_t total_comp = ll::mem_phy_info().total_compressed;
     if (total_comp > OnChipMemorySize) {
         OnChipMemorySize = total_comp;
     }
@@ -272,3 +270,5 @@ void check_emulator_status() {
         }
     }
 }
+
+}  // extern "C"

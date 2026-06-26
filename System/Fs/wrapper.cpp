@@ -17,6 +17,10 @@
 
 #include "sys_llapi.h"
 
+// All symbols below are newlib reentrant syscall stubs, resolved by C name from
+// newlib — keep C linkage now that this TU compiles as C++.
+extern "C" {
+
 int _fcntl_r(struct _reent *pReent, int fd, int cmd, int arg) {
     pReent->_errno = ENOTSUP;
     return -1;
@@ -85,9 +89,11 @@ int _unlink_r(struct _reent *pReent, const char *filename) {
 
 
 int fsync(int fd) {
-    
+
     return 0;
 }
+
+}  // extern "C"
 
 
 

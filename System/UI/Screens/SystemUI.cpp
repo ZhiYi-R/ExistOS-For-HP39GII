@@ -61,7 +61,7 @@
         }                                               \
     } while (0)
 
-static char *msgbox_button[] = {"OK", "Cancel", ""};
+static const char *msgbox_button[] = {"OK", "Cancel", ""};
 
 static uint8_t indicator = 0;
 
@@ -77,8 +77,11 @@ extern bool OS_UISuspend;
 //static TaskHandle_t lvgl_svc_task;
 //static TaskHandle_t lvgl_tick_task;
 
+// Defined here, but written by name from SysIRQ.c (kept as C) — force C linkage.
+extern "C" {
 uint32_t g_key;
 uint32_t g_key_press;
+}
 
 
 
@@ -304,8 +307,8 @@ void SystemUIInit() {
     xTaskCreate(UI_Task, "UICore", 800, NULL, configMAX_CO_ROUTINE_PRIORITIES - 3, &pUITask);
 }
 
-void UI_Resume();
-void UI_Suspend();
+extern "C" void UI_Resume();
+extern "C" void UI_Suspend();
 
 extern bool UIForceRefresh ;
 //void keyMsg(uint32_t key, int state);

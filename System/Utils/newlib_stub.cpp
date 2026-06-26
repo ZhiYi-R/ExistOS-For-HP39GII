@@ -23,6 +23,10 @@
 #include "SysConf.h"
 #include "task.h"
 
+// Newlib syscall stubs + _sbrk/heap + malloc wrappers — all resolved by C name
+// (newlib, the linker's --wrap=malloc/free, FreeRTOS). Keep C linkage under C++.
+extern "C" {
+
 #undef errno
 extern int errno;
 
@@ -31,7 +35,7 @@ extern char __HEAP_START asm("__HEAP_START");
 void __sync_synchronize() {
 }
 
-static void *heap = NULL;
+static char *heap = NULL;
 extern uint32_t SwapMemorySize;
 extern bool MemorySwapEnable;
 extern uint32_t OnChipMemorySize;
@@ -47,7 +51,7 @@ caddr_t _sbrk(uint32_t incr) {
     if (cur_heap_loc == 0) {
         if (((uint32_t)heap + incr) > RAM_BASE + OnChipMemorySize) {
             if (MemorySwapEnable) {
-                heap = (void *)(RAM_BASE + OnChipMemorySize);
+                heap = (char *)(RAM_BASE + OnChipMemorySize);
                 cur_heap_loc = 1;
                 prev_heap = heap;
                 heap += incr;
@@ -208,3 +212,5 @@ void __wrap_free(void *m) {
 
     (void)xTaskResumeAll();
 }
+
+}  // extern "C"

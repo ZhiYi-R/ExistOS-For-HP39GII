@@ -5,6 +5,11 @@
 
 #include <errno.h>
 #include <unistd.h>
+
+// Called by newlib (arc4random / getentropy) by C name — must keep C linkage
+// now that this TU is compiled as C++.
+extern "C" {
+
 int _getentropy(void *buffer, size_t length) {
     
     if (buffer == NULL) {
@@ -30,3 +35,5 @@ int _getentropy(void *buffer, size_t length) {
 int _getentropy_r(struct _reent *reent, void *buffer, size_t length) {
     return _getentropy(buffer, length);
 }
+
+}  // extern "C"

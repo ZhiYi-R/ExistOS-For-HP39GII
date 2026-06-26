@@ -45,7 +45,7 @@ int VROMLoaderCreateFileMap(FIL *f, uint32_t inFileStart, uint32_t memAddress, u
     }
     VROMMapInfo_t *map = NULL;
     if (vmmap_list == NULL) {
-        vmmap_list = pvPortMalloc(sizeof(VROMMapInfo_t));
+        vmmap_list = static_cast<VROMMapInfo_t *>(pvPortMalloc(sizeof(VROMMapInfo_t)));
         if (!vmmap_list) {
             return -1;
         }
@@ -55,7 +55,7 @@ int VROMLoaderCreateFileMap(FIL *f, uint32_t inFileStart, uint32_t memAddress, u
         while (map->next) {
             map = map->next;
         }
-        map->next = pvPortMalloc(sizeof(VROMMapInfo_t));
+        map->next = static_cast<VROMMapInfo_t *>(pvPortMalloc(sizeof(VROMMapInfo_t)));
         if (!map->next) {
             return -1;
         }

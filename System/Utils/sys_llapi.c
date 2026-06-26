@@ -26,8 +26,8 @@
     extern "C" {
 #endif
 //    Return Type       Function Name       Parameters                               LL SWI Number
-DECDEF_LLSWI(void,         ll_put_str,            (char *s)                               ,LL_SWI_WRITE_STRING1           );
-DECDEF_LLSWI(void,         ll_put_str2,           (char *s, uint32_t len)                 ,LL_SWI_WRITE_STRING2           );
+DECDEF_LLSWI(void,         ll_put_str,            (const char *s)                         ,LL_SWI_WRITE_STRING1           );
+DECDEF_LLSWI(void,         ll_put_str2,           (const char *s, uint32_t len)           ,LL_SWI_WRITE_STRING2           );
 DECDEF_LLSWI(void,         ll_put_ch,             (char c)                                ,LL_SWI_PUT_CH                  );
 DECDEF_LLSWI(uint32_t,     ll_get_time_us,        (void)                                  ,LL_FAST_SWI_GET_TIME_US        );
 DECDEF_LLSWI(uint32_t,     ll_get_time_ms,        (void)                                  ,LL_FAST_SWI_GET_TIME_MS        );
