@@ -103,3 +103,11 @@ UI_build_stamp.h
 claude.md
 glyphs3/
 Scripts/__pycache__/
+
+# KhiCAS localization one-shot apply scripts (output is baked into kdisplay.cc;
+# not reusable like the glyph-font generator, so kept out of the repo)
+Scripts/khicas_desc_tool.py
+Scripts/khicas_desc_zh.json
+Scripts/khicas_dialog_zh.py
+Scripts/khicas_help_zh.py
+Scripts/khicas_menu_zh.py

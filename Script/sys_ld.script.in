@@ -59,13 +59,10 @@ SECTIONS
 	} >vmROM
 
 	. = ALIGN(8);
-	.rodata : 
+	.rodata :
 	{
 		. = ALIGN(4);
-		*(.rodata) 
-		fonts_hzk_start = .;
-		INCLUDE "@FONT_HZK16S_LD@"
-		fonts_hzk_end = .;
+		*(.rodata)
 	} >vmROM
 
 	.ARM.extab :

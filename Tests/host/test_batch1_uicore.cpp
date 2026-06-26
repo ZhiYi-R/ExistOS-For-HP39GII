@@ -32,8 +32,6 @@ static void stub_draw(uint8_t *, uint32_t, uint32_t, uint32_t, uint32_t) {
 extern const unsigned char VGA_Ascii_5x8[95 * 8] = {0};
 extern const unsigned char VGA_Ascii_6x12[95 * 12] = {0};
 extern const unsigned char VGA_Ascii_8x16[95 * 16] = {0};
-unsigned int fonts_hzk_start = 0;
-unsigned int fonts_hzk_end = 0;
 
 #include "../../System/graphics/UICore.h"
 
@@ -51,18 +49,20 @@ static void test_msgbox_reallocates_for_longer_text() {
     msgbox.refresh();
 }
 
-static void test_draw_printf_handles_long_strings() {
+static void test_draw_text_handles_long_strings() {
     UI_Display disp(256, 127, stub_draw);
     char payload[600];
     std::memset(payload, 'A', sizeof(payload) - 1);
     payload[sizeof(payload) - 1] = '\0';
-    int ret = disp.draw_printf(0, 0, 12, 0, 255, "%s", payload);
-    assert(ret == static_cast<int>(std::strlen(payload)));
+    // draw_text stops once it runs past the display width, so an over-long
+    // string must not run away; it returns the (bounded) end x coordinate.
+    int end_x = disp.draw_text(0, 0, 12, 0, 255, payload);
+    assert(end_x > 0);
 }
 
 int main() {
     test_window_title_copy();
     test_msgbox_reallocates_for_longer_text();
-    test_draw_printf_handles_long_strings();
+    test_draw_text_handles_long_strings();
     return 0;
 }

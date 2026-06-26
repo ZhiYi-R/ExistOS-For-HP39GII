@@ -40,7 +40,3 @@ lock text eol=lf
 *.otf binary
 *.ico binary
 *.bin binary
-
-# Font data files - raw binary format
-fonts/fonts_hzk16h binary
-fonts/fonts_hzk16s binary

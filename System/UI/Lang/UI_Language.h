@@ -5,13 +5,13 @@
 
 #pragma once
 /*
- * UI_Chinese_gbk.h is generated at build time by transcoding the UTF-8 source
- * System/UI/Lang/UI_Chinese.h to GBK (the renderer decodes GB2312 and gcc has no
- * iconv). Do NOT include the UTF-8 source "UI_Chinese.h" directly here — it would
- * shadow the generated header via same-directory quote-include resolution and the
- * Chinese strings would render as mojibake. See System/CMakeLists.txt (gen_lang_gbk).
+ * Chinese strings live in the UTF-8 source UI_Chinese.h. The renderer no longer
+ * decodes GB2312 from a full font blob; draw_text decodes UTF-8 per character
+ * and looks each code point up in the compact glyph table built from these very
+ * strings (Scripts/gen_cjk_font.py -> cjk_font_data.h -> System/UI/Core/cjk_font.h).
+ * So no build-time transcoding is needed — include the UTF-8 source directly.
  */
-#include "UI_Chinese_gbk.h"
+#include "UI_Chinese.h"
 #include "UI_English.h"
 
 const char *MAIN_WIN_TITLE = MAIN_WIN_TITLE_EN;

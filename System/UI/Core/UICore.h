@@ -7,6 +7,7 @@
 
 #include "UI_Config.h"
 #include "UI_Language.h"
+#include "cjk_font.h"
 #include "font_ascii.h"
 
 #ifdef __cplusplus
@@ -178,23 +179,23 @@ public:
 
         this->drawf(&this->disp_buf[y0 * this->disp_w], 0, y0, this->disp_w - 1, y0 + font_h - 1);
     }
-    void draw_char_GBK16(uint32_t x0, uint32_t y0, uint16_t c, uint8_t fg, int16_t bg) {
-        extern uint32_t fonts_hzk_start;
-        extern uint32_t fonts_hzk_end;
-        int lv = (c & 0xFF) - 0xa1;
-        int hv = (c >> 8) - 0xa1;
-        uint32_t offset = (uint32_t)(94 * hv + lv) * 32;
-        uint8_t *font_data = (uint8_t *)(((uint32_t)&fonts_hzk_start) + offset);
-        if ((uint32_t)font_data > (uint32_t)&fonts_hzk_end) {
-            return;
+    /// Render one 16x16 CJK glyph (32 bytes, MSB-left, 2 bytes/row) for a
+    /// Unicode code point. Code points absent from the compact table fall back
+    /// to an all-zero (blank) cell; by construction every CJK character the UI
+    /// uses is present (the table is generated from UI_Chinese.h).
+    void draw_char_cjk16(uint32_t x0, uint32_t y0, uint32_t cp, uint8_t fg, int16_t bg) {
+        static const uint8_t tofu[32] = {0};
+        const uint8_t *font_data = cjkfont::glyph(cp);
+        if (font_data == nullptr) {
+            font_data = tofu;
         }
 
         int x = x0;
         int y = y0;
 
         for (int i = 0; i < 32; i += 2) {
-            uint8_t pix = 0;
-            for (int t = 0, pix = font_data[i]; t < 8; t++) {
+            uint8_t pix = font_data[i];
+            for (int t = 0; t < 8; t++) {
                 if ((pix & 0x80) != 0) {
                     buf_set(x, y, fg);
                 } else {
@@ -205,7 +206,8 @@ public:
                 pix <<= 1;
             }
 
-            for (int t = 0, pix = font_data[i + 1]; t < 8; t++) {
+            pix = font_data[i + 1];
+            for (int t = 0; t < 8; t++) {
                 if ((pix & 0x80) != 0) {
                     buf_set(x, y, fg);
                 } else {
@@ -219,42 +221,29 @@ public:
             x = x0;
             y++;
         }
-        // printf("GBK PRINT:%02x\n", c);
         this->drawf(&this->disp_buf[y0 * this->disp_w], 0, y0, this->disp_w - 1, y0 + 16);
     }
-    int draw_printf(uint32_t x0, uint32_t y0, uint8_t fontSize, uint8_t fg, int16_t bg, const char *format, ...) {
-        va_list aptr;
-        int ret = 0;
 
-        char buffer[256];
-
-        va_start(aptr, format);
-        ret = vsnprintf(buffer, sizeof(buffer), format, aptr);
-        va_end(aptr);
-        if (ret < 0) {
-            buffer[0] = '\0';
-            return ret;
-        }
-        buffer[sizeof(buffer) - 1] = '\0';
-
-        for (int i = 0, x = x0; (i < sizeof(buffer)) && ((buffer[i]) != 0u); i++) {
-            unsigned char ch = (unsigned char)buffer[i];
-            if (ch < 0x80) {
-                draw_char_ascii(x, y0, buffer[i], fontSize, fg, bg);
+    /// Draw a UTF-8 string: ASCII via draw_char_ascii (advance 8 px at size 16,
+    /// else 6 px), CJK via draw_char_cjk16 (advance 16 px). Returns the end x so
+    /// callers can chain "label + value" without hand-computing offsets.
+    int draw_text(uint32_t x0, uint32_t y0, uint8_t fontSize, uint8_t fg, int16_t bg, const char *s) {
+        const char *p = s;
+        uint32_t x = x0;
+        while (*p != '\0') {
+            uint32_t cp = cjkfont::utf8_next(p);
+            if (cp < 0x80) {
+                draw_char_ascii(x, y0, (char)cp, fontSize, fg, bg);
                 x += fontSize == 16 ? 8 : 6;
-                if (x > disp_w) {
-                    break;
-                }
             } else {
-                draw_char_GBK16(x, y0, buffer[i + 1] | (buffer[i] << 8), fg, bg);
+                draw_char_cjk16(x, y0, cp, fg, bg);
                 x += 16;
-                if (x > disp_w) {
-                    break;
-                }
-                i++;
+            }
+            if (x > (uint32_t)disp_w) {
+                break;
             }
         }
-        return (ret);
+        return (int)x;
     }
     ~UI_Display() {
         vPortFree(this->disp_buf);
@@ -461,7 +450,7 @@ public:
     void refreshTitle() {
         disp->draw_box(x0 + 1, y0, x0 + width, y0 + WIN_DEFAULT_FONTSIZE - 3, WIN_DEFAULT_BORDER_COLOR, WIN_DEFAULT_TITLE_BG_COLOR);
         if (this->title != nullptr) {
-            disp->draw_printf(x0 + 1, y0, WIN_DEFAULT_FONTSIZE, WIN_DEFAULT_TITLE_FONT_COLOR, WIN_DEFAULT_TITLE_BG_COLOR, "%s", this->title);
+            disp->draw_text(x0 + 1, y0, WIN_DEFAULT_FONTSIZE, WIN_DEFAULT_TITLE_FONT_COLOR, WIN_DEFAULT_TITLE_BG_COLOR, this->title);
         }
         // disp->draw_line(x0, WIN_DEFAULT_FONTSIZE, x0 + width, WIN_DEFAULT_FONTSIZE, WIN_DEFAULT_BORDER_COLOR);
     }
@@ -478,9 +467,31 @@ public:
 
             for (int i = 0; i < 6; i++) {
                 if (this->funcKey[i][0] != 0u) {
-                    disp->draw_printf(i * item_w, FUNCKEY_BAR_Y, FUNCKEY_FONTSIZE, 255 - FUNCKEY_BAR_BG_COLOR, -1,
-                                      "%*s",
-                                      3 + strlen(this->funcKey[i]) / 2, this->funcKey[i], 3 - strlen(this->funcKey[i]) / 2, "");
+                    // The old GBK build centered each label with "%*s" in a field
+                    // of (3 + gbkBytes/2), i.e. leading spaces = 3 - gbkBytes/2,
+                    // where a CJK char was 2 GBK bytes. Recompute that GBK byte
+                    // length from the UTF-8 source (ASCII = 1, CJK lead = 2) so
+                    // label positions stay pixel-identical to before.
+                    int gbkBytes = 0;
+                    for (const char *q = this->funcKey[i]; *q != 0; ++q) {
+                        unsigned char uc = (unsigned char)*q;
+                        if (uc < 0x80) {
+                            gbkBytes += 1;
+                        } else if ((uc & 0xC0) != 0x80) {
+                            gbkBytes += 2;
+                        }
+                    }
+                    int pad = 3 - gbkBytes / 2;
+                    char fkbuf[32];
+                    int n = 0;
+                    for (; n < pad && n < (int)sizeof(fkbuf) - 1; n++) {
+                        fkbuf[n] = ' ';
+                    }
+                    for (const char *q = this->funcKey[i]; (*q != 0) && (n < (int)sizeof(fkbuf) - 1); ++q) {
+                        fkbuf[n++] = *q;
+                    }
+                    fkbuf[n] = '\0';
+                    disp->draw_text(i * item_w, FUNCKEY_BAR_Y, FUNCKEY_FONTSIZE, 255 - FUNCKEY_BAR_BG_COLOR, -1, fkbuf);
                 }
             }
         }
@@ -592,8 +603,8 @@ public:
     void refresh() {
         disp->draw_box(this->x0, this->y0, this->x0 + this->width, this->y0 + this->height, 0, 224);
         disp->draw_line(this->x0, this->y0 + 16, this->x0 + this->width, this->y0 + 16, 0);
-        disp->draw_printf(this->x0 + 4, this->y0 + 4, 12, 0, 224, "%s", this->title);
-        disp->draw_printf(this->text_x0, this->text_y0, 12, 0, 224, "%s", this->text);
+        disp->draw_text(this->x0 + 4, this->y0 + 4, 12, 0, 224, this->title);
+        disp->draw_text(this->text_x0, this->text_y0, 12, 0, 224, this->text);
     }
 
     bool show() {
@@ -816,9 +827,7 @@ public:
         }
 
         if (title[0]) {
-            win->disp->draw_printf(x, y + h + 1, 16, 0, -1,
-                                   "%s",
-                                   this->title);
+            win->disp->draw_text(x, y + h + 1, 16, 0, -1, this->title);
         }
         if (next) {
             next->drawContent();

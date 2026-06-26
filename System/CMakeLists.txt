@@ -49,37 +49,35 @@ add_subdirectory(Apps/user/khicas)
 
 add_executable(sys.elf ${SYS_SRCS})
 
-# --- Generate GBK copy of the UTF-8 UI_Chinese.h at build time ---------------
-# The on-screen CJK renderer (draw_char_GBK16) decodes GB2312 and arm-none-eabi-gcc
-# has no iconv, so string literals must already be GBK bytes in the source fed to the
-# compiler. We keep the checked-in source UTF-8 (editor/git/CI friendly) and transcode
-# it here into a differently-named header so it does not shadow the UTF-8 source via
-# same-directory quote-include. UI_Language.h includes the generated UI_Chinese_gbk.h.
+# --- Generate the compact CJK glyph table from UI_Chinese.h at build time -----
+# draw_text decodes UTF-8 per character and looks each code point up in a
+# compile-time hash table built over this generated header. gen_cjk_font.py scans
+# the UTF-8 source for CJK code points and rasterizes each from GNU Unifont (the
+# same glyphs as the retired fonts_hzk blob), so on-screen Chinese is byte-identical
+# while the checked-in source stays UTF-8 (no GBK transcoding, no full font blob).
 find_program(UV uv)
 if(NOT UV)
-  message(FATAL_ERROR "uv not found: it is required to transcode UI_Chinese.h (UTF-8) to GBK. Install uv or add it to PATH.")
+  message(FATAL_ERROR "uv not found: it is required to generate the CJK glyph table from UI_Chinese.h. Install uv or add it to PATH.")
 endif()
 
-set(LANG_GBK_DIR ${CMAKE_CURRENT_BINARY_DIR}/lang_gbk)
+set(CJK_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/cjk_gen)
 add_custom_command(
-  OUTPUT ${LANG_GBK_DIR}/UI_Chinese_gbk.h
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${LANG_GBK_DIR}
+  OUTPUT ${CJK_GEN_DIR}/cjk_font_data.h
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CJK_GEN_DIR}
   COMMAND ${UV} run -q --project ${CMAKE_SOURCE_DIR}/Scripts python
-          ${CMAKE_SOURCE_DIR}/Scripts/transcode.py
-          ${CMAKE_CURRENT_SOURCE_DIR}/UI/Lang/UI_Chinese.h
-          ${LANG_GBK_DIR}/UI_Chinese_gbk.h
-          gbk
+          ${CMAKE_SOURCE_DIR}/Scripts/gen_cjk_font.py
+          --source ${CMAKE_CURRENT_SOURCE_DIR}/UI/Lang/UI_Chinese.h
+          --write ${CJK_GEN_DIR}/cjk_font_data.h
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/UI/Lang/UI_Chinese.h
-          ${CMAKE_SOURCE_DIR}/Scripts/transcode.py
-  COMMENT "Transcoding UI_Chinese.h (UTF-8) -> UI_Chinese_gbk.h (GBK)"
+          ${CMAKE_SOURCE_DIR}/Scripts/gen_cjk_font.py
+  COMMENT "Generating CJK glyph table cjk_font_data.h from UI_Chinese.h (UTF-8)"
   VERBATIM
 )
-add_custom_target(gen_lang_gbk DEPENDS ${LANG_GBK_DIR}/UI_Chinese_gbk.h)
-add_dependencies(sys.elf gen_lang_gbk)
-include_directories(${LANG_GBK_DIR})
+add_custom_target(gen_cjk DEPENDS ${CJK_GEN_DIR}/cjk_font_data.h)
+add_dependencies(sys.elf gen_cjk)
+include_directories(${CJK_GEN_DIR})
 # -----------------------------------------------------------------------------
 
-set(FONT_HZK16S_LD "${CMAKE_SOURCE_DIR}/fonts/fonts_hzk16s.ld")
 configure_file(
   ${CMAKE_SOURCE_DIR}/Script/sys_ld.script.in
   ${CMAKE_CURRENT_BINARY_DIR}/sys_ld.script

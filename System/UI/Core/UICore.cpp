@@ -219,6 +219,7 @@ void UI_OOM() {
 void pageUpdate() {
     uint32_t clk_div[3];
     char timeStr[16];
+    char buf[64];
     int line = 0;
 
     getTimeStr(timeStr);
@@ -229,12 +230,13 @@ void pageUpdate() {
 
     if (curPage <= 2) {
         uidisp->draw_box(180, 0, 255, 11, -1, 0);
-        uidisp->draw_printf(180, 0, 16, 255, -1, "%s", timeStr);
+        uidisp->draw_text(180, 0, 16, 255, -1, timeStr);
     }
 
     if (curPage == 3) {
         uidisp->draw_box(180, 0, 255, 11, -1, 0);
-        uidisp->draw_printf(200, 0, 16, 255, -1, "%d/%d", page3Subpage + 1, CONF_SUBPAGES);
+        snprintf(buf, sizeof(buf), "%d/%d", page3Subpage + 1, CONF_SUBPAGES);
+        uidisp->draw_text(200, 0, 16, 255, -1, buf);
         if (page3Subpage == 0) {
             ll_get_clkctrl_div(clk_div);
 
@@ -244,27 +246,38 @@ void pageUpdate() {
 
             uint32_t Charging = ll_get_charge_status();
 
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "CPU:%3d/%d MHz, %s:%d `C", ll_get_cur_freq(), 480 * 18 / cur_cpu_div / cur_cpu_frac, UI_TEMPERRATURE, ll_get_core_temp());
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %d/%d KB", UI_MEMUSE, getHeapAllocateSize() / 1024, TotalAllocatableSize / 1024);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %d mv, %s: %s  ", UI_BATTERY, ll_get_bat_voltage(), UI_CHARGING, (Charging != 0u) ? UI_Yes : UI_No);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %s", UI_TIME, timeStr);
+            snprintf(buf, sizeof(buf), "CPU:%3d/%d MHz, %s:%d `C", ll_get_cur_freq(), 480 * 18 / cur_cpu_div / cur_cpu_frac, UI_TEMPERRATURE, ll_get_core_temp());
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            snprintf(buf, sizeof(buf), "%s: %d/%d KB", UI_MEMUSE, getHeapAllocateSize() / 1024, TotalAllocatableSize / 1024);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            snprintf(buf, sizeof(buf), "%s: %d mv, %s: %s  ", UI_BATTERY, ll_get_bat_voltage(), UI_CHARGING, (Charging != 0u) ? UI_Yes : UI_No);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            snprintf(buf, sizeof(buf), "%s: %s", UI_TIME, timeStr);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
 
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "[%c]%s (1)", config_get_power_save(), UI_Power_Save_Mode);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "[%c]%s (2)", config_get_enable_charge() ? 'X' : ' ', UI_Enable_Charge);
+            snprintf(buf, sizeof(buf), "[%c]%s (1)", config_get_power_save(), UI_Power_Save_Mode);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            snprintf(buf, sizeof(buf), "[%c]%s (2)", config_get_enable_charge() ? 'X' : ' ', UI_Enable_Charge);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
         } else if (page3Subpage == 1) {
 
             // sprintf(s, "%02d:%02d:%02d", (rtc_time_sec / (60 * 60)) % 24, (rtc_time_sec / 60) % 60, rtc_time_sec % 60);
 
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s:[1]%s [2]%s", UI_LANGUAGE, UI_LANGUAGE_ENGLISH_EN, UI_LANGUAGE_CHINESE_CN);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %s", UI_TIME, timeStr);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s+ [7] %s+ [8] %s+ [9]", UI_Hours, UI_Minutes, UI_Seconds);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s- [4] %s- [5] %s- [6]", UI_Hours, UI_Minutes, UI_Seconds);
+            snprintf(buf, sizeof(buf), "%s:[1]%s [2]%s", UI_LANGUAGE, UI_LANGUAGE_ENGLISH_EN, UI_LANGUAGE_CHINESE_CN);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            snprintf(buf, sizeof(buf), "%s: %s", UI_TIME, timeStr);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            snprintf(buf, sizeof(buf), "%s+ [7] %s+ [8] %s+ [9]", UI_Hours, UI_Minutes, UI_Seconds);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            snprintf(buf, sizeof(buf), "%s- [4] %s- [5] %s- [6]", UI_Hours, UI_Minutes, UI_Seconds);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
             uint32_t total = 0;
             uint32_t free = 0;
             exf_getfree((uint8_t *)"0:", &total, &free);
 
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s: %d/%d KB", UI_Storage_Space, total - free, total);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s", UI_ONF5Format);
+            snprintf(buf, sizeof(buf), "%s: %d/%d KB", UI_Storage_Space, total - free, total);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, UI_ONF5Format);
         } else if (page3Subpage == 2) {
             uint32_t free;
             uint32_t total;
@@ -273,26 +286,32 @@ void pageUpdate() {
             total_phy_mem /= 1024;
             free /= 1024;
             total /= 1024;
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s:%d/%d KB   ", UI_Allocate_Mem, getHeapAllocateSize() / 1024, TotalAllocatableSize / 1024);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s:%d/%d KB   ", UI_PhyMem, total - free, total);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s:%.2f", UI_Compression_rate, mem_cmpr);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s:%d KB   ", UI_SRAM_Heap_Pre_Allocated, getOnChipHeapAllocated() / 1024);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "%s:%d KB   ", UI_Swap_Heap_Pre_Allocated, getSwapMemHeapAllocated() / 1024);
-            uidisp->draw_printf(DISPX, DISPY + 16 * line++, 16, 0, 255, "[%c] %s (1)", (ll_mem_swap_size() != 0u) ? 'X' : ' ', UI_Enable_Mem_Swap);
+            snprintf(buf, sizeof(buf), "%s:%d/%d KB   ", UI_Allocate_Mem, getHeapAllocateSize() / 1024, TotalAllocatableSize / 1024);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            snprintf(buf, sizeof(buf), "%s:%d/%d KB   ", UI_PhyMem, total - free, total);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            snprintf(buf, sizeof(buf), "%s:%.2f", UI_Compression_rate, mem_cmpr);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            snprintf(buf, sizeof(buf), "%s:%d KB   ", UI_SRAM_Heap_Pre_Allocated, getOnChipHeapAllocated() / 1024);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            snprintf(buf, sizeof(buf), "%s:%d KB   ", UI_Swap_Heap_Pre_Allocated, getSwapMemHeapAllocated() / 1024);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
+            snprintf(buf, sizeof(buf), "[%c] %s (1)", (ll_mem_swap_size() != 0u) ? 'X' : ' ', UI_Enable_Mem_Swap);
+            uidisp->draw_text(DISPX, DISPY + 16 * line++, 16, 0, 255, buf);
         } else if (page3Subpage == 3) {
             uidisp->draw_bmp((char *)logo, DISPX + 12, DISPY + 8, 50, 25);
 
             uidisp->draw_line(DISPX + 64, DISPY + 10, DISPX + 64, DISPY + 30, 64);
             uidisp->draw_line(DISPX + 63, DISPY + 10, DISPX + 63, DISPY + 30, 64);
 
-            uidisp->draw_printf(DISPX + 72, DISPY + 11, 8, 64, 255, BUILD_STAMP);
-            uidisp->draw_printf(DISPX + 72, DISPY + 23, 8, 64, 255, "%s", _TIMEZ_);
+            uidisp->draw_text(DISPX + 72, DISPY + 11, 8, 64, 255, BUILD_STAMP);
+            uidisp->draw_text(DISPX + 72, DISPY + 23, 8, 64, 255, _TIMEZ_);
 
             line = 3;
-            uidisp->draw_printf(DISPX + (DISPW - (8 * 29)) / 2, DISPY - 8 + 16 * line++, 16, 64, 255, "Open Source Firmware Project");
-            uidisp->draw_printf(DISPX + (DISPW - (16 * 9 + 8 * 7)) / 2, DISPY - 8 + 16 * line++, 16, 64, 255, "%s", UI_ABOUT_PROJECT_CN);
-            uidisp->draw_printf(DISPX + 16, DISPY - 4 + 16 * line, 8, 64, 255, "github.com/ExistOS-Team");
-            uidisp->draw_printf(DISPX + DISPW - 16 - 6 * 21, DISPY - 4 + 16 * line + 8, 8, 64, 255, "/ExistOS-For-HP39GII");
+            uidisp->draw_text(DISPX + (DISPW - (8 * 29)) / 2, DISPY - 8 + 16 * line++, 16, 64, 255, "Open Source Firmware Project");
+            uidisp->draw_text(DISPX + (DISPW - (16 * 9 + 8 * 7)) / 2, DISPY - 8 + 16 * line++, 16, 64, 255, UI_ABOUT_PROJECT_CN);
+            uidisp->draw_text(DISPX + 16, DISPY - 4 + 16 * line, 8, 64, 255, "github.com/ExistOS-Team");
+            uidisp->draw_text(DISPX + DISPW - 16 - 6 * 21, DISPY - 4 + 16 * line + 8, 8, 64, 255, "/ExistOS-For-HP39GII");
         }
     }
     if (isMsgBoxShow)
@@ -300,6 +319,7 @@ void pageUpdate() {
 }
 
 void drawPage(int page) {
+    char buf[256];
 
     uidisp->draw_box(mainw->content_x0,
                      mainw->content_y0,
@@ -311,8 +331,8 @@ void drawPage(int page) {
     case 0:
         uidisp->draw_bmp((char *)gImage_khicas_ico, mainw->content_x0 + 12, mainw->content_y0 + 12, 48, 48);
 
-        uidisp->draw_printf(mainw->content_x0 + 12,
-                            mainw->content_y0 + 12 + 48 + 1, 16, 0, 0xFF, "KhiCAS");
+        uidisp->draw_text(mainw->content_x0 + 12,
+                          mainw->content_y0 + 12 + 48 + 1, 16, 0, 0xFF, "KhiCAS");
 
         uidisp->draw_box((mainw->content_x0 + 12) + appPage_select * (48 + appPage_select * 32),
                          mainw->content_y0 + 12,
@@ -328,12 +348,14 @@ void drawPage(int page) {
 
     case 2:
         uidisp->draw_box(DISPX, DISPY + 16, 255, DISPY + 16, -1, 0);
-        uidisp->draw_printf(DISPX, DISPY, 16, 0, 255, "%d item(s) [%s] (%d/%d)", *filesCount, pathNow, (*filesCount == 0 ? 0 : *pageNow), *pageAll);
+        snprintf(buf, sizeof(buf), "%d item(s) [%s] (%d/%d)", *filesCount, pathNow, (*filesCount == 0 ? 0 : *pageNow), *pageAll);
+        uidisp->draw_text(DISPX, DISPY, 16, 0, 255, buf);
         for (int i = 1; i <= 5 && ((*pageNow - 1) * 5 + i) <= *filesCount; i++) {
-            uidisp->draw_printf(DISPX, DISPY + i * 16 + 1, 12, (i == *selectedItem ? 255 : 0), (i == *selectedItem ? 0 : 255), "%s%s", (dirItemInfos[(*pageNow - 1) * 5 + i - 1] == false ? "/" : ""), dirItemNames[(*pageNow - 1) * 5 + i - 1]);
+            snprintf(buf, sizeof(buf), "%s%s", (dirItemInfos[(*pageNow - 1) * 5 + i - 1] == false ? "/" : ""), dirItemNames[(*pageNow - 1) * 5 + i - 1]);
+            uidisp->draw_text(DISPX, DISPY + i * 16 + 1, 12, (i == *selectedItem ? 255 : 0), (i == *selectedItem ? 0 : 255), buf);
         }
         if (*filesCount == 0) {
-            uidisp->draw_printf(DISPX + 64, DISPY + 48, 8, 0, 255, "Nothing here...");
+            uidisp->draw_text(DISPX + 64, DISPY + 48, 8, 0, 255, "Nothing here...");
         }
         break;
 
@@ -431,7 +453,7 @@ void keyMsg(uint32_t key, int state) {
             if (shift == 1) {
                 uidisp->draw_box(0, 0, 255, 126, 255, 255);
                 uidisp->draw_bmp((char *)logo, 103, 32, 50, 25);
-                uidisp->draw_printf(128 - 14 * 6 / 2, 74, 12, 0, 255, "Shutting down");
+                uidisp->draw_text(128 - 14 * 6 / 2, 74, 12, 0, 255, "Shutting down");
 
                 printf("Trig Power Off\n");
 
@@ -956,19 +978,19 @@ static void checkFS() {
 
     fres = f_mount(fs, FS_FLASH_PATH, 1);
     if (fres != FR_OK) {
-        uidisp->draw_printf(0, disp_off_y + 16 * 0, 16, 0, -1, "The flash is not initialized.");
-        uidisp->draw_printf(0, disp_off_y + 16 * 1, 16, 0, -1, "Press [F2] to format.");
+        uidisp->draw_text(0, disp_off_y + 16 * 0, 16, 0, -1, "The flash is not initialized.");
+        uidisp->draw_text(0, disp_off_y + 16 * 1, 16, 0, -1, "Press [F2] to format.");
 
-        uidisp->draw_printf(0, disp_off_y + 16 * 2, 16, 0, -1, UI_FS_init1);
-        uidisp->draw_printf(0, disp_off_y + 16 * 3, 16, 0, -1, UI_FS_init2);
+        uidisp->draw_text(0, disp_off_y + 16 * 2, 16, 0, -1, UI_FS_init1);
+        uidisp->draw_text(0, disp_off_y + 16 * 3, 16, 0, -1, UI_FS_init2);
 
         while (keys != KEY_F2) {
             vTaskDelay(pdMS_TO_TICKS(20));
             keys = ll_vm_check_key() & 0xFFFF;
         }
 
-        uidisp->draw_printf(0, disp_off_y + 16 * 5, 16, 0, -1, "Formatting...");
-        uidisp->draw_printf(0, disp_off_y + 16 * 6, 16, 0, -1, UI_FS_init3);
+        uidisp->draw_text(0, disp_off_y + 16 * 5, 16, 0, -1, "Formatting...");
+        uidisp->draw_text(0, disp_off_y + 16 * 6, 16, 0, -1, UI_FS_init3);
 
         BYTE *work = (BYTE *)pvPortMalloc(FF_MAX_SS);
         fres = f_mkfs(FS_FLASH_PATH, 0, work, FF_MAX_SS);
