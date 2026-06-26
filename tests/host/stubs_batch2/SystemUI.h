@@ -1,4 +1,0 @@
-#pragma once
-
-#define SYSTEMUI_MSGBOX_BUTTON_CANCAL 1
-#define SYSTEMUI_MSGBOX_BUTTON_OK 2
