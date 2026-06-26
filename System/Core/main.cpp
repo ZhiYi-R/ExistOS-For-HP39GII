@@ -35,12 +35,22 @@
 #include "ff.h"
 //#include "mpy_port.h"
 
-// main.c 是 C 入口:被 startup/FreeRTOS/newlib/asm 以及 UICore 按 C 名引用
-// (enableMemSwap / StartKhiCAS / UI_OOM / khicasLaunch / IRQ_ISR / SWI_ISR /
-// symtab_def 等两端均为 C 链接)。整文件包 extern "C",迁移到 .cpp 后符号名不变。
+// main.cpp is ordinary C++. Only the few symbols a C or asm translation unit
+// references by name keep C linkage, each marked with an explicit `extern "C"`
+// at its declaration/definition below:
+//   - the FreeRTOS hooks and vAssertCalled (called from FreeRTOS C);
+//   - IRQ_ISR / SWI_ISR (defined in SysIRQ.c, installed as vectors in main());
+//   - the newlib heap-accounting stubs (defined in newlib_stub.cpp's C block).
 extern "C" {
+void IRQ_ISR(uint32_t IRQNum, uint32_t par1, uint32_t par2, uint32_t par3);
+void SWI_ISR(void);
+size_t getOnChipHeapAllocated();
+size_t getSwapMemHeapAllocated();
+uint32_t getHeapAllocateSize();
+}
 
 void check_emulator_status();
+void UI_OOM(); // defined in UICore.cpp (C++)
 
 uint32_t OnChipMemorySize = BASIC_RAM_SIZE;
 uint32_t SwapMemorySize = 0;
@@ -62,11 +72,6 @@ volatile unsigned long ulHighFrequencyTimerTicks;
 
 char pcWriteBuffer[4096];
 void printTaskList() {
-
-    size_t getOnChipHeapAllocated();
-    size_t getSwapMemHeapAllocated();
-    uint32_t getHeapAllocateSize();
-
     vTaskList((char *)&pcWriteBuffer);
     printf("=============SYSTEM STATUS=================\r\n");
     printf("Task Name         Task Status   Priority   Stack   ID\n");
@@ -117,7 +122,7 @@ void vTask2(void *par1) {
     }
 }
 
-void vApplicationIdleHook(void) {
+extern "C" void vApplicationIdleHook(void) {
     ll_system_idle();
 }
 
@@ -166,8 +171,6 @@ uint32_t __attribute__((naked)) getCurStackAdr() {
 }
 extern uint32_t SYSTEM_STACK; // in ld script
 int main() {
-    void IRQ_ISR(uint32_t IRQNum, uint32_t par1, uint32_t par2, uint32_t par3);
-    void SWI_ISR(void);
     ll_set_irq_stack((uint32_t)&SYSTEM_STACK);
     ll_set_irq_vector(((uint32_t)IRQ_ISR) + 4);
     ll_set_svc_stack(((uint32_t)&SYSTEM_STACK) - 0x500);
@@ -203,15 +206,15 @@ int main() {
         ;
 }
 
-void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
+extern "C" void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
     STACK_OVERFLOW("SYS StackOverflowHook:%s\n", pcTaskName);
 }
 
-void vAssertCalled(char *file, int line) {
+extern "C" void vAssertCalled(char *file, int line) {
     ASSERT_FAIL("SYS ASSERTION FAILED AT %s:%d\n", file, line);
 }
 
-void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
+extern "C" void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
                                     StackType_t **ppxTimerTaskStackBuffer,
                                     uint32_t *pulTimerTaskStackSize) {
     *ppxTimerTaskTCBBuffer = (StaticTask_t *)pvPortMalloc(sizeof(StaticTask_t));
@@ -219,9 +222,7 @@ void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
     *pulTimerTaskStackSize = configMINIMAL_STACK_SIZE * 4;
 }
 
-void vApplicationMallocFailedHook() {
-
-    void UI_OOM();
+extern "C" void vApplicationMallocFailedHook() {
     UI_OOM();
     OUT_OF_MEMORY("SYS ASSERT: Out of Memory.\n");
 }
@@ -254,5 +255,3 @@ void check_emulator_status() {
         }
     }
 }
-
-}  // extern "C"

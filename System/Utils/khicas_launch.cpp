@@ -20,7 +20,13 @@
 
 #include "sys_llapi.h"
 
-extern "C" uint32_t getCurStackAdr(void);
+#include "SystemFs.h"
+#include "SysConf.h"
+
+// getCurStackAdr() is defined in main.cpp (C++). khicasStopHelpers() lives in the
+// KhiCAS adaptation layer khicas_stub.cpp, whose blob-facing block keeps C linkage.
+uint32_t getCurStackAdr();
+extern "C" void khicasStopHelpers();
 
 // giac interrupt flags (referenced by libgiac).
 volatile bool interrupted = false;
@@ -43,10 +49,7 @@ stdostream cout;
 // when the user presses Home/MENU to quit (Console_GetLine returns NULL).
 int khicas_repl(int isAppli, unsigned short OptionNum);
 
-extern "C" {
 extern bool khicasRunning;
-#include "SystemFs.h"
-#include "SysConf.h"
 
 void khicasLaunch()
 {
@@ -73,10 +76,7 @@ void khicasLaunch()
     // (Console_GetLine -> NULL). Stop the KhiCAS helper tasks before releasing
     // the framebuffers, otherwise the orphaned vGL flush task keeps painting
     // KhiCAS over the resumed system UI (flicker) and stale tasks eat input.
-    void khicasStopHelpers();
     khicasStopHelpers();
 
     vGL_Release();
-}
-
 }

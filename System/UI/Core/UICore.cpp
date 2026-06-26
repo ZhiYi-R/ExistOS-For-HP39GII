@@ -27,8 +27,8 @@
 #include "UI_build_stamp.h"
 #include "SystemConfig.h"
 
-// ����enableMemSwap����
-extern "C" void enableMemSwap(bool enable);
+// Defined in main.cpp (C++); enableMemSwap toggles the swap-backed heap.
+void enableMemSwap(bool enable);
 
 #include "logo.h"
 
@@ -38,10 +38,6 @@ extern "C" void enableMemSwap(bool enable);
 #include <malloc.h>
 
 #include "timestamp.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define CONF_SUBPAGES (4)
 
@@ -72,7 +68,8 @@ static int appPage_select = 0;
 
 static int alpha = 0, shift = 0;
 
-void memtest(uint32_t testSize);
+// Defined in tests/memtest.c (kept as C).
+extern "C" void memtest(uint32_t testSize);
 
 extern uint32_t OnChipMemorySize;
 extern uint32_t TotalAllocatableSize;
@@ -104,9 +101,12 @@ void refreshDir();
 void getWholePath(TCHAR *ans);
 void getSuffix(TCHAR *ret, TCHAR *filename); // get suffix without a dot.
 
+// Heap introspection defined among the newlib C stubs (newlib_stub.cpp).
+extern "C" {
 size_t getOnChipHeapAllocated();
 size_t getSwapMemHeapAllocated();
 uint32_t getHeapAllocateSize();
+}
 
 void UI_keyScanner(void *_);
 void drawPage(int page);
@@ -374,11 +374,13 @@ void UI_Refrush() {
     drawPage(curPage);
 }
 
-void UI_Suspend() {
+// UI_Suspend / UI_Resume are called from SystemUI.cpp via an explicit
+// extern "C" declaration there, so their definitions keep C linkage too.
+extern "C" void UI_Suspend() {
     uidisp->releaseBuffer();
 }
 
-void UI_Resume() {
+extern "C" void UI_Resume() {
     uidisp->restoreBuffer();
 }
 
@@ -1267,14 +1269,10 @@ void UI_keyScanner(void *_) {
                 mainw->refreshWindow();
                 drawPage(curPage);
                 UIForceRefresh = false;
-                
+
                 // �ڽ���ˢ��ʱ��������
                 config_save();
             }
         }
     }
 }
-
-#ifdef __cplusplus
-}
-#endif
