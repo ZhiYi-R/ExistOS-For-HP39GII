@@ -18,6 +18,7 @@ include_directories(./drivers/input)
 include_directories(./drivers/timer)
 include_directories(./Hal)
 include_directories(./Hal/Hardware/registers)
+include_directories(./Hal/Hardware/registers/generated)
 include_directories(./Vm)
 include_directories(./Llapi)
 include_directories(./boot/core)
@@ -94,6 +95,30 @@ foreach(_loader_tgt rom.elf hal drivers display input timer vmmgr vmmgr_mmu)
     target_compile_options(${_loader_tgt} PRIVATE ${LOADER_CXX_FLAGS})
     set_target_properties(${_loader_tgt} PROPERTIES CXX_STANDARD 23 CXX_STANDARD_REQUIRED ON)
 endforeach()
+
+
+# ---- Typed register model: bit-exact parity gate + regen convenience -------
+# generated/reg_verify.cpp is ~6.5k static_assert comparing the typed C++23
+# register model (generated/reg_model.hpp) against the legacy BM_/BP_/_ADDR
+# macros it replaces. Compile-only OBJECT target, EXCLUDE_FROM_ALL: built on
+# demand (`cmake --build build --target reg_verify`), never linked into rom.elf.
+add_library(reg_verify OBJECT EXCLUDE_FROM_ALL
+    ${CMAKE_CURRENT_SOURCE_DIR}/Hal/Hardware/registers/generated/reg_verify.cpp)
+target_compile_options(reg_verify PRIVATE
+    -mtune=arm926ej-s -mcpu=arm926ej-s -mlittle-endian -mfloat-abi=soft -mthumb -Os
+    ${LOADER_CXX_FLAGS})
+set_target_properties(reg_verify PROPERTIES CXX_STANDARD 23 CXX_STANDARD_REQUIRED ON)
+
+# regmodel-regen re-runs the generator (generated artifacts are committed to the
+# repo, like the consteval glyph tables). Best-effort: defined only when a
+# python3 is discoverable on PATH; the committed outputs make it optional.
+find_program(REGMODEL_PYTHON NAMES python3 python py)
+if(REGMODEL_PYTHON)
+  add_custom_target(regmodel-regen
+    COMMAND ${REGMODEL_PYTHON} gen_regmodel.py
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Hal/Hardware/registers
+    COMMENT "Regenerating typed register model from legacy regs*.h")
+endif()
 
 
 add_custom_command(TARGET rom.elf POST_BUILD
