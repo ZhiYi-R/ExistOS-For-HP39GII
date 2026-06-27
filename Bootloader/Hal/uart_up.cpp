@@ -3,8 +3,7 @@
  * @brief uart_up module
  */
 
-
-
+#include "uart_up.h"
 
 void uartInit(void)
 {

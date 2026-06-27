@@ -74,7 +74,8 @@ uint32_t portLRADCConvCh(uint32_t ch, uint32_t samples)
 
 }
 
-void port_LRADC_IRQ(uint32_t ch)
+// Dispatched by name from interrupt_up.c (stays C); keep C linkage.
+extern "C" void port_LRADC_IRQ(uint32_t ch)
 {
 
     INFO("\n\nLRADC IRQ:%u, val:%d\n", ch, BF_RDn(LRADC_CHn, ch, VALUE));

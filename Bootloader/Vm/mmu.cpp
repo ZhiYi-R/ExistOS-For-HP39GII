@@ -288,6 +288,7 @@ void mmu_dumpMapInfo()
                     
                 break;
             case L1PTE_INTERPRET_COARSE:
+            {
                 INFO("L1PTE:  Seg %d(%08x) Reference L2 Table:%08x:\n",
                     i, i*SEG_SIZE, (L1PTE[i] & ~0x3FF));
 
@@ -306,6 +307,7 @@ void mmu_dumpMapInfo()
 
                     }
                 break;
+            }
             default:
                 break;
             }

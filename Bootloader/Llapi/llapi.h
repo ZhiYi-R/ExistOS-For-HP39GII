@@ -51,6 +51,13 @@ typedef struct LLAPI_KBD_t
     uint8_t press;
 }LLAPI_KBD_t;
 
+// The low-level API is called by name from still-C TUs (start.c, vectors.c).
+// Keep C linkage so those callers resolve the unmangled symbols now that llapi
+// is compiled as C++.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern QueueHandle_t LLAPI_Queue;
 extern QueueHandle_t LLIRQ_Queue;
 extern QueueHandle_t LLAPI_KBDQueue;
@@ -71,6 +78,10 @@ void LL_CheckIRQAndTrap();
 
 
 void LLIRQ_PostIRQ(uint32_t IRQNum, uint32_t par1, uint32_t par2, uint32_t par3);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

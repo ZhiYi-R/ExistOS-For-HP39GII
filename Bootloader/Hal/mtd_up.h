@@ -49,9 +49,15 @@ typedef struct
     uint32_t len;
     bool needToMoveData;
     TaskHandle_t task;
-    
+
 }MTD_Operates;
 
+// The MTD physical layer (portMTD*) is implemented in the (now C++) NAND/GPMI
+// driver but called by name from mtd_up.c (stays C until its phase); the MTD_*
+// service entry points are likewise reached from C. Keep C linkage.
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void portMTDInterfaceInit(void);
 void portMTDDeviceInit(mtdInfo_t *mtdinfo);
@@ -82,5 +88,9 @@ int MTD_ReadPhyPageMeta(uint32_t page, uint32_t len, uint8_t *buffer);
 int MTD_CopyPhyPage(uint32_t srcPage, uint32_t dstPage);
 int MTD_EraseAllBLock(void);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

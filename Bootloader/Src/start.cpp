@@ -39,6 +39,31 @@
 #include "boot/core/boot_manager.h"
 #include "boot/services/services.h"
 
+// --- C-linkage seams -------------------------------------------------------
+// These functions are defined below but referenced by name from C/asm TUs or
+// the FreeRTOS C kernel, so they must keep C linkage. Declaring them extern "C"
+// before their definitions propagates C linkage to those definitions:
+//   _startup                      <- boot_manager.c _boot() asm branch
+//   vApplication*Hook / *Memory   <- FreeRTOS kernel (C)
+//   waitIRQ / VM_Unconscious      <- vectors.c (stays C)
+//   parseCDCCommand               <- msc_disk.cpp (extern "C" caller)
+//   capt_ON_Key                   <- keyboard_up.cpp (extern "C" caller)
+// (tud_cdc_* callbacks already get C linkage from tusb.h's own guards.)
+extern "C" {
+volatile void _startup();
+void vApplicationIdleHook(void);
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName);
+void vApplicationMallocFailedHook(void);
+void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,
+                                    StackType_t **ppxTimerTaskStackBuffer,
+                                    uint32_t *pulTimerTaskStackSize);
+void waitIRQ(int r);
+void VM_Unconscious(TaskHandle_t task, char *res, uint32_t address);
+void parseCDCCommand(char *cmd);
+int capt_ON_Key(int ck, int cp);
+}
+// ---------------------------------------------------------------------------
+
 TaskHandle_t pDispTask = NULL;
 TaskHandle_t pStatusPrintTask = NULL;
 TaskHandle_t pSysTask = NULL;
@@ -228,7 +253,7 @@ void System(void *par) {
 
         DisplayFillBox(32, 32, 224, 64, 128);
         DisplayFillBox(48, 80, 208, 96, 255);
-        DisplayPutStr(54, 42, (int)isInterrupted ? " Boot  Interrupted  " : "No System Installed ", 255, 128, 16);
+        DisplayPutStr(54, 42, (char *)((int)isInterrupted ? " Boot  Interrupted  " : "No System Installed "), 255, 128, 16);
 
         // DisplayFillBox(0, 0, 255, 126, 255);
 
@@ -395,8 +420,10 @@ unsigned char blockChksum(char *block, unsigned int blockSize) {
 bool transBinMode = false;
 char *binBuf = NULL;
 uint32_t cdcBlockCnt;
-void MscSetCmd(char *cmd);
-void mkSTMPNandStructure(uint32_t OLStartBlock, uint32_t OLPages);
+// Defined extern "C" in msc_disk.cpp / stmp37xxNandConf.cpp; declare them with C
+// linkage here so this C++ caller resolves the unmangled symbols.
+extern "C" void MscSetCmd(char *cmd);
+extern "C" void mkSTMPNandStructure(uint32_t OLStartBlock, uint32_t OLPages);
 void parseCDCCommand(char *cmd) {
     if (strcmp(cmd, "PING") == 0) {
         slowDownEnable(false);
@@ -765,7 +792,7 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
         if (transScr) {
             vTaskDelay(pdMS_TO_TICKS(1000));
 
-            vramBuf = pvPortMalloc(256 * 3);
+            vramBuf = (uint8_t *)pvPortMalloc(256 * 3);
             if (!vramBuf) {
                 goto fin;
             }
@@ -1037,8 +1064,8 @@ volatile void _startup() {
 
     xTaskCreate(System, "System", configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES - 7, &pSysTask);
 
-    xTaskCreate(vBatteryMon, "Battery Mon", configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES - 1, &pBattmon);
-    xTaskCreate(vMainThread, "Main Thread", configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES - 1, &pMainThread);
+    xTaskCreate((TaskFunction_t)vBatteryMon, "Battery Mon", configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES - 1, &pBattmon);
+    xTaskCreate((TaskFunction_t)vMainThread, "Main Thread", configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES - 1, &pMainThread);
 
     // pSysTask = xTaskCreateStatic( (TaskFunction_t)0x00100000, "System", VM_RAM_SIZE, NULL, 1, VM_RAM_BASE, pvPortMalloc(sizeof(StaticTask_t)));
 
@@ -1054,10 +1081,6 @@ volatile void _startup() {
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
     PANIC("StackOverflowHook:%s\n", pcTaskName);
-}
-
-void vAssertCalled(char *file, int line) {
-    PANIC("ASSERT %s:%d\n", file, line);
 }
 
 void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer,

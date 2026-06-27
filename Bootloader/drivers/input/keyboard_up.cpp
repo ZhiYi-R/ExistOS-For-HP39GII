@@ -33,7 +33,9 @@ QueueHandle_t keyQueue;
 
 uint32_t ck = 0, cp = 0;
 uint32_t key_notify = 0;
-int capt_ON_Key(int ck, int cp);
+// capt_ON_Key is defined in start.c, which stays C until its own phase; keep the
+// forward declaration extern "C" so this call resolves the unmangled symbol.
+extern "C" int capt_ON_Key(int ck, int cp);
 void key_task_capt()
 {
     int state = 0;
@@ -95,7 +97,7 @@ void key_task_capt()
     }
 }
 
-void __attribute__((target("arm"))) key_task_capt_arm()
+void __attribute__((target("arm"))) key_task_capt_arm(void *)
 {
     key_task_capt();
 }

@@ -56,7 +56,7 @@ void DisplayReadArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_
         return;
     }
     DisplayOpaQueue_t opa;
-    uint32_t *pars = pvPortMalloc(6 * sizeof(uint32_t));
+    uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     if (!pars)
         return;
     pars[0] = x_start;
@@ -73,7 +73,7 @@ void DisplayReadArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_
 
 void DisplayFlushArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf, bool block) {
     DisplayOpaQueue_t opa;
-    uint32_t *pars = pvPortMalloc(6 * sizeof(uint32_t));
+    uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     if (!pars)
         return;
 
@@ -99,7 +99,7 @@ void DisplayFlushArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32
 
 void DisplayPutChar(uint32_t x, uint32_t y, char c, uint8_t fg, uint8_t bg, uint8_t fontSize) {
     DisplayOpaQueue_t opa;
-    uint32_t *pars = pvPortMalloc(6 * sizeof(uint32_t));
+    uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     if (!pars)
         return;
     pars[0] = x;
@@ -116,8 +116,8 @@ void DisplayPutChar(uint32_t x, uint32_t y, char c, uint8_t fg, uint8_t bg, uint
 
 bool DisplayPutStr(uint32_t x, uint32_t y, char *s, uint8_t fg, uint8_t bg, uint8_t fontSize) {
     DisplayOpaQueue_t opa;
-    uint32_t *pars = pvPortMalloc(6 * sizeof(uint32_t));
-    char *str = pvPortMalloc(strlen(s));
+    uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
+    char *str = (char *)pvPortMalloc(strlen(s));
     strcpy(str, s);
     if (!pars)
         return false;
@@ -139,7 +139,7 @@ bool DisplayPutStr(uint32_t x, uint32_t y, char *s, uint8_t fg, uint8_t bg, uint
 
 void DisplayHLine(uint32_t x0, uint32_t x1, uint32_t y, uint8_t c) {
     DisplayOpaQueue_t opa;
-    uint32_t *pars = pvPortMalloc(4 * sizeof(uint32_t));
+    uint32_t *pars = (uint32_t *)pvPortMalloc(4 * sizeof(uint32_t));
     if (!pars)
         return;
     pars[0] = x0;
@@ -154,7 +154,7 @@ void DisplayHLine(uint32_t x0, uint32_t x1, uint32_t y, uint8_t c) {
 
 void DisplayVLine(uint32_t y0, uint32_t y1, uint32_t x, uint8_t c) {
     DisplayOpaQueue_t opa;
-    uint32_t *pars = pvPortMalloc(4 * sizeof(uint32_t));
+    uint32_t *pars = (uint32_t *)pvPortMalloc(4 * sizeof(uint32_t));
     if (!pars)
         return;
     pars[0] = y0;
@@ -170,7 +170,7 @@ void DisplayVLine(uint32_t y0, uint32_t y1, uint32_t x, uint8_t c) {
 void DisplayBoxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
     DisplayOpaQueue_t opa;
     bool fin = false;
-    uint32_t *pars = pvPortMalloc(6 * sizeof(uint32_t));
+    uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     if (!pars)
         return;
     pars[0] = x0;
@@ -189,7 +189,7 @@ void DisplayBoxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t
 
 void DisplayBox(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
     DisplayOpaQueue_t opa;
-    uint32_t *pars = pvPortMalloc(6 * sizeof(uint32_t));
+    uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     if (!pars)
         return;
     pars[0] = x0;
@@ -207,7 +207,7 @@ void DisplayBox(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
 void DisplayFillBoxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
     DisplayOpaQueue_t opa;
     bool fin = false;
-    uint32_t *pars = pvPortMalloc(6 * sizeof(uint32_t));
+    uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     if (!pars)
         return;
     pars[0] = x0;
@@ -226,7 +226,7 @@ void DisplayFillBoxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uin
 
 void DisplayFillBox(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
     DisplayOpaQueue_t opa;
-    uint32_t *pars = pvPortMalloc(6 * sizeof(uint32_t));
+    uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     if (!pars)
         return;
     pars[0] = x0;
@@ -244,7 +244,7 @@ void DisplayFillBox(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t 
 /*
 void DisplayCircle(uint32_t x0, uint32_t y0, uint32_t r, uint8_t c, bool isFill) {
     DisplayOpaQueue_t opa;
-    uint32_t *pars = pvPortMalloc(6 * sizeof(uint32_t));
+    uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     if (!pars)
         return;
     pars[0] = x0;
@@ -272,7 +272,7 @@ void DisplaySetIndicate(int Indicate, int batInd) {
     /*
         return;
         DisplayOpaQueue_t opa;
-        uint32_t *pars = pvPortMalloc(2 * sizeof(uint32_t));
+        uint32_t *pars = (uint32_t *)pvPortMalloc(2 * sizeof(uint32_t));
         if(!pars)return;
         pars[0] = Indicate;
         pars[1] = batInd;
@@ -286,14 +286,14 @@ static void innerDispHLine(uint32_t x0, uint32_t x1, uint32_t y, uint8_t c) {
     if (x1 < x0) {
         return;
     }
-    uint8_t *buf = pvPortMalloc(x1 - x0 + 1);
+    uint8_t *buf = (uint8_t *)pvPortMalloc(x1 - x0 + 1);
     memset(buf, c, x1 - x0 + 1);
     portDispFlushAreaBuf(x0, y, x1, y, buf);
     vPortFree(buf);
 }
 
 static void innerDispVLine(uint32_t y0, uint32_t y1, uint32_t x, uint8_t c) {
-    uint8_t *buf = pvPortMalloc(y1 - y0 + 1);
+    uint8_t *buf = (uint8_t *)pvPortMalloc(y1 - y0 + 1);
     memset(buf, c, y1 - y0 + 1);
     portDispFlushAreaBuf(x, y0, x, y1, buf);
     vPortFree(buf);
@@ -301,7 +301,7 @@ static void innerDispVLine(uint32_t y0, uint32_t y1, uint32_t x, uint8_t c) {
 
 /**
 static void innerDispPoint(uint32_t x0, uint32_t y0, uint8_t c) {
-    uint8_t *buf = pvPortMalloc(3);
+    uint8_t *buf = (uint8_t *)pvPortMalloc(3);
     memset(buf, c, 3);
     portDispFlushAreaBuf(x0 - 1, y0, x0 + 1, y0, buf);
     vPortFree(buf);
@@ -377,7 +377,7 @@ void DisplayTask() {
 
                 uint32_t n = c - ' ';
                 const uint8_t *p = &VGA_Ascii_8x16[16 * n];
-                uint8_t *buf = pvPortMalloc(8 * fontSize);
+                uint8_t *buf = (uint8_t *)pvPortMalloc(8 * fontSize);
                 for (int y = 0; y < fontSize; y++) {
                     for (int x = 0; x < 8; x++) {
                         buf[8 * y + x] = ((p[y] >> (7 - x)) & 1) ? fg : bg;
@@ -414,7 +414,7 @@ void DisplayTask() {
                     // fontWidth = 6;
                 }
 
-                uint8_t *buf = pvPortMalloc(8 * str_len * fontSize);
+                uint8_t *buf = (uint8_t *)pvPortMalloc(8 * str_len * fontSize);
                 uint32_t x0 = 0;
                 for (int n = 0; n < str_len; n++) {
                     char c = s[n];

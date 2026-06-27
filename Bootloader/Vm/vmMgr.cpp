@@ -22,7 +22,12 @@
 #include "vmMgr.h"
 
 #include "minilzo.h"
+// tlsf is a vendored C library with no extern "C" guards; pull it under C
+// linkage so this (now C++) TU calls init_memory_pool/tlsf_realloc/etc. by
+// their unmangled names.
+extern "C" {
 #include "tlsf/tlsf.h"
+}
 
 typedef struct CachePageInfo_t {
     struct CachePageInfo_t *prev;
@@ -44,14 +49,14 @@ static MapList_t *maplist;
 
 static inline void mapListInit()
 {
-    maplist = pvPortMalloc(sizeof(MapList_t));
+    maplist = (MapList_t *)pvPortMalloc(sizeof(MapList_t));
     memset(maplist, 0, sizeof(MapList_t));
 }
 
 
 static inline uint32_t mapList_AddPartitionMap(int part, uint32_t perm, uint32_t VMemStartAddr, uint32_t PartStartSector, uint32_t memSize)
 {
-    MapList_t *tmp = pvPortMalloc(sizeof(MapList_t));
+    MapList_t *tmp = (MapList_t *)pvPortMalloc(sizeof(MapList_t));
     MapList_t *chain = maplist;
     if(tmp == NULL){
         return 1;
@@ -159,7 +164,9 @@ uint8_t calc_chksum(uint8_t *buf, uint32_t size) {
 */
 QueueHandle_t PageFaultQueue;
 
-void VM_Unconscious(TaskHandle_t task, char *res, uint32_t address);
+// VM_Unconscious is defined in start.c (stays C until its own phase); keep the
+// forward declaration extern "C" so this call resolves the unmangled symbol.
+extern "C" void VM_Unconscious(TaskHandle_t task, char *res, uint32_t address);
 
 static void taskAccessFaultAddr(pageFaultInfo_t *info, char *res) {
     // VM_ERR("Fault Task:%s\n", pcTaskGetTaskName(info->FaultTask));
@@ -357,7 +364,7 @@ static inline int save_cache_page(CachePageInfo_t *cache_page) {
             // memcpy(mem_buffer(ZRAMAddress_Tab[ind]), (void *)cache_page->PageOnPhyAddr, PAGE_SIZE);
             // memset(workbuf_comp, 0, sizeof(workbuf_comp));
 #if MEM_COMPRESSION_ALGORITHM == MINILZO
-            int ret = lzo1x_1_compress((void *)cache_page->PageOnPhyAddr, PAGE_SIZE, (char *)compress_buffer, &sz, comp_wrkbuffer);
+            int ret = lzo1x_1_compress((const unsigned char *)cache_page->PageOnPhyAddr, PAGE_SIZE, (unsigned char *)compress_buffer, &sz, comp_wrkbuffer);
             if (ret == LZO_E_OK) {
                 lzo_sizeof_dict_t;
                 // printf("comp:%d>%d\n", PAGE_SIZE, sz);
@@ -520,7 +527,7 @@ static inline int save_cache_page(CachePageInfo_t *cache_page) {
 
 #endif
 
-bool inline __attribute__((target("thumb"))) vmMgr_checkAddressValid(uint32_t address, uint32_t perm) {
+bool __attribute__((target("thumb"))) vmMgr_checkAddressValid(uint32_t address, uint32_t perm) {
     if (address < MEMORY_SIZE) {
         return true;
     }
@@ -767,9 +774,9 @@ void __attribute__((optimize("-Os"))) vmMgr_task() {
                                 //int ret = lzo1x_decompress(cdmp_get_memblock(ZRAMAddress_Tab[zram_ind]),
                                 //                           cdmp_memblock_size(ZRAMAddress_Tab[zram_ind]),
                                 //                           (void *)CachePageVRAMCur->PageOnPhyAddr, &sz, NULL);
-                                int ret = lzo1x_decompress(((void *)ZRAMAddress_Tab[zram_ind]),
+                                int ret = lzo1x_decompress(((const unsigned char *)ZRAMAddress_Tab[zram_ind]),
                                                            PAGE_SIZE,
-                                                           (void *)CachePageVRAMCur->PageOnPhyAddr, &sz, NULL);
+                                                           (unsigned char *)CachePageVRAMCur->PageOnPhyAddr, &sz, NULL);
                                 if ((ret == LZO_E_OK) || (ret == LZO_E_INPUT_NOT_CONSUMED) || (ret == LZO_E_INPUT_OVERRUN)) {
 
                                 } else {

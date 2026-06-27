@@ -10,6 +10,15 @@
 #include <stdbool.h>
 #include "FreeRTOS.h"
 
+// HAL board interface: these functions are defined in the (now C++) board /
+// power / clock / audio drivers but are still called by name from C/asm
+// translation units that stay C -- vectors.c's arm_do_swi fast path
+// (portBoardGetTime_us/ms) and, until their own phases land, start.c and
+// utilities.c. Keep C linkage so those callers resolve the unmangled symbols.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 uint64_t nsToCycles(uint64_t nstime, uint64_t period, uint64_t min) ;
 
 bool driverWaitTrueF(bool (*f)(), TickType_t timeout);
@@ -52,5 +61,8 @@ void setSlowDownMinCpuFrac(uint8_t frac);
 void stmp_audio_init();
 void pcm_play();
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

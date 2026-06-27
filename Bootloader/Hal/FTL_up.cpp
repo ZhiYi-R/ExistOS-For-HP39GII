@@ -59,8 +59,8 @@ int dhara_nand_is_bad(const struct dhara_nand *n, dhara_block_t b) {
 void dhara_nand_mark_bad(const struct dhara_nand *n, dhara_block_t b) {
     meta = BAD_BLOCK;
     printf("MARK BAD BLOCK\n");
-    uint8_t *tempbuf = pvPortMalloc(2048);
-    uint8_t *tempmeta = pvPortMalloc(19);
+    uint8_t *tempbuf = (uint8_t *)pvPortMalloc(2048);
+    uint8_t *tempmeta = (uint8_t *)pvPortMalloc(19);
     if (!tempbuf || !tempmeta) {
         printf("MALLOC FAIL\n");
         if (tempbuf) vPortFree(tempbuf);
@@ -158,7 +158,7 @@ int dhara_nand_copy(const struct dhara_nand *n,
     ret = MTD_CopyPhyPage(src + (DATA_START_BLOCK *  pMtdinfo->PagesPerBlock),
                           dst + (DATA_START_BLOCK *  pMtdinfo->PagesPerBlock));*/
 
-    uint8_t *CopyBuffer = pvPortMalloc(2048);
+    uint8_t *CopyBuffer = (uint8_t *)pvPortMalloc(2048);
 
     *err = DHARA_E_NONE;
 
@@ -211,7 +211,7 @@ int FTL_MapInit() {
     dhara_error_t err;
     int ret = 0;
     dhara_map_init(&FTLmap, &nandDevice, PageBuffer, GC_RATIO);
-    err = 0;
+    err = (dhara_error_t)0;
     ret = dhara_map_resume(&FTLmap, &err);
     INFO("Resume FTL: %d\n", ret);
 

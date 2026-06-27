@@ -63,13 +63,13 @@ typedef struct GPMI_Timing_t {
 
 static struct GPMI_Timing_t defaultTiming =
 {
+        .tPROG_us = 15,
+        .tBERS_us = 2000,
+        .tREAD_us = 7,
         .DataSetup_ns = 6 + 2,
         .DataHold_ns = 5 + 2,
         .AddressSetup_ns = 6 + 2,
         .SampleDelay_cyc = 3.0,
-        .tREAD_us = 7,
-        .tPROG_us = 15,
-        .tBERS_us = 2000
 };
 
 typedef enum {
@@ -1248,7 +1248,9 @@ static void GPMI_GetNANDInfo(mtdInfo_t *mtdinfo)
 
 }
 
-void portMTD_ISR()
+// portMTD_ISR / portMTD_DMA_ISR / portMTD_ECC_ISR are dispatched by name from
+// interrupt_up.c (stays C until its phase); keep C linkage on the definitions.
+extern "C" void portMTD_ISR()
 {
 
     if(BF_RD(GPMI_CTRL1, TIMEOUT_IRQ))
@@ -1260,7 +1262,7 @@ void portMTD_ISR()
     BF_CS1(GPMI_CTRL1, TIMEOUT_IRQ, 0);
 }
 
-void portMTD_DMA_ISR()
+extern "C" void portMTD_DMA_ISR()
 {
     uint32_t error = BF_RD(APBH_CTRL1, CH4_AHB_ERROR_IRQ);
     //INFO("\nportMTD_DMA_ISR\n");
@@ -1333,7 +1335,7 @@ void portMTD_DMA_ISR()
     
 }
 
-bool portMTD_ECC_ISR()
+extern "C" bool portMTD_ECC_ISR()
 {
 
 

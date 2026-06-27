@@ -42,6 +42,7 @@
 #include "hw_irq.h"
 
 #include "interrupt_up.h"
+#include "board_up.h"
 
 //--------------------------------------------------------------------+
 // MACRO TYPEDEF CONSTANT ENUM DECLARATION
@@ -463,7 +464,8 @@ void dcd_int_handler(uint8_t rhport) {
 
 }
 
-void usb_dcd_isr(void) 
+// Dispatched by name from interrupt_up.c (stays C); keep C linkage.
+extern "C" void usb_dcd_isr(void)
 {
     dcd_int_handler(0);
 }
@@ -596,7 +598,6 @@ bool dcd_edpt_xfer (uint8_t rhport, uint8_t ep_addr, uint8_t * buffer, uint16_t 
     uint8_t const epnum = tu_edpt_number(ep_addr);
     uint8_t const dir = tu_edpt_dir(ep_addr);
     uint8_t const ep_idx = 2 * epnum + dir;
-    #include "board_up.h"
     if (epnum == 0) {
         // follows UM 24.10.8.1.1 Setup packet handling using setup lockout mechanism
         // wait until ENDPTSETUPSTAT before priming data/status in response TODO add time out

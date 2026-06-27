@@ -29,7 +29,8 @@ void portChargeEnable(bool enable)
     }
 }
 
-void portPowerIRQ(uint32_t nirq)
+// Dispatched by name from interrupt_up.c (stays C); keep C linkage.
+extern "C" void portPowerIRQ(uint32_t nirq)
 {
     switch (nirq)
     {

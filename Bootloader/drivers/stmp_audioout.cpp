@@ -88,12 +88,15 @@ void portDAC_IRQ(uint32_t IRQn)
     
 }
 
-bool is_pcm_buffer_idle()
+// is_pcm_buffer_idle / pcm_buffer_load have no shared header; they are
+// forward-declared and called by name from the C translation unit vectors.c
+// (arm_do_swi audio fast path), so their definitions keep C linkage.
+extern "C" bool is_pcm_buffer_idle()
 {
     return pcm_buffer_1_fin || pcm_buffer_2_fin;
 }
 
-void pcm_buffer_load(void *pcmdat)
+extern "C" void pcm_buffer_load(void *pcmdat)
 {
     if(pcm_buffer_1_fin)
     {

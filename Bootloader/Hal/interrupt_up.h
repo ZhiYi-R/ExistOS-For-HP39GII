@@ -39,6 +39,12 @@ typedef struct
     IRQCallback cb;
 }IRQList;
 
+// The IRQ controller HAL is shared across the C/asm boundary: up_isr is invoked
+// from the naked vector in vectors.c (stays C), portEnableIRQ is called from the
+// C++ drivers, and the rest from board/start C code -- keep C linkage.
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 bool portIRQDecode(IRQNumber* IRQNum, IRQTypes *IRQType, IRQInfo *IRQInfo);
 void portIRQCtrlInit( void );
@@ -50,5 +56,9 @@ void register_ISR(IRQNumber IRQNum, IRQTypes IRQType, IRQCallback cb);
 void up_isr( void );
 void IRQInit( void );
 void IRQTimerEnable( void );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -99,6 +99,14 @@ typedef enum Keys_t {
 } Keys_t;
 
 
+// The keyboard HAL is implemented in the (now C++) input driver but called by
+// name from C translation units (key_service.c, start.c, llapi.c), so the
+// interface keeps C linkage. Keys_t stays outside the block: it is a plain enum
+// shared by value across both languages.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void portKeyboardGPIOInit(void);
 void portKeyScan(void);
 bool portIsKeyDown(Keys_t key);
@@ -116,6 +124,10 @@ void key_register_notify(TaskHandle_t task);
 
 //uint8_t key_getChanged();
 //void kb_isAnyKeyPress(Keys_t *key, bool *press);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

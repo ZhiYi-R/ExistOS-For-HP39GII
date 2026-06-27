@@ -30,6 +30,9 @@ void up_register_ISR(IRQNumber ISRNum, IRQTypes IRQType, IRQCallback cb)
 }
 */
 
+// These ISR callbacks are defined extern "C" in the (now C++) drivers; the
+// up_isr() dispatcher calls them by name, so declare them with C linkage too.
+extern "C" {
 void usb_dcd_isr(void);
 
 void portMTD_ISR();
@@ -40,6 +43,7 @@ void portDISP_ISR();
 void port_LRADC_IRQ(uint32_t ch);
 void portPowerIRQ(uint32_t nirq);
 void portDAC_IRQ(uint32_t IRQn);
+}
 
 void up_isr(void) {
 /*

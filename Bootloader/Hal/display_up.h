@@ -25,6 +25,12 @@
 #define INDICATE_TX        (1 << 5)
 #define INDICATE_RX        (1 << 6)
 
+// The display HAL is implemented in the (now C++) display driver but called by
+// name from translation units that stay C (start.c, board_up.c, vmMgr.c, and
+// the LCDIF ISR dispatch), so the interface keeps C linkage.
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void portDispInterfaceInit(void);
 void portDispDeviceInit(void);
@@ -55,6 +61,10 @@ void DisplayInit(void);
 void DisplayTask(void);
 
 //float __sqrt(int x);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

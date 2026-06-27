@@ -28,6 +28,14 @@
 
 extern volatile void *pxCurrentTCB;
 extern volatile uint32_t ulCriticalNesting;
+
+// FreeRTOSConfig.h's configASSERT redirects here. Defined in this still-C TU so
+// the FreeRTOS C kernel resolves the unmangled symbol (start.cpp, now C++, can't
+// host it: FreeRTOSConfig.h declares vAssertCalled with C++ linkage there, which
+// conflicts with the C linkage the kernel callers require).
+void vAssertCalled(char *file, int line) {
+    PANIC("ASSERT %s:%d\n", file, line);
+}
 uint32_t
     __attribute__((naked))
     _get_sp() {

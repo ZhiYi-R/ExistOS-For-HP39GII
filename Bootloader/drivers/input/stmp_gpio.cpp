@@ -13,7 +13,7 @@
 uint8_t key_matrix[5][11] = {0};
 uint8_t key_matrix_last[5][11] = {0};
 
-Keys_t ChangedKey = 255;
+Keys_t ChangedKey = (Keys_t)255;
 
 
 
@@ -204,13 +204,13 @@ Keys_t portGetChangedKey()
 {
     Keys_t ret;
     if(ChangedKey == 255){
-        return 255;
+        return (Keys_t)255;
     }
 
     key_matrix_last[ChangedKey % 8][ChangedKey >> 3] = key_matrix[ChangedKey % 8][ChangedKey >> 3]; 
 
     ret = ChangedKey;
-    ChangedKey = 255;
+    ChangedKey = (Keys_t)255;
     return ret;
 }
 
@@ -229,7 +229,7 @@ void portKeyScan()
             if(key_matrix_last[x][y] != key_matrix[x][y])
             {   
                 if(ChangedKey == 255)
-                    ChangedKey = (y << 3) + x;
+                    ChangedKey = (Keys_t)((y << 3) + x);
             }
         }
     }
@@ -239,7 +239,7 @@ void portKeyScan()
     if(key_matrix_last[0][10] != key_matrix[0][10])
     {
         if(ChangedKey == 255)
-            ChangedKey = (10 << 3) + 0;
+            ChangedKey = (Keys_t)((10 << 3) + 0);
     }
 
 };

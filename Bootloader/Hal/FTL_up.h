@@ -17,7 +17,16 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+// Dhara is a vendored C library with no extern "C" guards of its own. Pull its
+// headers under C linkage so this (now C++) TU both calls dhara_map_*/dhara_strerror
+// with the right names and exports its dhara_nand_* callbacks unmangled for Dhara.
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "map.h"
+#ifdef __cplusplus
+}
+#endif
 
 #define BAD_BLOCK           (0)
 #define DATA_BLOCK          (0xDADADADA)
@@ -52,6 +61,13 @@ typedef struct PartitionInfo_t
   uint32_t Sectors[4];
 }PartitionInfo_t;
 
+// The FTL API is called by name from still-C TUs (vmMgr.c, msc_disk.c,
+// start.c, llapi.c, ftl_service.c). Keep C linkage so those callers resolve
+// the unmangled symbols even though FTL_up is now compiled as C++.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int FTL_init(void);
 int FTL_MapInit(void);
 bool FTL_inited(void);
@@ -68,5 +84,9 @@ void FTL_ClearAllSector(void);
 
 bool FTL_ScanPartition(void);
 PartitionInfo_t *FTL_GetPartitionInfo(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -34,9 +34,9 @@ void mkNCB(uint32_t inBlock)
 {
   mtdInfo_t *info = MTD_getDeviceInfo();
   
-  uint8_t *pageBuff = pvPortMalloc(info->PageSize_B);
+  uint8_t *pageBuff = (uint8_t *)pvPortMalloc(info->PageSize_B);
   
-  uint8_t *metaBuff = pvPortMalloc(info->MetaSize_B);
+  uint8_t *metaBuff = (uint8_t *)pvPortMalloc(info->MetaSize_B);
 
 	memset(pageBuff, 0xff, info->PageSize_B);
 	memset(metaBuff, 0xff, info->MetaSize_B);
@@ -90,8 +90,8 @@ void mkNCB(uint32_t inBlock)
 void mkDBBT(uint32_t inBlock)
 {
   mtdInfo_t *info = MTD_getDeviceInfo();
-  uint8_t *pageBuff = pvPortMalloc(info->PageSize_B);
-  uint8_t *metaBuff = pvPortMalloc(info->MetaSize_B);
+  uint8_t *pageBuff = (uint8_t *)pvPortMalloc(info->PageSize_B);
+  uint8_t *metaBuff = (uint8_t *)pvPortMalloc(info->MetaSize_B);
 
 	memset(pageBuff, 0x00, info->PageSize_B);
 	memset(metaBuff, 0xff, info->MetaSize_B);
@@ -121,8 +121,8 @@ void mkDBBT(uint32_t inBlock)
 void mkLDLB(uint32_t inBlock, uint32_t fwPageOffset, uint32_t fwPageTotal, uint32_t DBBT1_page, uint32_t DBBT2_page)
 {
   mtdInfo_t *info = MTD_getDeviceInfo();
-  uint8_t *pageBuff = pvPortMalloc(info->PageSize_B);
-  uint8_t *metaBuff = pvPortMalloc(info->MetaSize_B);
+  uint8_t *pageBuff = (uint8_t *)pvPortMalloc(info->PageSize_B);
+  uint8_t *metaBuff = (uint8_t *)pvPortMalloc(info->MetaSize_B);
 
 	memset(pageBuff, 0xff, info->PageSize_B);
 	memset(metaBuff, 0xff, info->MetaSize_B);
@@ -172,8 +172,8 @@ void mkLDLB(uint32_t inBlock, uint32_t fwPageOffset, uint32_t fwPageTotal, uint3
 void RestoreLDLB2()
 {
     mtdInfo_t *nand_info = MTD_getDeviceInfo();
-    uint8_t *pgbuff = pvPortMalloc(nand_info->PageSize_B);
-    uint8_t *mtbuff = pvPortMalloc(nand_info->MetaSize_B);
+    uint8_t *pgbuff = (uint8_t *)pvPortMalloc(nand_info->PageSize_B);
+    uint8_t *mtbuff = (uint8_t *)pvPortMalloc(nand_info->MetaSize_B);
 
 
     memset(pgbuff, 0xFF, nand_info->PageSize_B);
@@ -192,7 +192,8 @@ void RestoreLDLB2()
 }
 
 
-void mkSTMPNandStructure(uint32_t OLStartBlock, uint32_t OLPages)
+// Called by name from parseCDCCommand() in start.c (stays C); keep C linkage.
+extern "C" void mkSTMPNandStructure(uint32_t OLStartBlock, uint32_t OLPages)
 {
 	mkNCB(0);
 	mkNCB(4);

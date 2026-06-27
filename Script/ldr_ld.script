@@ -28,13 +28,45 @@ SECTIONS
 	__data_end__ = .;
 
 
-	.rodata : 
+	.rodata :
 	{
-		*(.rodata) 
+		*(.rodata)
 	}
 
+	/* C++ global constructors are NOT supported in the bootloader: startup
+	   (_boot in boot_manager.c) clears BSS and branches straight to _startup,
+	   never calling __libc_init_array. Collect the init/fini arrays here so any
+	   accidental global constructor lands in a known place, and ASSERT below
+	   that they stay empty -- a future dynamic-init global then fails the link
+	   loudly instead of silently never running. See the Bootloader C++ plan. */
+	.init_array :
+	{
+		__init_array_start = .;
+		KEEP(*(.preinit_array))
+		KEEP(*(SORT(.init_array.*)))
+		KEEP(*(.init_array))
+		__init_array_end = .;
+	}
+	.fini_array :
+	{
+		KEEP(*(.fini_array))
+		KEEP(*(SORT(.fini_array.*)))
+	}
+	.ctors :
+	{
+		KEEP(*(SORT(.ctors.*)))
+		KEEP(*(.ctors))
+	}
+	.dtors :
+	{
+		KEEP(*(SORT(.dtors.*)))
+		KEEP(*(.dtors))
+	}
+	ASSERT(__init_array_end - __init_array_start == 0,
+	       "bootloader: C++ global constructors are not supported (.init_array non-empty); see the Bootloader C++ migration plan")
 
-  
+
+
 
   .bss  ALIGN(4) :
   {

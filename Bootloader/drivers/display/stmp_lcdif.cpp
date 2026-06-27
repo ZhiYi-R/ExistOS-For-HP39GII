@@ -330,7 +330,8 @@ static void LCDIF_ReadDAT(uint8_t *dat, uint32_t len) {
 
 #define BigEnd16(x) ((((x & 0xFFFF) << 8) | ((x & 0xFFFF) >> 8)))
 
-void portDISP_ISR() {
+// Dispatched by name from interrupt_up.c (stays C); keep C linkage.
+extern "C" void portDISP_ISR() {
     if (!BF_RD(APBH_CTRL1, CH0_CMDCMPLT_IRQ)) {
         INFO("LCDIF ERR IRQ, Overflow:%d, Underflow:%d\n",
              BF_RD(LCDIF_CTRL1, OVERFLOW_IRQ),

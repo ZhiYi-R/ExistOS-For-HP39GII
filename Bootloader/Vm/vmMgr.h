@@ -43,6 +43,13 @@ typedef struct pageFaultInfo_t
     uint32_t FaultPC;
 }pageFaultInfo_t;
 
+// The VM manager API is called by name from still-C TUs (start.c, llapi.c,
+// vm_service.c, vectors.c). Keep C linkage so those callers resolve the
+// unmangled symbols now that vmMgr is compiled as C++.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern QueueHandle_t PageFaultQueue;
 
 void vmMgr_init(void);
@@ -58,6 +65,10 @@ void vmMgr_ReleaseAllPage();
 
 void zram_info(uint32_t *free, uint32_t *total);
 //uint32_t vmMgr_getMountPhyAddressAndLock(uint32_t vaddr, uint32_t perm);
+
+#ifdef __cplusplus
+}
+#endif
 
 
 //uint32_t vmMgr_mapFile(FIL *file, uint32_t perm, uint32_t MemAddrStart, uint32_t FileAddrStart, uint32_t memSize);

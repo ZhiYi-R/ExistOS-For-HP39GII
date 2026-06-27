@@ -342,7 +342,7 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void *buff
             memcpy(buffer, addr, bufsize);*/
             
             #ifndef RAW_FLASH_ACCESS
-            FTL_ReadSector(FLASH_FTL_DATA_SECTOR + lba, 1, buffer);
+            FTL_ReadSector(FLASH_FTL_DATA_SECTOR + lba, 1, (uint8_t *)buffer);
             #else
             MTD_ReadPhyPage(lba, offset, bufsize, buffer);
             #endif
@@ -372,8 +372,12 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void *buff
     return bufsize;
 }
 
-void parseCDCCommand(char *cmd);
-void MscSetCmd(char *cmd) {
+// parseCDCCommand is defined in start.c (stays C until its own phase); keep the
+// forward declaration extern "C" so this call resolves the unmangled symbol.
+extern "C" void parseCDCCommand(char *cmd);
+// MscSetCmd is called by name from parseCDCCommand() in start.c (stays C);
+// define it with C linkage so that caller resolves the unmangled symbol.
+extern "C" void MscSetCmd(char *cmd) {
     memset(MscCmdBuf, 0, sizeof(MscCmdBuf));
     memcpy(MscCmdBuf, cmd, sizeof(MscCmdBuf));
     //strcpy((char *)MscCmdBuf, cmd);

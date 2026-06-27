@@ -77,11 +77,24 @@ target_compile_options(rom.elf PRIVATE -mtune=arm926ej-s -mcpu=arm926ej-s -mlitt
 -ffunction-sections
 -fdelete-null-pointer-checks 
 -fcommon 
--finline-functions 
+-finline-functions
 -finline-small-functions
 
 )
- 
+
+# C++ native migration: first-party Bootloader targets compile as zero-overhead
+# C++23. Flags are CXX-only generator expressions so the remaining .c units (and
+# vendored libs) are untouched -- mirrors the System-side migration.
+# -fno-exceptions/-fno-rtti drop landing pads and RTTI; -fno-use-cxa-atexit/
+# -fno-threadsafe-statics avoid runtime hooks the bootloader has no scaffolding
+# for. No global constructors allowed (ldr_ld.script ASSERTs .init_array empty).
+set(LOADER_CXX_FLAGS
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions;-fno-rtti;-fno-use-cxa-atexit;-fno-threadsafe-statics>)
+foreach(_loader_tgt rom.elf hal drivers display input timer vmmgr vmmgr_mmu)
+    target_compile_options(${_loader_tgt} PRIVATE ${LOADER_CXX_FLAGS})
+    set_target_properties(${_loader_tgt} PROPERTIES CXX_STANDARD 23 CXX_STANDARD_REQUIRED ON)
+endforeach()
+
 
 add_custom_command(TARGET rom.elf POST_BUILD
     COMMAND arm-none-eabi-size ${CMAKE_CURRENT_BINARY_DIR}/rom.elf 
