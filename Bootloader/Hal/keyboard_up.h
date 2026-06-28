@@ -99,18 +99,15 @@ typedef enum Keys_t {
 } Keys_t;
 
 
-// The keyboard HAL is implemented in the (now C++) input driver but called by
-// name from C translation units (key_service.c, start.c, llapi.c), so the
-// interface keeps C linkage. Keys_t stays outside the block: it is a plain enum
-// shared by value across both languages.
+// The keyboard scan service (key_task / key_svcInit / key_register_notify) is
+// reached by name across translation units, so it keeps C linkage for now;
+// folding it into the Keyboard driver class is left to a later phase. The
+// register-poking entry points are now the Keyboard:: methods in stmp_gpio.hpp,
+// called directly by their C++ consumers. Keys_t stays outside the block: it is
+// a plain enum shared by value across both languages.
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-void portKeyboardGPIOInit(void);
-void portKeyScan(void);
-bool portIsKeyDown(Keys_t key);
-Keys_t portGetChangedKey(void);
 
 /**
 Keys_t kb_waitAnyKeyPress();

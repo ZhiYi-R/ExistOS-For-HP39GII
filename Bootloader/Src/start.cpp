@@ -22,6 +22,7 @@
 #include "stmp_board.hpp"
 #include "stmp_lradc.hpp"
 #include "stmp_power.hpp"
+#include "stmp_gpio.hpp"
 #include "display_up.h"
 #include "keyboard_up.h"
 #include "llapi.h"
@@ -247,7 +248,7 @@ void System(void *par) {
     for (int i = 120; i <= 150; ++i)
         DisplayFillBox(i - 2, 84, i, 92, 72);
 
-    if (((*bootAddr != 0xEF5AE0EF) || (*(bootAddr + 1) != 0xFECDAFDE)) || (isInterrupted = portIsKeyDown(KEY_F3))) {
+    if (((*bootAddr != 0xEF5AE0EF) || (*(bootAddr + 1) != 0xFECDAFDE)) || (isInterrupted = Keyboard::isKeyDown(KEY_F3))) {
         slowDownEnable(false);
         // DisplayClean();
         // DisplayPutStr(0, 16 * 0, "========[Exist OS Loader]======", 0, 255, 16);

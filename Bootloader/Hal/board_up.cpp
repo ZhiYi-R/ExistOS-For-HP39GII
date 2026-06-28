@@ -16,6 +16,7 @@
 #include "mtd_up.h"
 #include "display_up.h"
 #include "keyboard_up.h"
+#include "stmp_gpio.hpp"
 #include "rtc_up.h"
 
 #include "debug.h"
@@ -69,14 +70,14 @@ void boardInit(void)
     portBoardInit();
 
     uartInit();
-    
+
     IRQInit();
-    
+
     MTD_InterfaceInit();
-    
+
     Display_InterfaceInit();
-    
-    portKeyboardGPIOInit();
+
+    Keyboard::gpioInit();
 
     
     rtc_init();

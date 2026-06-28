@@ -6,6 +6,7 @@
 
 
 #include "keyboard_up.h"
+#include "stmp_gpio.hpp"
 
 typedef struct CheckKey_t {
     Keys_t key;
@@ -155,12 +156,12 @@ void key_task() {
         }
 
         vTaskDelay(pdMS_TO_TICKS(20));
-        portKeyScan();
-        k = portGetChangedKey();
+        Keyboard::scan();
+        k = Keyboard::getChangedKey();
         if (k == 255) {
             continue;
         } else {
-            press = (uint8_t)portIsKeyDown(k);
+            press = (uint8_t)Keyboard::isKeyDown(k);
             key_notify = (press << 16) | (k & 0xFFFF);
 
             //ck = k;
