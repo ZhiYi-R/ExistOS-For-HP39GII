@@ -4,7 +4,6 @@
  */
 
 #include "FreeRTOS.h"
-#include "task.h"
 
 #include "stmp_timer.hpp"
 #include "timer_up.h"
@@ -30,17 +29,6 @@ bool up_TimerSetup( void ){
     Timer::enable(LFTimer, true);
 
     return true;
-}
-
-
-
-void up_TimerTick()
-{
-    
-    if( xTaskIncrementTick() != pdFALSE )
-	{	
-		vTaskSwitchContext();
-	}
 }
 
 

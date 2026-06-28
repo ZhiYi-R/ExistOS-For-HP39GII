@@ -3,8 +3,7 @@
  * @brief Timer (TIMROT) driver — pure-static @c Timer singleton (definitions).
  *
  * The @c Timer class is declared in stmp_timer.hpp; this file carries the method
- * definitions, the kept @c extern @c "C" portAckTimerIRQ seam, and the
- * reload-value state.
+ * definitions and the reload-value state.
  *
  * Uses the typed register model. TIMROT_ROTCTRL / TIMROT_TIMCTRLn carry atomic
  * SET/CLR aliases, so BF_SET/CLR and BF_CS1n become reg::*::set/clr.
@@ -15,9 +14,9 @@
  * @c init / @c getTimer / @c setPeriod / @c enableIRQ / @c enable are ordinary
  * out-of-line static methods, called directly by @c up_TimerSetup; their old
  * portTimer* forwarding shims (and the dead portGetTimerNum / Timer::getNum) are
- * gone. @c ackIRQ stays @c inline and folds into the kept @c portAckTimerIRQ
- * shim, whose only (commented-out) caller lives in the up_isr dispatcher -- that
- * ack wiring is the interrupt_up service-layer refactor's call.
+ * gone. The TIMER0 tick IRQ is acked + serviced inline in the up_isr dispatcher
+ * (Hal/interrupt_up.cpp), so the former Timer::ackIRQ / portAckTimerIRQ ack chain
+ * is gone -- routing the hot ISR path through it was not bit-identical.
  */
 
 
@@ -25,7 +24,6 @@
 #include "stmp_timer.hpp"
 
 #include "hw_irq.h"
-#include "timer_up.h"
 #include <stdint.h>
 #include "interrupt_up.h"
 
@@ -57,12 +55,6 @@ void Timer::init()
 }
 
 
-
-inline void Timer::ackIRQ()
-{
-    reg::TIMROT_TIMCTRLn::clr(0, reg::TIMROT_TIMCTRLn_::IRQ::mask);
-    up_TimerTick();
-}
 
 bool Timer::enableIRQ(int timer, bool enable)
 {
@@ -102,11 +94,3 @@ bool Timer::setPeriod(int timer, unsigned int us)
 int Timer::getTimer(){
     return HW_IRQ_TIMER0;
 }
-
-// ---------------------------------------------------------------------------
-// extern "C" ack seam (declared in timer_up.h). Its only caller is the
-// commented-out timer case in the up_isr dispatcher; kept so the interrupt_up
-// service-layer refactor can re-point that dispatch here. The inline ackIRQ
-// above folds into it, so the emitted clear-IRQ + tick is the pre-class path.
-// ---------------------------------------------------------------------------
-extern "C" void portAckTimerIRQ(void) { Timer::ackIRQ(); }

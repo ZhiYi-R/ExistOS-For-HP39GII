@@ -11,13 +11,13 @@
  *
  * @c init / @c getTimer / @c setPeriod / @c enableIRQ / @c enable are ordinary
  * out-of-line static methods, called directly by @c up_TimerSetup (the FreeRTOS
- * tick service in timer_up.cpp) -- the @c portTimer* forwarding shells are gone.
+ * tick-timer start in timer_up.cpp) -- the @c portTimer* forwarding shells are gone.
  *
- * @c ackIRQ is reached only through the kept @c extern @c "C" portAckTimerIRQ
- * shim (same TU): the live @c up_isr path acknowledges the timer IRQ inline, so
- * wiring the dispatcher onto this method belongs to the interrupt_up service-layer
- * refactor. Its .cpp def stays @c [[gnu::always_inline]] so the shim folds to the
- * bare clear-IRQ + tick bit-for-bit.
+ * The TIMER0 tick IRQ is acknowledged and serviced inline in the up_isr dispatcher
+ * (Hal/interrupt_up.cpp), so this class carries no ackIRQ method: routing the hot
+ * ISR path through one would cost an extra @c bl (not bit-identical) and would drag
+ * reg_model.hpp into this header. The former portAckTimerIRQ / up_TimerTick ack
+ * chain was therefore removed rather than wired.
  */
 #pragma once
 
@@ -34,12 +34,6 @@ public:
     static bool enable(int timer, bool enable);
     static bool setPeriod(int timer, unsigned int us);
     static int  getTimer();
-
-    // IRQ-acknowledge + FreeRTOS tick. Reached only through the kept extern "C"
-    // portAckTimerIRQ shim (same TU); its .cpp def is [[gnu::always_inline]] so
-    // the shim folds bit-for-bit. The live up_isr inlines the ack today, so
-    // re-pointing the dispatcher at this is the interrupt_up refactor's job.
-    [[gnu::always_inline]] static void ackIRQ();
 
 private:
     static inline uint32_t timer0ReloadVal = 0;

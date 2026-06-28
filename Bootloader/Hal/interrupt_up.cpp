@@ -7,12 +7,9 @@
 
 #include "interrupt_up.h"
 #include "debug.h"
-#include "timer_up.h"
 
 #include "hw_irq.h"
 #include "reg_model.hpp"
-
-#include "timer_up.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -45,59 +42,20 @@ void portDAC_IRQ(uint32_t IRQn);
 }
 
 void up_isr(void) {
-/*
-    portIRQDecode(&CurrentIRQNumber, &IRQType, &IRQInfo);
-
-    switch (IRQType) {
-    case IRQType_Timer:
-        portAckTimerIRQ();
-        break;
-    case IRQType_USBCtrl:
-        usb_dcd_isr();
-        break;
-    case IRQType_MTD:
-        portMTD_ISR();
-        break;
-    case IRQType_MTD_DMA:
-        portMTD_DMA_ISR();
-        break;
-    case IRQType_MTD_ECC:
-        portMTD_ECC_ISR();
-        break;
-    case IRQType_DISP:
-        portDISP_ISR();
-        break;
-    case IRQType_LRADC:
-        port_LRADC_IRQ(IRQInfo);
-        break;
-    case IRQType_PWR:
-        portPowerIRQ(IRQInfo);
-        break;
-#ifdef ENABLE_AUIDIOOUT
-    case IRQType_DAC:
-        portDAC_IRQ(IRQInfo);
-        break;
-#endif
-    default:
-        PANIC("Unknown IRQ:%d,%d\n", CurrentIRQNumber, IRQInfo);
-        break;
-    }*/
-
     CurrentIRQNumber = reg::ICOLL_VECTOR::B().IRQVECTOR  ;
     switch (CurrentIRQNumber)
     {
     case HW_IRQ_TIMER0:
+        // TIMER0 is the FreeRTOS tick source: clear the timer IRQ and drive the
+        // scheduler tick inline (hot ISR path). Deliberately not routed through
+        // Timer::ackIRQ()/up_TimerTick() -- that would emit an extra bl and is not
+        // bit-identical, so the dead parallel ack chain was removed, not wired.
         reg::TIMROT_TIMCTRLn::clr(0, reg::TIMROT_TIMCTRLn_::IRQ::mask);
-        //up_TimerTick();
         if( xTaskIncrementTick() != pdFALSE )
 	    {	
 	    	vTaskSwitchContext();
 	    }
-        //portAckTimerIRQ();
-        break;/*
-    case HW_IRQ_TIMER1:
-        portAckTimerIRQ();
-        break;    */
+        break;
     case HW_IRQ_USB_CTRL:
         usb_dcd_isr();
         break; 

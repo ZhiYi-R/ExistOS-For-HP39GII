@@ -9,19 +9,17 @@
 #include <stdbool.h>
 #include "interrupt_up.h"
 
-// The timer driver is the (now C++) Timer class (drivers/timer/stmp_timer.hpp);
-// this header keeps C linkage only for the seams still reached by name:
-// up_TimerSetup (called from the FreeRTOS port layer under External/) and
-// portAckTimerIRQ (the up_isr ack dispatch, to be wired by the interrupt_up
-// refactor). up_TimerTick is the FreeRTOS tick service.
+// The timer driver is the (now C++) Timer class (drivers/timer/stmp_timer.hpp).
+// The only seam still reached by name is up_TimerSetup, called from the FreeRTOS
+// port layer (External/.../port.c xPortStartScheduler) to start the tick timer;
+// it keeps C linkage. The tick itself is acknowledged and serviced inline in the
+// up_isr dispatcher (Hal/interrupt_up.cpp), so the former portAckTimerIRQ /
+// up_TimerTick ack helpers are gone.
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void portAckTimerIRQ(void);
-
 bool up_TimerSetup(void);
-void up_TimerTick(void);
 
 #ifdef __cplusplus
 }
