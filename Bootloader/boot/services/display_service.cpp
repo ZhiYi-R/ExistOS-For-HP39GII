@@ -8,11 +8,11 @@
 
 void vDispSvc(void *pvParameters)
 {
-    DisplayInit();
+    Display::init();
 
-    DisplaySetIndicate(0, 0);
+    Display::setIndicate(0, 0);
 
     for(;;){
-        DisplayTask();
+        Display::task();
     }
 }

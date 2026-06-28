@@ -1,9 +1,15 @@
 /**
- * @file Bootloader/drivers/display/display_up.c
- * @brief display_up module
+ * @file Bootloader/drivers/display/display_up.cpp
+ * @brief Display graphics / operation-queue layer — @c Display method bodies.
+ *
+ * Phase 3.5a fold: the former free @c DisplayXxx() functions are now the
+ * out-of-line definitions of the pure-static @c Display class (display_up.hpp).
+ * Bodies are unchanged — they still marshal each request onto @c opaQueue and
+ * the display task still drains it, rendering through the @c Lcdif hardware
+ * class. The two inner span helpers stay file-scope @c static so the compiler
+ * keeps inlining and discarding them (they carry no class state), and the queue
+ * message types stay local to this TU.
  */
-
-
 
 #include "FreeRTOS.h"
 #include "event_groups.h"
@@ -11,13 +17,23 @@
 #include "semphr.h"
 #include "task.h"
 
+#include <stdint.h>
+#include <string.h>
+
 #include "debug.h"
-#include "display_up.h"
+#include "display_up.hpp"
 #include "stmp_lcdif.hpp"
 #include "font_ascii.h"
 
+// Cross-cutting contrast level: owned here, written by start.cpp's contrast
+// hot-key path and read by Lcdif::setContrast (stmp_lcdif.cpp). Kept a free
+// global rather than a Display member to avoid a Display<->Lcdif dependency.
 uint32_t g_lcd_contrast = 62;
 
+// ---------------------------------------------------------------------------
+// Queue message types — implementation detail of the operation queue, not part
+// of the public Display API, so they stay file-scope in this TU.
+// ---------------------------------------------------------------------------
 typedef enum {
     DISPOPA_CLEAN,
     DISPOPA_FLUSH_AREA,
@@ -29,7 +45,6 @@ typedef enum {
     DISPOPA_FILL_BOX,
     DISPOPA_SET_INDICATE,
     DISPOPA_READ_VRAM
-    //DISPOPA_CIRCLE,
 } DispOpa;
 
 typedef struct DisplayOpaQueue_t {
@@ -38,19 +53,14 @@ typedef struct DisplayOpaQueue_t {
     uint32_t *pars;
 } DisplayOpaQueue_t;
 
-QueueHandle_t DisplayOpaQueue;
-
-static uint32_t DispIndicatorBit = 0, DispBatteryBit = 0;
-static uint32_t Last_DispIndicatorBit = 0, Last_DispBatteryBit = 0;
-
-void DisplayClean(void) {
+void Display::clean(void) {
     DisplayOpaQueue_t opa;
     opa.opa = DISPOPA_CLEAN;
     opa.parNum = 0;
-    xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
+    xQueueSend(opaQueue, &opa, portMAX_DELAY);
 }
 
-void DisplayReadArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf, bool *fin) {
+void Display::readArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf, bool *fin) {
     *fin = false;
     if ((x_end - x_start + 1) * (y_end - y_start + 1) > 4096) {
         *fin = true;
@@ -69,10 +79,10 @@ void DisplayReadArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_
     opa.opa = DISPOPA_READ_VRAM;
     opa.parNum = 5;
     opa.pars = pars;
-    xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
+    xQueueSend(opaQueue, &opa, portMAX_DELAY);
 }
 
-void DisplayFlushArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf, bool block) {
+void Display::flushArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf, bool block) {
     DisplayOpaQueue_t opa;
     uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     if (!pars)
@@ -90,7 +100,7 @@ void DisplayFlushArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32
     opa.opa = DISPOPA_FLUSH_AREA;
     opa.parNum = 6;
     opa.pars = pars;
-    xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
+    xQueueSend(opaQueue, &opa, portMAX_DELAY);
     if (block) {
         while ((int)fin == false) {
             vTaskDelay(2);
@@ -98,7 +108,7 @@ void DisplayFlushArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32
     }
 }
 
-void DisplayPutChar(uint32_t x, uint32_t y, char c, uint8_t fg, uint8_t bg, uint8_t fontSize) {
+void Display::putChar(uint32_t x, uint32_t y, char c, uint8_t fg, uint8_t bg, uint8_t fontSize) {
     DisplayOpaQueue_t opa;
     uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     if (!pars)
@@ -112,10 +122,10 @@ void DisplayPutChar(uint32_t x, uint32_t y, char c, uint8_t fg, uint8_t bg, uint
     opa.opa = DISPOPA_PUT_CHAR;
     opa.parNum = 6;
     opa.pars = pars;
-    xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
+    xQueueSend(opaQueue, &opa, portMAX_DELAY);
 }
 
-bool DisplayPutStr(uint32_t x, uint32_t y, char *s, uint8_t fg, uint8_t bg, uint8_t fontSize) {
+bool Display::putStr(uint32_t x, uint32_t y, char *s, uint8_t fg, uint8_t bg, uint8_t fontSize) {
     DisplayOpaQueue_t opa;
     uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     char *str = (char *)pvPortMalloc(strlen(s));
@@ -133,12 +143,12 @@ bool DisplayPutStr(uint32_t x, uint32_t y, char *s, uint8_t fg, uint8_t bg, uint
     opa.opa = DISPOPA_PUT_STR;
     opa.parNum = 6;
     opa.pars = pars;
-    xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
+    xQueueSend(opaQueue, &opa, portMAX_DELAY);
 
     return true;
 }
 
-void DisplayHLine(uint32_t x0, uint32_t x1, uint32_t y, uint8_t c) {
+void Display::hLine(uint32_t x0, uint32_t x1, uint32_t y, uint8_t c) {
     DisplayOpaQueue_t opa;
     uint32_t *pars = (uint32_t *)pvPortMalloc(4 * sizeof(uint32_t));
     if (!pars)
@@ -150,10 +160,10 @@ void DisplayHLine(uint32_t x0, uint32_t x1, uint32_t y, uint8_t c) {
     opa.opa = DISPOPA_HLINE;
     opa.parNum = 4;
     opa.pars = pars;
-    xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
+    xQueueSend(opaQueue, &opa, portMAX_DELAY);
 }
 
-void DisplayVLine(uint32_t y0, uint32_t y1, uint32_t x, uint8_t c) {
+void Display::vLine(uint32_t y0, uint32_t y1, uint32_t x, uint8_t c) {
     DisplayOpaQueue_t opa;
     uint32_t *pars = (uint32_t *)pvPortMalloc(4 * sizeof(uint32_t));
     if (!pars)
@@ -165,10 +175,10 @@ void DisplayVLine(uint32_t y0, uint32_t y1, uint32_t x, uint8_t c) {
     opa.opa = DISPOPA_VLINE;
     opa.parNum = 4;
     opa.pars = pars;
-    xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
+    xQueueSend(opaQueue, &opa, portMAX_DELAY);
 }
 
-void DisplayBoxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
+void Display::boxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
     DisplayOpaQueue_t opa;
     bool fin = false;
     uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
@@ -183,12 +193,12 @@ void DisplayBoxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t
     opa.opa = DISPOPA_BOX;
     opa.parNum = 6;
     opa.pars = pars;
-    xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
+    xQueueSend(opaQueue, &opa, portMAX_DELAY);
     while ((int)fin == false)
         ;
 }
 
-void DisplayBox(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
+void Display::box(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
     DisplayOpaQueue_t opa;
     uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     if (!pars)
@@ -202,10 +212,10 @@ void DisplayBox(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
     opa.opa = DISPOPA_BOX;
     opa.parNum = 6;
     opa.pars = pars;
-    xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
+    xQueueSend(opaQueue, &opa, portMAX_DELAY);
 }
 
-void DisplayFillBoxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
+void Display::fillBoxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
     DisplayOpaQueue_t opa;
     bool fin = false;
     uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
@@ -220,12 +230,12 @@ void DisplayFillBoxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uin
     opa.opa = DISPOPA_FILL_BOX;
     opa.parNum = 6;
     opa.pars = pars;
-    xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
+    xQueueSend(opaQueue, &opa, portMAX_DELAY);
     while ((int)fin == false)
         ;
 }
 
-void DisplayFillBox(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
+void Display::fillBox(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c) {
     DisplayOpaQueue_t opa;
     uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
     if (!pars)
@@ -239,48 +249,12 @@ void DisplayFillBox(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t 
     opa.opa = DISPOPA_FILL_BOX;
     opa.parNum = 6;
     opa.pars = pars;
-    xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
+    xQueueSend(opaQueue, &opa, portMAX_DELAY);
 }
 
-/*
-void DisplayCircle(uint32_t x0, uint32_t y0, uint32_t r, uint8_t c, bool isFill) {
-    DisplayOpaQueue_t opa;
-    uint32_t *pars = (uint32_t *)pvPortMalloc(6 * sizeof(uint32_t));
-    if (!pars)
-        return;
-    pars[0] = x0;
-    pars[1] = y0;
-    pars[2] = r;
-    pars[3] = c;
-    pars[4] = isFill;
-    pars[5] = 0;
-    opa.opa = DISPOPA_CIRCLE;
-    opa.parNum = 5;
-    opa.pars = pars;
-    xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);
-}
-*/
-/**
-bool DisplayOperatesFin() {
-    uint32_t len = uxQueueGetQueueNumber((QueueHandle_t)&DisplayOpaQueue);
-    // printf("Qlen:%d\n",len);
-    return len == 0;
-}*/
-
-void DisplaySetIndicate(int Indicate, int batInd) {
-    DispIndicatorBit = Indicate;
-    DispBatteryBit = batInd;
-    /*
-        return;
-        DisplayOpaQueue_t opa;
-        uint32_t *pars = (uint32_t *)pvPortMalloc(2 * sizeof(uint32_t));
-        if(!pars)return;
-        pars[0] = Indicate;
-        pars[1] = batInd;
-        opa.opa = DISPOPA_SET_INDICATE;
-        opa.parNum = 2;
-        opa.pars = pars;
-        xQueueSend(DisplayOpaQueue, &opa, portMAX_DELAY);*/
+void Display::setIndicate(int Indicate, int batInd) {
+    ind.indicator = Indicate;
+    ind.battery = batInd;
 }
 
 static void innerDispHLine(uint32_t x0, uint32_t x1, uint32_t y, uint8_t c) {
@@ -300,51 +274,21 @@ static void innerDispVLine(uint32_t y0, uint32_t y1, uint32_t x, uint8_t c) {
     vPortFree(buf);
 }
 
-/**
-static void innerDispPoint(uint32_t x0, uint32_t y0, uint8_t c) {
-    uint8_t *buf = (uint8_t *)pvPortMalloc(3);
-    memset(buf, c, 3);
-    portDispFlushAreaBuf(x0 - 1, y0, x0 + 1, y0, buf);
-    vPortFree(buf);
-}
-*/
-
-void Display_InterfaceInit() {
+void Display::interfaceInit() {
     Lcdif::interfaceInit();
 }
-/**
-volatile static bool led_refresh = false;
 
-void vTaskDispLedRefresh() {
-    for (;;) {
-        if ((Last_DispBatteryBit != DispBatteryBit) || (Last_DispIndicatorBit != DispIndicatorBit)) {
-            led_refresh = true;
-            portDispSetIndicate(DispIndicatorBit, DispBatteryBit);
-        }
-        Last_DispBatteryBit = DispBatteryBit;
-        Last_DispIndicatorBit = DispIndicatorBit;
-        led_refresh = false;
-        vTaskDelay(pdMS_TO_TICKS(50));
-    }
-}*/
-
-void DisplayTask() {
+void Display::task() {
     DisplayOpaQueue_t curOpa;
 
-    // xTaskCreate(vTaskDispLedRefresh, "disp led", configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, NULL);
-
     for (;;) {
-        if ((Last_DispBatteryBit != DispBatteryBit) || (Last_DispIndicatorBit != DispIndicatorBit)) {
-            Lcdif::setIndicate(DispIndicatorBit, DispBatteryBit);
+        if ((ind.lastBattery != ind.battery) || (ind.lastIndicator != ind.indicator)) {
+            Lcdif::setIndicate(ind.indicator, ind.battery);
         }
-        Last_DispBatteryBit = DispBatteryBit;
-        Last_DispIndicatorBit = DispIndicatorBit;
+        ind.lastBattery = ind.battery;
+        ind.lastIndicator = ind.indicator;
 
-        if (xQueueReceive(DisplayOpaQueue, &curOpa, pdMS_TO_TICKS(50)) == pdTRUE) {
-            // INFO("g:%d\n", curOpa.opa);
-            // vTaskDelay(pdMS_TO_TICKS(10));
-            // vTaskSuspendAll();
-
+        if (xQueueReceive(opaQueue, &curOpa, pdMS_TO_TICKS(50)) == pdTRUE) {
             switch (curOpa.opa) {
             case DISPOPA_CLEAN:
                 Lcdif::clean();
@@ -355,7 +299,7 @@ void DisplayTask() {
                 uint32_t x_end = curOpa.pars[2];
                 uint32_t y_end = curOpa.pars[3];
                 uint8_t *buf = (uint8_t *)curOpa.pars[4];
-                
+
                 Lcdif::flushAreaBuf(x_start, y_start, x_end, y_end, buf);
 
                 bool *fin = (bool *)curOpa.pars[5];
@@ -404,15 +348,11 @@ void DisplayTask() {
                 uint32_t str_len = strlen(s);
                 const uint8_t *font = NULL;
                 uint32_t fontWidth = 0;
-                // if(fontSize == 16)
                 {
                     font = VGA_Ascii_8x16;
                     fontWidth = 8;
                 }
-                // else
                 {
-                    // font = VGA_Ascii_6x12;
-                    // fontWidth = 6;
                 }
 
                 uint8_t *buf = (uint8_t *)pvPortMalloc(8 * str_len * fontSize);
@@ -487,11 +427,6 @@ void DisplayTask() {
                 vPortFree(curOpa.pars);
             } break;
             case DISPOPA_SET_INDICATE: {
-                /*
-                int indicate = curOpa.pars[0];
-                int batIndicate = curOpa.pars[1];
-                */
-                // portDispSetIndicate(indicate, batIndicate);
                 vPortFree(curOpa.pars);
             } break;
             case DISPOPA_READ_VRAM: {
@@ -506,81 +441,14 @@ void DisplayTask() {
                 vPortFree(curOpa.pars);
                 *fin = true;
             } break;
-            /*
-            case DISPOPA_CIRCLE: {
-                uint32_t x0 = curOpa.pars[0];
-                uint32_t y0 = curOpa.pars[1];
-                uint32_t r = curOpa.pars[2];
-                uint32_t c = curOpa.pars[3];
-                bool isFill = curOpa.pars[4];
-
-                int x1, y1;
-                int j;
-                int pow_r;
-                int y_last;
-
-                for (int rr = r; rr >= 0; rr--) {
-                    pow_r = rr * rr;
-                    for (x1 = x0 - rr, y_last = y0; x1 <= x0; x1++) {
-                        y1 = y0 + __sqrt(pow_r - (x1 - x0) * (x1 - x0));
-                        if (y1 - y_last > 1) {
-
-                            for (j = y_last; j < (y1 + y_last) / 2; j++) { // add pixel from y_last to harf
-                                innerDispPoint(x1 - 1, j, c);
-                                innerDispPoint((x0 << 1) - x1 + 1, j, c);
-                                innerDispPoint((x0 << 1) - x1 + 1, (y0 << 1) - j, c);
-                                innerDispPoint(x1 - 1, (y0 << 1) - j, c);
-                            }
-                            for (j = (y1 + y_last) / 2; j < y1; j++) { // add pixel from hart to y_now
-                                innerDispPoint(x1, j, c);
-                                innerDispPoint((x0 << 1) - x1, j, c);
-                                innerDispPoint((x0 << 1) - x1, (y0 << 1) - j, c);
-                                innerDispPoint(x1, (y0 << 1) - j, c);
-                            }
-                        }
-                        innerDispPoint(x1, y1, c);
-                        innerDispPoint((x0 << 1) - x1, y1, c);
-                        innerDispPoint((x0 << 1) - x1, (y0 << 1) - y1, c);
-                        innerDispPoint(x1, (y0 << 1) - y1, c);
-                        y_last = y1;
-                    }
-                    if (!isFill)
-                        break;
-                }
-
-                vPortFree(curOpa.pars);
-            } break;
-            */
             default:
                 break;
             }
-
-            // xTaskResumeAll();
         }
     }
 }
 
-void DisplayInit() {
-    DisplayOpaQueue = xQueueCreate(4, sizeof(DisplayOpaQueue_t));
+void Display::init() {
+    opaQueue = xQueueCreate(4, sizeof(DisplayOpaQueue_t));
     Lcdif::deviceInit();
 }
-
-/*
-float __sqrt(int x) {
-    x = x << 8; 
-    uint32_t mask = 0x800;
-    uint32_t root = 0;
-    uint32_t trial;
-    // uint16_t i, f;
-    do {
-        trial = root + mask;
-        if (trial * trial <= x)
-            root = trial;
-        mask = mask >> 1;
-    } while (mask);
-
-    // i = root >> 4;
-    // f = (root & 0xf) << 4;
-    return (root >> 4);
-}
-*/

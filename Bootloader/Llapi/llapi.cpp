@@ -426,7 +426,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
 
             case LL_SWI_DISPLAY_SET_INDICATION:
             {
-                DisplaySetIndicate(currentCall.para0, currentCall.para1);
+                Display::setIndicate(currentCall.para0, currentCall.para1);
             }
             break;
 
@@ -462,7 +462,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
                 }
                 
                 //portDispFlushAreaBuf(x0, y0, x1, y1, (uint8_t *)vrambuf);
-                DisplayFlushArea(x0, y0, x1, y1, (uint8_t *)vrambuf, false);
+                Display::flushArea(x0, y0, x1, y1, (uint8_t *)vrambuf, false);
 
             } break;
 

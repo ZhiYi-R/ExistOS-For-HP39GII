@@ -196,17 +196,17 @@ void System(void *par) {
 
     // vTaskDelay(pdMS_TO_TICKS(5000));
     INFO("Booting...\n");
-    // DisplayClean();
+    // Display::clean();
 
-    // DisplayFillBox(32, 32, 224, 64, 128);
-    DisplayFlushArea(103, 32, 152, 56, (uint8_t *)&logo, false);
-    // DisplayPutStr(64, 42, "System Booting...", 255, 128, 16);
+    // Display::fillBox(32, 32, 224, 64, 128);
+    Display::flushArea(103, 32, 152, 56, (uint8_t *)&logo, false);
+    // Display::putStr(64, 42, "System Booting...", 255, 128, 16);
 
     for (int i = 90; i <= 120; ++i)
-        DisplayFillBox(i - 2, 84, i, 92, 72);
+        Display::fillBox(i - 2, 84, i, 92, 72);
 
-    // DisplayPutStr(64, 16 * 2, "System Booting...", 255, 32, 16);
-    // DisplayPutStr(64, 16 * 3, "Waiting for Flash GC...", 255, 32, 16);
+    // Display::putStr(64, 16 * 2, "System Booting...", 255, 32, 16);
+    // Display::putStr(64, 16 * 3, "Waiting for Flash GC...", 255, 32, 16);
 
     vTaskDelay(pdMS_TO_TICKS(100));
     uint32_t k;
@@ -216,9 +216,9 @@ void System(void *par) {
         Clk::slowEnable(false);
         tud_disconnect();
 
-        DisplayFillBox(32, 32, 224, 64, 128);
-        DisplayPutStr(80, 42, "USB MSC Mode", 255, 128, 16);
-        DisplayPutStr(42, 8, "Press [Views] to exit", 128, 255, 16);
+        Display::fillBox(32, 32, 224, 64, 128);
+        Display::putStr(80, 42, "USB MSC Mode", 255, 128, 16);
+        Display::putStr(42, 8, "Press [Views] to exit", 128, 255, 16);
 
         vTaskDelay(pdMS_TO_TICKS(200));
         g_MSC_Configuration = MSC_CONF_SYS_DATA;
@@ -233,10 +233,10 @@ void System(void *par) {
 
                 tud_disconnect();
 
-                DisplayFillBox(42, 8, 210, 24, 255);
-                DisplayFillBox(32, 32, 224, 64, 255);
-                DisplayFlushArea(103, 32, 152, 56, (uint8_t *)&logo, false);
-                // DisplayPutStr(64, 42, "System Booting...", 255, 128, 16);
+                Display::fillBox(42, 8, 210, 24, 255);
+                Display::fillBox(32, 32, 224, 64, 255);
+                Display::flushArea(103, 32, 152, 56, (uint8_t *)&logo, false);
+                // Display::putStr(64, 42, "System Booting...", 255, 128, 16);
 
                 g_MSC_Configuration = MSC_CONF_OSLOADER_EDB;
                 vTaskDelay(pdMS_TO_TICKS(10));
@@ -247,29 +247,29 @@ void System(void *par) {
     }
 
     for (int i = 120; i <= 150; ++i)
-        DisplayFillBox(i - 2, 84, i, 92, 72);
+        Display::fillBox(i - 2, 84, i, 92, 72);
 
     if (((*bootAddr != 0xEF5AE0EF) || (*(bootAddr + 1) != 0xFECDAFDE)) || (isInterrupted = Keyboard::isKeyDown(KEY_F3))) {
         Clk::slowEnable(false);
-        // DisplayClean();
-        // DisplayPutStr(0, 16 * 0, "========[Exist OS Loader]======", 0, 255, 16);
-        // DisplayPutStr(0, 16 * 1, "Could not find the System!", 0, 255, 16);
+        // Display::clean();
+        // Display::putStr(0, 16 * 0, "========[Exist OS Loader]======", 0, 255, 16);
+        // Display::putStr(0, 16 * 1, "Could not find the System!", 0, 255, 16);
 
-        DisplayFillBox(32, 32, 224, 64, 128);
-        DisplayFillBox(48, 80, 208, 96, 255);
-        DisplayPutStr(54, 42, (char *)((int)isInterrupted ? " Boot  Interrupted  " : "No System Installed "), 255, 128, 16);
+        Display::fillBox(32, 32, 224, 64, 128);
+        Display::fillBox(48, 80, 208, 96, 255);
+        Display::putStr(54, 42, (char *)((int)isInterrupted ? " Boot  Interrupted  " : "No System Installed "), 255, 128, 16);
 
-        // DisplayFillBox(0, 0, 255, 126, 255);
+        // Display::fillBox(0, 0, 255, 126, 255);
 
-        // DisplayFillBox(103, 16, 153, 66, 32);
+        // Display::fillBox(103, 16, 153, 66, 32);
 
-        // DisplayFillBox(128, 16, 153, 41, 128);
+        // Display::fillBox(128, 16, 153, 41, 128);
 
         for (int i = 16; i >= 0; --i) {
-            DisplayFillBox(115, 76, 141, 128, 255);
-            DisplayFillBox(123, 112 + i, 132, 128 + i, 128);
-            DisplayFillBox(120, 76 + i, 136, 80 + i, 192);
-            DisplayFillBox(115, 80 + i, 141, 112 + i, 0);
+            Display::fillBox(115, 76, 141, 128, 255);
+            Display::fillBox(123, 112 + i, 132, 128 + i, 128);
+            Display::fillBox(120, 76 + i, 136, 80 + i, 192);
+            Display::fillBox(115, 80 + i, 141, 112 + i, 0);
             vTaskDelay(pdMS_TO_TICKS(4 * (16 - i)));
         }
 
@@ -278,7 +278,7 @@ void System(void *par) {
     }
 
     for (int i = 150; i <= 180; ++i)
-        DisplayFillBox(i - 2, 84, i, 92, 72);
+        Display::fillBox(i - 2, 84, i, 92, 72);
 
     Clk::setCPUDivider(CPU_DIVIDE_NORMAL);
     bootAddr += 4;
@@ -289,7 +289,7 @@ void System(void *par) {
     g_vm_status = VM_STATUS_RUNNING;
 
     for (int i = 180; i <= 202; ++i)
-        DisplayFillBox(i - 2, 84, i, 92, 72);
+        Display::fillBox(i - 2, 84, i, 92, 72);
 
     vTaskPrioritySet(pDispTask, configMAX_PRIORITIES - 5);
 
@@ -364,47 +364,47 @@ void VM_Unconscious(TaskHandle_t task, char *res, uint32_t address) {
         uint32_t *pRegFrame = (uint32_t *)(((uint32_t *)task)[1]);
         pRegFrame -= 16;
 
-        DisplayClean();
-        DisplayFillBox(4, 4, 252, 20, 0);
-        DisplayPutStr(16, 5, "System Panic! ", 255, 0, 16);
-        DisplayFillBox(8, 24, 248, 120, 208);
+        Display::clean();
+        Display::fillBox(4, 4, 252, 20, 0);
+        Display::putStr(16, 5, "System Panic! ", 255, 0, 16);
+        Display::fillBox(8, 24, 248, 120, 208);
 
         if (res != NULL && res[0]) {
             snprintf(buf, sizeof(buf), "%s ", res);
-            DisplayPutStr(240 - 8 * strlen(buf), 5, buf, 208, 0, 16);
+            Display::putStr(240 - 8 * strlen(buf), 5, buf, 208, 0, 16);
         }
 
-        DisplayPutStr(24, 16 * 2 - 8, "[ON+F5] > Maintenance Menu", 96, 208, 16);
+        Display::putStr(24, 16 * 2 - 8, "[ON+F5] > Maintenance Menu", 96, 208, 16);
         /*
                 for(i = 0; i < 4; i++){
                     memset(buf, 0, sizeof(buf));
                     sprintf(buf, "%08lx %08lx ", pRegFrame[12 + i], pRegFrame[i]);
-                    DisplayPutStr(56, 16 * (i + 2), buf, 0, 208, 16);
+                    Display::putStr(56, 16 * (i + 2), buf, 0, 208, 16);
                 }
                 memset(buf, 0, sizeof(buf));
                 sprintf(buf, "%08lx %08lx ", pRegFrame[-1], address);
-                DisplayPutStr(56, 96, buf, 0, 208, 16);
+                Display::putStr(56, 96, buf, 0, 208, 16);
         */
 
         memset(buf, 0, sizeof(buf));
         sprintf(buf, "R12:%08x  R0:%08x ", pRegFrame[12], pRegFrame[0]);
-        DisplayPutStr(24, 16 * 3 - 8, buf, 0, 208, 16);
+        Display::putStr(24, 16 * 3 - 8, buf, 0, 208, 16);
 
         memset(buf, 0, sizeof(buf));
         sprintf(buf, "R13:%08x  R1:%08x ", pRegFrame[13], pRegFrame[1]);
-        DisplayPutStr(24, 16 * 4 - 8, buf, 0, 208, 16);
+        Display::putStr(24, 16 * 4 - 8, buf, 0, 208, 16);
 
         memset(buf, 0, sizeof(buf));
         sprintf(buf, "R14:%08x  R2:%08x ", pRegFrame[14], pRegFrame[2]);
-        DisplayPutStr(24, 16 * 5 - 8, buf, 0, 208, 16);
+        Display::putStr(24, 16 * 5 - 8, buf, 0, 208, 16);
 
         memset(buf, 0, sizeof(buf));
         sprintf(buf, "R15:%08x  R3:%08x ", pRegFrame[15], pRegFrame[3]);
-        DisplayPutStr(24, 16 * 6 - 8, buf, 0, 208, 16);
+        Display::putStr(24, 16 * 6 - 8, buf, 0, 208, 16);
 
         memset(buf, 0, sizeof(buf));
         sprintf(buf, "CPSR:%08x FAR:%08x ", pRegFrame[-1], address);
-        DisplayPutStr(24, 16 * 7 - 8, buf, 0, 208, 16);
+        Display::putStr(24, 16 * 7 - 8, buf, 0, 208, 16);
 
         g_vm_status = VM_STATUS_UNCONSCIOUS;
 
@@ -544,8 +544,8 @@ void parseCDCCommand(char *cmd) {
 
     if (strcmp(cmd, "MSCDATA") == 0) {
         tud_disconnect();
-        DisplayClean();
-        DisplayPutStr(0, 0, "USB MSC Mode.", 0, 255, 16);
+        Display::clean();
+        Display::putStr(0, 0, "USB MSC Mode.", 0, 255, 16);
         vTaskDelay(pdMS_TO_TICKS(200));
         g_MSC_Configuration = MSC_CONF_SYS_DATA;
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -702,74 +702,74 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
         if (eraseDataMenu) {
 
             VMSuspend();
-            DisplayClean();
+            Display::clean();
 
             uint8_t key;
             uint8_t op;
             op = 0;
-            DisplayFillBox(4, 4, 252, 20, 0);
-            DisplayPutStr(36, 5, "Device Maintenance Menu ", 255, 0, 16);
+            Display::fillBox(4, 4, 252, 20, 0);
+            Display::putStr(36, 5, "Device Maintenance Menu ", 255, 0, 16);
 
             do {
-                DisplayFillBox(8, 24, 248, 120, 208);
-                DisplayPutStr(36, 44, "[F1]  Clear System Data ", 32, 208, 16);
-                DisplayPutStr(36, 60, "[F2]  Erase All Flash ", 32, 208, 16);
-                DisplayPutStr(36, 76, "[F3]  Exit & Reboot ", 32, 208, 16);
-                // DisplayFlushArea(20, 100, 39, 109, &logo, true);
+                Display::fillBox(8, 24, 248, 120, 208);
+                Display::putStr(36, 44, "[F1]  Clear System Data ", 32, 208, 16);
+                Display::putStr(36, 60, "[F2]  Erase All Flash ", 32, 208, 16);
+                Display::putStr(36, 76, "[F3]  Exit & Reboot ", 32, 208, 16);
+                // Display::flushArea(20, 100, 39, 109, &logo, true);
                 //  DisplayCircle(128, 64, 48, 129, true);
 
                 vTaskDelay(pdMS_TO_TICKS(200));
                 key = waitAnyKey();
 
-                DisplayFillBox(8, 24, 248, 120, 208);
+                Display::fillBox(8, 24, 248, 120, 208);
                 vTaskDelay(pdMS_TO_TICKS(200));
                 if (key == KEY_F1) {
-                    DisplayPutStr(16, 32, "Clear System Data?", 32, 208, 16);
-                    // DisplayPutStr(16, 48, "User data will be erased! ", 128, 208, 16);
-                    DisplayPutStr(16, 104, "[Enter]: YES    [Else]: NO ", 32, 208, 16);
+                    Display::putStr(16, 32, "Clear System Data?", 32, 208, 16);
+                    // Display::putStr(16, 48, "User data will be erased! ", 128, 208, 16);
+                    Display::putStr(16, 104, "[Enter]: YES    [Else]: NO ", 32, 208, 16);
 
                     // vTaskDelay(pdMS_TO_TICKS(200));
                     key = waitAnyKey();
 
-                    DisplayFillBox(8, 24, 248, 120, 208);
+                    Display::fillBox(8, 24, 248, 120, 208);
                     if (key == KEY_ENTER) {
-                        DisplayFillBox(32, 32, 224, 64, 128);
-                        DisplayPutStr(48, 42, "Clearing System Data", 255, 128, 16);
-                        DisplayFillBox(48, 80, 208, 96, 200);
-                        DisplayFillBox(50, 82, 206, 94, 255);
+                        Display::fillBox(32, 32, 224, 64, 128);
+                        Display::putStr(48, 42, "Clearing System Data", 255, 128, 16);
+                        Display::fillBox(48, 80, 208, 96, 200);
+                        Display::fillBox(50, 82, 206, 94, 255);
 
                         // vTaskDelay(pdMS_TO_TICKS(500));
                         for (int i = FLASH_DATA_BLOCK; i < 1024; i++) {
                             MTD_ErasePhyBlock(i);
-                            DisplayFillBox(52, 84, 52 + i * 0.15, 92, 16);
+                            Display::fillBox(52, 84, 52 + i * 0.15, 92, 16);
                         }
                         op = 1;
                     }
 
                 } else if (key == KEY_F2) {
-                    DisplayPutStr(16, 32, "Erase ALL Flash? ", 32, 208, 16);
-                    // DisplayPutStr(16, 48, "You need to ", 128, 208, 16);
-                    // DisplayPutStr(16, 64, "reinstall firmware! ", 128, 208, 16);
-                    DisplayPutStr(16, 104, "[Enter]: YES    [Else]: NO ", 32, 208, 16);
+                    Display::putStr(16, 32, "Erase ALL Flash? ", 32, 208, 16);
+                    // Display::putStr(16, 48, "You need to ", 128, 208, 16);
+                    // Display::putStr(16, 64, "reinstall firmware! ", 128, 208, 16);
+                    Display::putStr(16, 104, "[Enter]: YES    [Else]: NO ", 32, 208, 16);
 
                     // vTaskDelay(pdMS_TO_TICKS(200));
                     key = waitAnyKey();
 
-                    DisplayFillBox(8, 24, 248, 120, 208);
+                    Display::fillBox(8, 24, 248, 120, 208);
                     if (key == KEY_ENTER) {
-                        DisplayFillBox(32, 32, 224, 64, 128);
-                        DisplayPutStr(60, 42, "Erasing All Flash", 255, 128, 16);
-                        DisplayFillBox(48, 80, 208, 96, 200);
-                        DisplayFillBox(50, 82, 206, 94, 255);
+                        Display::fillBox(32, 32, 224, 64, 128);
+                        Display::putStr(60, 42, "Erasing All Flash", 255, 128, 16);
+                        Display::fillBox(48, 80, 208, 96, 200);
+                        Display::fillBox(50, 82, 206, 94, 255);
 
                         // vTaskDelay(pdMS_TO_TICKS(500));
                         for (int i = 0; i < 1024; i++) {
                             MTD_ErasePhyBlock(i);
-                            DisplayFillBox(52, 84, 52 + i * 0.15, 92, 16);
+                            Display::fillBox(52, 84, 52 + i * 0.15, 92, 16);
                         }
 
-                        // DisplayFillBox(8, 24, 248, 120, 208);
-                        // DisplayPutStr(30, 48, "ALL FLASH HAS BEEN ERASED ", 32, 208, 16);
+                        // Display::fillBox(8, 24, 248, 120, 208);
+                        // Display::putStr(30, 48, "ALL FLASH HAS BEEN ERASED ", 32, 208, 16);
                         // vTaskDelay(pdMS_TO_TICKS(1000));
                         op = 2;
                     }
@@ -779,14 +779,14 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
                 }
             } while (op == 0);
 
-            DisplayFillBox(8, 24, 248, 120, 208);
+            Display::fillBox(8, 24, 248, 120, 208);
             if (op == 1) {
-                DisplayPutStr(48, 52, "Device is Rebooting", 32, 208, 16);
+                Display::putStr(48, 52, "Device is Rebooting", 32, 208, 16);
                 vTaskDelay(pdMS_TO_TICKS(500));
                 portBoardReset();
             } else if (op == 2) {
-                DisplayClean();
-                DisplayPutStr(76, 52, "Flash Cleared ", 0, 255, 16);
+                Display::clean();
+                Display::putStr(76, 52, "Flash Cleared ", 0, 255, 16);
                 vTaskDelay(pdMS_TO_TICKS(500));
                 portBoardReset();
             }
@@ -803,7 +803,7 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
 
             for (int y = 0; y < 128; y += 2) {
                 bool fin = false;
-                DisplayReadArea(0, y, 255, y + 2, vramBuf, &fin);
+                Display::readArea(0, y, 255, y + 2, vramBuf, &fin);
                 while (!fin) {
                     vTaskDelay(pdMS_TO_TICKS(30));
                 }
@@ -851,7 +851,7 @@ int __attribute__((target("thumb"))) capt_ON_Key(int ck, int cp) {
     }
 
     if ((ck == KEY_F6) && cp) { // [ON] + [F6]
-        // DisplayClean();
+        // Display::clean();
 
         // FTL_Sync();
         portBoardReset();
@@ -971,7 +971,7 @@ void vBatteryMon(void *__n) {
             n |= (1 << 2);
         if (((show_bat_val - 800) * 100 / (1500 - 800)) >= ((100 / 4) * 4))
             n |= (1 << 3);
-        DisplaySetIndicate(-1, n);
+        Display::setIndicate(-1, n);
     }
 }
 

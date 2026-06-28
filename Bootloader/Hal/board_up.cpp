@@ -75,7 +75,7 @@ void boardInit(void)
 
     MTD_InterfaceInit();
 
-    Display_InterfaceInit();
+    Display::interfaceInit();
 
     Keyboard::gpioInit();
 

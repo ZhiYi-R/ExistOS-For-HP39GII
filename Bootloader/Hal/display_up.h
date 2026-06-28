@@ -25,36 +25,12 @@
 #define INDICATE_TX        (1 << 5)
 #define INDICATE_RX        (1 << 6)
 
-// The display HAL is implemented in the (now C++) display driver but called by
-// name from translation units that stay C (start.c, board_up.c, vmMgr.c, and
-// the LCDIF ISR dispatch), so the interface keeps C linkage.
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-bool DisplayOperatesFin();
-void DisplayReadArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf, bool *fin);
-void DisplayFlushArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf, bool block);
-void DisplayPutChar(uint32_t x, uint32_t y, char c, uint8_t fg, uint8_t bg, uint8_t fontSize);
-bool DisplayPutStr(uint32_t x, uint32_t y, char *s, uint8_t fg, uint8_t bg, uint8_t fontSize);
-void DisplayBox(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c);
-void DisplayBoxBlock(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c);
-void DisplayHLine(uint32_t y0, uint32_t y1, uint32_t x, uint8_t c);
-void DisplayVLine(uint32_t y0, uint32_t y1, uint32_t x, uint8_t c);
-void DisplayFillBox(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t c);
-//void DisplayCircle(uint32_t x0, uint32_t y0, uint32_t r, uint8_t c, bool isFill);
-void DisplaySetIndicate(int Indicate, int batInd);
-void DisplayClean(void);
-
-void Display_InterfaceInit(void);
-void DisplayInit(void);
-void DisplayTask(void);
-
-//float __sqrt(int x);
-
-#ifdef __cplusplus
-}
-#endif
+// The display HAL is now the pure-static C++ `Display` class; every former
+// free `DisplayXxx()` entry is a `Display::xxx` method (Phase 3.5a fold). This
+// header is retained as a thin compatibility shim — it pulls in the class for
+// the translation units that still `#include "display_up.h"` and keeps the
+// indicator-bit macros above. New code should include "display_up.hpp" directly.
+#include "display_up.hpp"
 
 #endif
 
