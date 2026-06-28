@@ -472,7 +472,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
                     (!vmMgr_checkAddressValid(currentCall.para0 + 8, PERM_R))) {
                     break;
                 }
-                portGetCoreFreqDIV(
+                Clk::getCoreFreqDIV(
                     (uint32_t *)(currentCall.para0),
                     (uint32_t *)(currentCall.para0 + 4),
                     (uint32_t *)(currentCall.para0 + 8));
@@ -492,9 +492,9 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
                 if ((HCLK_DIV == 0) || (HCLK_DIV > 35)) {
                     break;
                 }
-                setHCLKDivider(HCLK_DIV);
-                setCPUDivider(CPU_DIV);
-                setCPUFracDivider(CPU_FRAC);
+                Clk::setHCLKDivider(HCLK_DIV);
+                Clk::setCPUDivider(CPU_DIV);
+                Clk::setCPUFracDivider(CPU_FRAC);
 
             } break;
 
@@ -571,7 +571,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
 
             case LL_SWI_SLOW_DOWN_ENABLE:
             {
-                slowDownEnable(currentCall.para0);
+                Clk::slowEnable(currentCall.para0);
             }break;
 
             case LL_SWI_PWR_SPEED:
@@ -581,7 +581,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
 
             case LL_SWI_SLOW_DOWN_MINFRAC:
             {
-                setSlowDownMinCpuFrac(currentCall.para0);
+                Clk::setSlowMinFrac(currentCall.para0);
             }break;
 
             case LL_SWI_PWR_POWEROFF:

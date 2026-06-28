@@ -212,7 +212,7 @@ void System(void *par) {
     uint32_t kp;
     getKey(&k, &kp);
     if ((k == KEY_F2) && kp) {
-        slowDownEnable(false);
+        Clk::slowEnable(false);
         tud_disconnect();
 
         DisplayFillBox(32, 32, 224, 64, 128);
@@ -249,7 +249,7 @@ void System(void *par) {
         DisplayFillBox(i - 2, 84, i, 92, 72);
 
     if (((*bootAddr != 0xEF5AE0EF) || (*(bootAddr + 1) != 0xFECDAFDE)) || (isInterrupted = Keyboard::isKeyDown(KEY_F3))) {
-        slowDownEnable(false);
+        Clk::slowEnable(false);
         // DisplayClean();
         // DisplayPutStr(0, 16 * 0, "========[Exist OS Loader]======", 0, 255, 16);
         // DisplayPutStr(0, 16 * 1, "Could not find the System!", 0, 255, 16);
@@ -279,7 +279,7 @@ void System(void *par) {
     for (int i = 150; i <= 180; ++i)
         DisplayFillBox(i - 2, 84, i, 92, 72);
 
-    setCPUDivider(CPU_DIVIDE_NORMAL);
+    Clk::setCPUDivider(CPU_DIVIDE_NORMAL);
     bootAddr += 4;
     atagsAddr = (uint32_t *)(VM_ROM_BASE + (4234 - 1984) * 2048);
     // 1984 is the System page in options of Updater
@@ -429,7 +429,7 @@ extern "C" void MscSetCmd(char *cmd);
 extern "C" void mkSTMPNandStructure(uint32_t OLStartBlock, uint32_t OLPages);
 void parseCDCCommand(char *cmd) {
     if (strcmp(cmd, "PING") == 0) {
-        slowDownEnable(false);
+        Clk::slowEnable(false);
 
         vTaskSuspend(pMainThread);
         vTaskSuspend(pUSBLOGTask);
@@ -651,8 +651,8 @@ static int contrast_adj = 0;
 void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters) {
 
     // vTaskDelay(pdMS_TO_TICKS(100));
-    setHCLKDivider(2);
-    setCPUDivider(2);
+    Clk::setHCLKDivider(2);
+    Clk::setCPUDivider(2);
 
     // Lradc::enable(true, 7);
     //  MTD_EraseAllBLock();
@@ -1022,7 +1022,7 @@ void TaskUSBLog(void *_) {
 extern int g_slowdown_enable;
 void waitIRQ(int r) {
 
-    enterSlowDown();
+    Clk::enterSlow();
     if (g_slowdown_enable) {
         reg::CLKCTRL_CPU::B().INTERRUPT_WAIT = 1;
 
@@ -1031,7 +1031,7 @@ void waitIRQ(int r) {
         asm volatile("nop");
     }
 
-    exitSlowDown();
+    Clk::exitSlow();
 }
 
 void vApplicationIdleHook(void) {

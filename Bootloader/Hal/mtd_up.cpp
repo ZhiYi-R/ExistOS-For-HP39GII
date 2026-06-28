@@ -74,7 +74,7 @@ void MTD_Task()
         
         if(xQueueReceive(MTD_Operates_Queue, &curOpa, portMAX_DELAY) == pdTRUE)
         {
-            enterSlowDown();
+            Clk::enterSlow();
 
 
             retry_cnt = 5;
@@ -257,7 +257,7 @@ void MTD_Task()
             }
 
             //xEventGroupSetBits(MTDLockEventGroup , (1 << curOpa.BLock));
-            exitSlowDown();
+            Clk::exitSlow();
             
         }
 

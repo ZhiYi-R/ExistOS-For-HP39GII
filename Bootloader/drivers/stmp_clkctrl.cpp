@@ -1,21 +1,20 @@
 /**
  * @file Bootloader/drivers/stmp_clkctrl.cpp
- * @brief Clock control driver — pure-static singleton class.
+ * @brief Clock control driver — pure-static @c Clk singleton (definitions).
  *
- * Phase 2 of the HAL C++23 migration: the clock driver becomes the @c Clk
- * pure-static singleton. Its slowdown policy state @c min_cpu_frac_sd moves into
- * the class as a @c private @c static @c inline member; the internal sequencing
- * helpers (PLL / HFreq-domain / USB-clock) become private methods. The cross-
- * cutting @c g_slowdown_enable is intentionally NOT encapsulated: start.cpp reads
- * it by name via `extern int g_slowdown_enable`, so it must remain a global-scope
- * (unmangled) symbol -- a data seam, the moral twin of the extern "C" seams.
+ * The @c Clk class is declared in stmp_clkctrl.hpp; this file carries the method
+ * definitions and the @c min_cpu_frac_sd policy state. The public divider /
+ * slowdown methods are ordinary out-of-line static methods, called directly by
+ * their C++ consumers (start.cpp, llapi.cpp, mtd_up.cpp) as @c Clk::setCPUDivider
+ * / @c Clk::enterSlow / etc.; the legacy extern "C" forwarding shims are gone.
  *
- * The legacy entries survive as thin @c extern @c "C" forwarding shims
- * (stmp_clkctrl.hpp / clkctrl_up.h declare the interface @c extern @c "C"). The single-
- * caller policy/bring-up entries are always_inline so each shim folds back to the
- * pre-class body bit-for-bit; the three register-divider primitives are shared by
- * the bring-up sequence AND external callers, so they stay out-of-line methods
- * behind their shims (caller migration onto @c Clk:: is deferred to Phase 3).
+ * @c init() and the @c private PLL / HFreq-domain / USB-clock sequencing helpers
+ * stay @c always_inline, folded into the one remaining seam @c portCLKCtrlInit
+ * (its thin-wrapper merge with CLKCtrlInit/setCoreFreq is a later phase).
+ *
+ * The cross-cutting @c g_slowdown_enable is intentionally NOT encapsulated:
+ * start.cpp reads it by name via `extern int g_slowdown_enable`, so it stays a
+ * global-scope (unmangled) data seam, the moral twin of the extern "C" seams.
  */
 
 #include "stmp_clkctrl.hpp"
@@ -32,33 +31,11 @@
 // Cross-TU data seam (see file banner): must stay a global-scope symbol.
 int g_slowdown_enable = 0;
 
-class Clk {
-public:
-    // Single-caller entries (only their extern "C" shim); always_inline folds
-    // each body into the named entry so it is bit-for-bit the pre-class function.
-    [[gnu::always_inline]] static void init();
-    [[gnu::always_inline]] static void setSlowMinFrac(uint8_t frac);
-    [[gnu::always_inline]] static void enterSlow();
-    [[gnu::always_inline]] static void exitSlow();
-    [[gnu::always_inline]] static void slowEnable(int mode);
-    [[gnu::always_inline]] static void getCoreFreqDIV(uint32_t *CPU_DIV, uint32_t *CPU_Frac, uint32_t *HCLK_DIV);
-
-    // Shared register-divider primitives: called by init() AND by external TUs,
-    // so they stay out-of-line (one body, internal callers bl it; their shims
-    // forward). Stateless -- touch no class member.
-    static void setCPUDivider(uint32_t div);
-    static void setHCLKDivider(uint32_t div);
-    static void setCPUFracDivider(uint32_t div);
-
-private:
-    static inline uint8_t min_cpu_frac_sd = CPU_DIVIDE_IDLE_INITIAL;
-
-    // Were file-scope `static` single-caller helpers (-Os folded them into the
-    // bring-up path); always_inline keeps that folding now that they are methods.
-    [[gnu::always_inline]] static void PLLEnable(bool enable);
-    [[gnu::always_inline]] static void setCPU_HFreqDomain(bool enable);
-    [[gnu::always_inline]] static void enableUSBClock(bool enable);
-};
+// Slowdown policy seed (declared in stmp_clkctrl.hpp). Defined here so the
+// CPU_DIVIDE_IDLE_INITIAL seed stays in this .cpp, keeping SystemConfig.h out of
+// the header (where its VERSION macro would collide reg_model's bitfield).
+// Constant init -> .data, no global constructor.
+uint8_t Clk::min_cpu_frac_sd = CPU_DIVIDE_IDLE_INITIAL;
 
 inline void Clk::PLLEnable(bool enable) {
     reg::CLKCTRL_PLLCTRL0::set(reg::CLKCTRL_PLLCTRL0_::POWER::val(enable));
@@ -77,7 +54,7 @@ void Clk::setHCLKDivider(uint32_t div)
 
 }
 
-inline void Clk::setSlowMinFrac(uint8_t frac)
+void Clk::setSlowMinFrac(uint8_t frac)
 {
     if(frac > 14 || frac < 2)
     {
@@ -86,7 +63,7 @@ inline void Clk::setSlowMinFrac(uint8_t frac)
     min_cpu_frac_sd = frac;
 }
 
-inline void Clk::enterSlow()
+void Clk::enterSlow()
 {
     if(g_slowdown_enable)
     {
@@ -94,7 +71,7 @@ inline void Clk::enterSlow()
     }
 }
 
-inline void Clk::exitSlow()
+void Clk::exitSlow()
 {
     if(g_slowdown_enable == 1)
     {
@@ -108,7 +85,7 @@ inline void Clk::exitSlow()
 }
 
 
-inline void Clk::slowEnable(int mode)
+void Clk::slowEnable(int mode)
 {
     g_slowdown_enable = mode;
     if(g_slowdown_enable == 0)
@@ -191,7 +168,7 @@ inline void Clk::init() {
     enableUSBClock(true);
 }
 
-inline void Clk::getCoreFreqDIV(uint32_t *CPU_DIV, uint32_t *CPU_Frac, uint32_t *HCLK_DIV)
+void Clk::getCoreFreqDIV(uint32_t *CPU_DIV, uint32_t *CPU_Frac, uint32_t *HCLK_DIV)
 {
     *CPU_DIV = reg::CLKCTRL_CPU::B().DIV_CPU;
     *CPU_Frac = reg::CLKCTRL_FRAC::B().CPUFRAC;
@@ -199,18 +176,8 @@ inline void Clk::getCoreFreqDIV(uint32_t *CPU_DIV, uint32_t *CPU_Frac, uint32_t 
 }
 
 // ---------------------------------------------------------------------------
-// extern "C" seams (stmp_clkctrl.hpp / clkctrl_up.h declare the interface extern "C").
-// Caller migration onto Clk:: is deferred to the layer-merge phase.
+// portCLKCtrlInit is the one surviving seam: init() is reached by name from the
+// CLKCtrlInit bring-up wrapper (clkctrl_up.h) pending the thin-wrapper merge.
+// The divider / slowdown shims are gone -- their C++ callers now call Clk::.
 // ---------------------------------------------------------------------------
-extern "C" void portCLKCtrlInit(void)            { Clk::init(); }
-extern "C" void setHCLKDivider(uint32_t div)     { Clk::setHCLKDivider(div); }
-extern "C" void setCPUDivider(uint32_t div)      { Clk::setCPUDivider(div); }
-extern "C" void setCPUFracDivider(uint32_t div)  { Clk::setCPUFracDivider(div); }
-extern "C" void setSlowDownMinCpuFrac(uint8_t frac) { Clk::setSlowMinFrac(frac); }
-extern "C" void enterSlowDown()                  { Clk::enterSlow(); }
-extern "C" void exitSlowDown()                   { Clk::exitSlow(); }
-extern "C" void slowDownEnable(int mode)         { Clk::slowEnable(mode); }
-extern "C" void portGetCoreFreqDIV(uint32_t *CPU_DIV, uint32_t *CPU_Frac, uint32_t *HCLK_DIV)
-{
-    Clk::getCoreFreqDIV(CPU_DIV, CPU_Frac, HCLK_DIV);
-}
+extern "C" void portCLKCtrlInit(void) { Clk::init(); }
