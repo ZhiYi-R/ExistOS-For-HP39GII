@@ -718,7 +718,7 @@ void __attribute__((optimize("-Os"))) vmMgr_task() {
                         CachePageVROMCur->onSector = mapinfo->PartStartSector + ((currentFault.FaultMemAddr - mapinfo->VMemStartAddr) & 0xFFFFFC00) / 2048;
                         CachePageVROMCur->sectorOffset = (currentFault.FaultMemAddr / 1024) % 2 ? 1024 : 0;
                         CachePageVROMCur->dirty = false;
-                        MTD_ReadPhyPage(CachePageVROMCur->onSector, CachePageVROMCur->sectorOffset, PAGE_SIZE, (uint8_t *)CachePageVROMCur->PageOnPhyAddr);
+                        Mtd::readPhyPage(CachePageVROMCur->onSector, CachePageVROMCur->sectorOffset, PAGE_SIZE, (uint8_t *)CachePageVROMCur->PageOnPhyAddr);
 
                         mmu_map_page(
                             CachePageVROMCur->mapToVirtAddr,
@@ -855,10 +855,10 @@ void __attribute__((optimize("-Os"))) vmMgr_task() {
                     case MAP_PART_RAWFLASH:
                         g_page_vrom_fault_cnt++;
 #if USE_TINY_PAGE
-                        ret = MTD_ReadPhyPage(CachePageCur->onSector, CachePageCur->sectorOffset, PAGE_SIZE, (uint8_t *)CachePageCur->PageOnPhyAddr);
+                        ret = Mtd::readPhyPage(CachePageCur->onSector, CachePageCur->sectorOffset, PAGE_SIZE, (uint8_t *)CachePageCur->PageOnPhyAddr);
 #else
-                        ret = MTD_ReadPhyPage(CachePageCur->onSector, 0, 2048, (uint8_t *)CachePageCur->PageOnPhyAddr);
-                        ret = MTD_ReadPhyPage(CachePageCur->onSector + 1, 0, 2048, (uint8_t *)(CachePageCur->PageOnPhyAddr + 2048));
+                        ret = Mtd::readPhyPage(CachePageCur->onSector, 0, 2048, (uint8_t *)CachePageCur->PageOnPhyAddr);
+                        ret = Mtd::readPhyPage(CachePageCur->onSector + 1, 0, 2048, (uint8_t *)(CachePageCur->PageOnPhyAddr + 2048));
 #endif
                         // INFO("rom:%d\n", CachePageCur->onSector );
                         break;

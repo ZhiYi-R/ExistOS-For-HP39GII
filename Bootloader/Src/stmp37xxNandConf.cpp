@@ -31,7 +31,7 @@ uint8_t LDLB2[144] = {
 
 void mkNCB(uint32_t inBlock)
 {
-  mtdInfo_t *info = MTD_getDeviceInfo();
+  mtdInfo_t *info = Mtd::getDeviceInfo();
   
   uint8_t *pageBuff = (uint8_t *)pvPortMalloc(info->PageSize_B);
   
@@ -72,14 +72,14 @@ void mkNCB(uint32_t inBlock)
 	metaBuff[4] = 0x42;
 	metaBuff[5] = 0x20;
 
-  MTD_ErasePhyBlock(inBlock);
+  Mtd::erasePhyBlock(inBlock);
 
 /*
   MTD_WritePhyPageMeta(inBlock * info->PagesPerBlock, info->MetaSize_B, metaBuff);
-  MTD_WritePhyPage(inBlock * info->PagesPerBlock, pageBuff);
+  Mtd::writePhyPage(inBlock * info->PagesPerBlock, pageBuff);
 */
 
-  MTD_WritePhyPageWithMeta(inBlock * info->PagesPerBlock, info->MetaSize_B, pageBuff, metaBuff);
+  Mtd::writePhyPageWithMeta(inBlock * info->PagesPerBlock, info->MetaSize_B, pageBuff, metaBuff);
 
   vPortFree(pageBuff);
   vPortFree(metaBuff);
@@ -88,7 +88,7 @@ void mkNCB(uint32_t inBlock)
 
 void mkDBBT(uint32_t inBlock)
 {
-  mtdInfo_t *info = MTD_getDeviceInfo();
+  mtdInfo_t *info = Mtd::getDeviceInfo();
   uint8_t *pageBuff = (uint8_t *)pvPortMalloc(info->PageSize_B);
   uint8_t *metaBuff = (uint8_t *)pvPortMalloc(info->MetaSize_B);
 
@@ -108,9 +108,9 @@ void mkDBBT(uint32_t inBlock)
 
   memset(&metaBuff[2], 0, 6);
 
-  MTD_ErasePhyBlock(inBlock);
+  Mtd::erasePhyBlock(inBlock);
 
-  MTD_WritePhyPageWithMeta(inBlock * info->PagesPerBlock, info->MetaSize_B, pageBuff, metaBuff);
+  Mtd::writePhyPageWithMeta(inBlock * info->PagesPerBlock, info->MetaSize_B, pageBuff, metaBuff);
 
   vPortFree(pageBuff);
   vPortFree(metaBuff);
@@ -119,7 +119,7 @@ void mkDBBT(uint32_t inBlock)
 
 void mkLDLB(uint32_t inBlock, uint32_t fwPageOffset, uint32_t fwPageTotal, uint32_t DBBT1_page, uint32_t DBBT2_page)
 {
-  mtdInfo_t *info = MTD_getDeviceInfo();
+  mtdInfo_t *info = Mtd::getDeviceInfo();
   uint8_t *pageBuff = (uint8_t *)pvPortMalloc(info->PageSize_B);
   uint8_t *metaBuff = (uint8_t *)pvPortMalloc(info->MetaSize_B);
 
@@ -158,9 +158,9 @@ void mkLDLB(uint32_t inBlock, uint32_t fwPageOffset, uint32_t fwPageTotal, uint3
 	metaBuff[4] = 0x42; //B
 	metaBuff[5] = 0x20; //' '
 
-  MTD_ErasePhyBlock(inBlock);
+  Mtd::erasePhyBlock(inBlock);
 
-  MTD_WritePhyPageWithMeta(inBlock * info->PagesPerBlock, info->MetaSize_B, pageBuff, metaBuff);
+  Mtd::writePhyPageWithMeta(inBlock * info->PagesPerBlock, info->MetaSize_B, pageBuff, metaBuff);
 
   vPortFree(pageBuff);
   vPortFree(metaBuff);
@@ -170,7 +170,7 @@ void mkLDLB(uint32_t inBlock, uint32_t fwPageOffset, uint32_t fwPageTotal, uint3
 
 void RestoreLDLB2()
 {
-    mtdInfo_t *nand_info = MTD_getDeviceInfo();
+    mtdInfo_t *nand_info = Mtd::getDeviceInfo();
     uint8_t *pgbuff = (uint8_t *)pvPortMalloc(nand_info->PageSize_B);
     uint8_t *mtbuff = (uint8_t *)pvPortMalloc(nand_info->MetaSize_B);
 
@@ -182,8 +182,8 @@ void RestoreLDLB2()
 	mtbuff[3] = 0x43; //C
 	mtbuff[4] = 0x42; //B
 	mtbuff[5] = 0x20; //' ' 
-    MTD_WritePhyPageWithMeta(8*64+1, nand_info->MetaSize_B, pgbuff, mtbuff);
-    MTD_WritePhyPageWithMeta(12*64+1, nand_info->MetaSize_B, pgbuff, mtbuff);
+    Mtd::writePhyPageWithMeta(8*64+1, nand_info->MetaSize_B, pgbuff, mtbuff);
+    Mtd::writePhyPageWithMeta(12*64+1, nand_info->MetaSize_B, pgbuff, mtbuff);
 
     vPortFree(pgbuff);
     vPortFree(mtbuff);

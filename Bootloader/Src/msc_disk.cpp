@@ -212,7 +212,7 @@ extern uint32_t g_MSC_Configuration;
 void tud_msc_capacity_cb(uint8_t lun, uint32_t *block_count, uint16_t *block_size) {
     (void)lun;
     /**
-        mtdInfo_t *info = MTD_getDeviceInfo();
+        mtdInfo_t *info = Mtd::getDeviceInfo();
         *block_count = info->Blocks * info->PagesPerBlock;
         *block_size  = info->PageSize_B;
         return;
@@ -344,7 +344,7 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void *buff
             #ifndef RAW_FLASH_ACCESS
             FTL_ReadSector(FLASH_FTL_DATA_SECTOR + lba, 1, (uint8_t *)buffer);
             #else
-            MTD_ReadPhyPage(lba, offset, bufsize, buffer);
+            Mtd::readPhyPage(lba, offset, bufsize, buffer);
             #endif
             }else{
                 printf("RD:lba=%u, off:%u, len:%u\n",lba, offset, bufsize);
@@ -364,10 +364,10 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void *buff
 
     // FTL_ReadSector(MSCpartStartSector + lba, 1, buffer);
 
-    // MTD_ReadPhyPage(lba, offset, bufsize, buffer);
+    // Mtd::readPhyPage(lba, offset, bufsize, buffer);
 
     // memset(buffer, 0xFF, bufsize);
-    // MTD_ReadPhyPageMeta(lba, 19, buffer);
+    // Mtd::readPhyPageMeta(lba, 19, buffer);
 
     return bufsize;
 }
@@ -424,12 +424,12 @@ int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t *
             if(offset == 1536)
                 FTL_WriteSector(FLASH_FTL_DATA_SECTOR + lba, 1, MSCWRBuf);
                 */
-            //MTD_WritePhyPage(lba, buffer);
+            //Mtd::writePhyPage(lba, buffer);
             
             #ifndef RAW_FLASH_ACCESS
             FTL_WriteSector(FLASH_FTL_DATA_SECTOR + lba, 1, buffer);
             #else
-            MTD_WritePhyPage(lba, buffer);
+            Mtd::writePhyPage(lba, buffer);
             #endif
             
         }else{
@@ -447,7 +447,7 @@ int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t *
       FTL_WriteSector(lba, MSCWRBuf);
     */
 
-    // MTD_WritePhyPage(lba, buffer);
+    // Mtd::writePhyPage(lba, buffer);
 
     // FTL_WriteSector(MSCpartStartSector + lba, 1, buffer);
 

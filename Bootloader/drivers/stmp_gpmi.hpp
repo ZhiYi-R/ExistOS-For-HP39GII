@@ -9,16 +9,17 @@
  * linkage; they are declared just below and granted @c friend access so they can
  * operate on that private state directly.
  *
- * The legacy @c portMTD* entry points (declared extern "C" in mtd_up.h and called
- * by the MTD upper layer) survive as thin forwarding shims in the .cpp; migrating
- * those callers onto @c Gpmi:: methods is deferred to the layer-merge phase.
+ * Phase 3.5b merged the MTD service layer (Hal/mtd_up) onto this driver: the
+ * @c Mtd class (mtd_up.hpp) calls these public methods directly, so the former
+ * @c portMTD* extern "C" forwarding shims are gone. The three ISRs below call
+ * @c Mtd::upOpaFin() to latch the ECC result and wake the blocked MTD task.
  */
 #pragma once
 
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "mtd_up.h"   // mtdInfo_t
+#include "mtd_up.hpp"   // mtdInfo_t + Mtd::upOpaFin
 
 // ---------------------------------------------------------------------------
 // Hardware-description types (namespace scope so the extern "C" ISR seams can

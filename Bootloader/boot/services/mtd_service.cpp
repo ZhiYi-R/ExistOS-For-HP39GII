@@ -8,7 +8,7 @@
 
 void vMTDSvc(void *pvParameters)
 {
-    MTD_DeviceInit();
+    Mtd::deviceInit();
     for(;;)
-        MTD_Task();
+        Mtd::task();
 }

@@ -6,6 +6,8 @@
 #include "mtd_up.h"
 #include "interrupt_up.h"
 
+#include <string.h>
+
 #include "reg_model.hpp"
 #include "reg_values.hpp"
 
@@ -1227,17 +1229,17 @@ extern "C" void portMTD_DMA_ISR()
 #endif
         if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&Gpmi::chains_read[8]){
             INFO("GPMI_OPA_WRITE psense compare ERROR\n");
-            MTD_upOpaFin(1);
+            Mtd::upOpaFin(1);
         }else{
-            MTD_upOpaFin(0);
+            Mtd::upOpaFin(0);
         }
         break;
     case GPMI_OPA_ERASE:
         if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&Gpmi::chains_read[8]){
             INFO("GPMI_OPA_ERASE psense compare ERROR\n");
-            MTD_upOpaFin(1);
+            Mtd::upOpaFin(1);
         }else{
-            MTD_upOpaFin(0);
+            Mtd::upOpaFin(0);
         }
         break;  
 
@@ -1252,9 +1254,9 @@ extern "C" void portMTD_DMA_ISR()
         if(Gpmi::st.GPMI_CopyState == 1){
             if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&Gpmi::chains_read[8]){
                 INFO("GPMI_OPA_COPY_WRITE psense compare ERROR\n");
-                MTD_upOpaFin(0x0E0E0E0E);
+                Mtd::upOpaFin(0x0E0E0E0E);
             }else{
-                MTD_upOpaFin(Gpmi::st.CopyECCResult);
+                Mtd::upOpaFin(Gpmi::st.CopyECCResult);
             }
         }
 
@@ -1291,12 +1293,12 @@ extern "C" bool portMTD_ECC_ISR()
 
     Gpmi::st.ECC_FIN = true;
 
-    return MTD_upOpaFin(Gpmi::st.ECCResult);
+    return Mtd::upOpaFin(Gpmi::st.ECCResult);
 
 }
 
 
-inline void Gpmi::interfaceInit()
+void Gpmi::interfaceInit()
 {
     for(int i =0; i < 32; i++)
     {
@@ -1307,7 +1309,7 @@ inline void Gpmi::interfaceInit()
     
 }
 
-inline void Gpmi::deviceInit(mtdInfo_t *mtdinfo)
+void Gpmi::deviceInit(mtdInfo_t *mtdinfo)
 {
     NAND_Reset();
     GPMI_GetNANDInfo(mtdinfo);
@@ -1318,12 +1320,12 @@ inline void Gpmi::deviceInit(mtdInfo_t *mtdinfo)
 }
 //static uint32_t lastRDPage = 0xFFFFFFFF;
 
-inline void Gpmi::readPage(uint32_t page, uint8_t *buf)
+void Gpmi::readPage(uint32_t page, uint8_t *buf)
 {
     /*
     if((st.LastOpa == GPMI_OPA_READ) && (lastRDPage == page)){
         //INFO("RD:%d\n", page);
-        MTD_upOpaFin(st.ECCResult);
+        Mtd::upOpaFin(st.ECCResult);
         return;
     }*/
     
@@ -1332,44 +1334,36 @@ inline void Gpmi::readPage(uint32_t page, uint8_t *buf)
     //lastRDPage = page;
 }
 
-inline void Gpmi::writePage(uint32_t page, uint8_t *buf)
+void Gpmi::writePage(uint32_t page, uint8_t *buf)
 {
     //NFO("WR:%d\n", page);
     GPMI_WritePage(0, page, (uint32_t *)buf, NULL, false);
 }
 
-inline void Gpmi::writePageMeta(uint32_t page, uint8_t *buf, uint8_t *metaBuf)
+void Gpmi::writePageMeta(uint32_t page, uint8_t *buf, uint8_t *metaBuf)
 {
     //INFO("WRM:%d\n", page);
     GPMI_WritePage(0, page, (uint32_t *)buf, (uint32_t *)metaBuf, false);
 }
 
-inline uint8_t *Gpmi::getMetaData()
+uint8_t *Gpmi::getMetaData()
 {
     return (uint8_t *)GPMI_AuxiliaryBuffer;
 }
 
 
-inline void Gpmi::eraseBlock(uint32_t block)
+void Gpmi::eraseBlock(uint32_t block)
 {
     GPMI_EraseBlock(block, false);
 }
 
-inline void Gpmi::copyPage(uint32_t src, uint32_t dst)
+void Gpmi::copyPage(uint32_t src, uint32_t dst)
 {
     GPMI_CopyPage(src, dst);
 }
 
-// ---------------------------------------------------------------------------
-// Legacy extern "C" entry points: the MTD upper layer (mtd_up.c) still calls
-// these by name. They forward to the Gpmi methods above and will be removed
-// once the callers migrate to Gpmi:: directly (layer-merge phase).
-// ---------------------------------------------------------------------------
-extern "C" void portMTDInterfaceInit()                              { Gpmi::interfaceInit(); }
-extern "C" void portMTDDeviceInit(mtdInfo_t *mtdinfo)               { Gpmi::deviceInit(mtdinfo); }
-extern "C" void portMTDReadPage(uint32_t page, uint8_t *buf)        { Gpmi::readPage(page, buf); }
-extern "C" void portMTDWritePage(uint32_t page, uint8_t *buf)       { Gpmi::writePage(page, buf); }
-extern "C" void portMTDWritePageMeta(uint32_t page, uint8_t *buf, uint8_t *metaBuf) { Gpmi::writePageMeta(page, buf, metaBuf); }
-extern "C" uint8_t *portMTDGetMetaData()                           { return Gpmi::getMetaData(); }
-extern "C" void portMTDEraseBlock(uint32_t block)                  { Gpmi::eraseBlock(block); }
-extern "C" void portMTDCopyPage(uint32_t src, uint32_t dst)         { Gpmi::copyPage(src, dst); }
+// The eight public methods above are plain out-of-line definitions (not
+// `inline`): the MTD service layer (Mtd, Hal/mtd_up.cpp) links against their
+// real symbols and drives the NAND through Gpmi:: directly, so the former
+// portMTD* extern "C" forwarding shims were removed in the Phase 3.5b layer
+// merge.

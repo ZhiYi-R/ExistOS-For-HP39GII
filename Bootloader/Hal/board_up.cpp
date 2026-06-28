@@ -73,7 +73,7 @@ void boardInit(void)
 
     IRQInit();
 
-    MTD_InterfaceInit();
+    Mtd::interfaceInit();
 
     Display::interfaceInit();
 

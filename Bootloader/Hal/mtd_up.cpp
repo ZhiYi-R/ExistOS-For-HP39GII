@@ -1,253 +1,247 @@
 /**
- * @file Bootloader/Hal/mtd_up.c
- * @brief mtd_up module
+ * @file Bootloader/Hal/mtd_up.cpp
+ * @brief MTD service layer — @c Mtd method bodies over the @c Gpmi driver.
+ *
+ * Phase 3.5b fold: the former free @c MTD_*() service functions are now the
+ * out-of-line definitions of the pure-static @c Mtd class (mtd_up.hpp), and the
+ * physical layer is driven through @c Gpmi:: directly — the old @c portMTD*
+ * extern "C" forwarding shims are gone. Bodies are otherwise unchanged: each
+ * synchronous op still marshals an @c MTD_Operates onto @c st.opQueue and blocks
+ * on a task notification, and @c Mtd::task() drains the queue. The three GPMI
+ * ISRs call @c Mtd::upOpaFin() (defined here) to latch the ECC result and wake
+ * the waiter.
+ *
+ * The @c g_mtd_*_cnt counters stay free globals: start.cpp's flash-stats dump
+ * reads them through @c extern declarations, so they must keep plain symbols.
  */
 
 #include "SystemConfig.h"
 #include "FreeRTOS.h"
 
+#include <stdio.h>
+#include <string.h>
+
 #include "stmp_clkctrl.hpp"
 
-#include "mtd_up.h"
+#include "mtd_up.hpp"
+#include "stmp_gpmi.hpp"
 #include "nand.h"
 #include "debug.h"
 
-static QueueHandle_t MTD_Operates_Queue;
-//static EventGroupHandle_t MTDLockEventGroup;
-//static EventGroupHandle_t MTDDriverOpaDone;
-
-static mtdInfo_t mtdinfo;
-static MTD_Operates curOpa;
-static bool deviceInited = false;
-//static int32_t MTDLockBit = 0;
-
-static uint32_t ECCResult;
-
-//static int32_t MTDStatusBuf[32];
-//static int32_t pMTDStatus = 0;
-
-static uint8_t *pMetadata;
-
-static volatile bool mtd_opa_done = false;
-
+// Flash-activity counters — read elsewhere (start.cpp) via extern, so free
+// globals rather than Mtd members (folding them in would mangle the symbols).
 uint32_t g_mtd_write_cnt = 0;
 uint32_t g_mtd_read_cnt = 0;
 uint32_t g_mtd_erase_cnt = 0;
 uint32_t g_mtd_ecc_cnt = 0;
 uint32_t g_mtd_ecc_fatal_cnt = 0;
 
-uint32_t last_read_page = 0xFFFFFFFF;
-
-void MTD_InterfaceInit()
+void Mtd::interfaceInit()
 {
-    portMTDInterfaceInit();
+    Gpmi::interfaceInit();
 }
 
-
-static uint8_t MTD_PageBuffer[ 2048 ];
-
-bool MTD_isDeviceInited()
+bool Mtd::isDeviceInited()
 {
-    return deviceInited;
+    return st.deviceInited;
 }
 
-mtdInfo_t *MTD_getDeviceInfo()
+mtdInfo_t *Mtd::getDeviceInfo()
 {
-    return &mtdinfo;
+    return &st.info;
 }
 
-bool MTD_upOpaFin(uint32_t eccResult)
+bool Mtd::upOpaFin(uint32_t eccResult)
 {
     BaseType_t flag = false;
-    ECCResult = eccResult;
-    mtd_opa_done = true;
+    st.eccResult = eccResult;
+    st.opaDone = true;
     //xEventGroupSetBitsFromISR(MTDDriverOpaDone, 1, &flag);
     return flag != 0;
 
 }
 
-uint32_t retry_cnt;
-void MTD_Task()
+void Mtd::task()
 {
     //vTaskDelay(pdMS_TO_TICKS(1000));
     while(1){
-        
-        if(xQueueReceive(MTD_Operates_Queue, &curOpa, portMAX_DELAY) == pdTRUE)
+
+        if(xQueueReceive(st.opQueue, &st.curOpa, portMAX_DELAY) == pdTRUE)
         {
             Clk::enterSlow();
 
 
-            retry_cnt = 5;
+            st.retryCnt = 5;
             retry:
 
             MTD_INFO("MTD REC OPA\n");
-            mtd_opa_done = false;
+            st.opaDone = false;
 
-            switch (curOpa.opa)
+            switch (st.curOpa.opa)
             {
 
             case MTD_PHY_READ:
 
-                MTD_INFO_READ("QUEUE READ, page:%d, buf:%p, len: %d, needMove:%d\n",curOpa.page, curOpa.buf, curOpa.len, curOpa.needToMoveData);
+                MTD_INFO_READ("QUEUE READ, page:%d, buf:%p, len: %d, needMove:%d\n",st.curOpa.page, st.curOpa.buf, st.curOpa.len, st.curOpa.needToMoveData);
 
-                if(curOpa.needToMoveData)
+                if(st.curOpa.needToMoveData)
                 {
-                    MTD_INFO_READ("Move Dat Read,page:%d,%p\n",curOpa.page,MTD_PageBuffer);
-                    portMTDReadPage(curOpa.page, MTD_PageBuffer);
+                    MTD_INFO_READ("Move Dat Read,page:%d,%p\n",st.curOpa.page,pageBuffer);
+                    Gpmi::readPage(st.curOpa.page, pageBuffer);
                 }else{
-                    portMTDReadPage(curOpa.page, curOpa.buf);
+                    Gpmi::readPage(st.curOpa.page, st.curOpa.buf);
                 }
-                
+
                 break;
             case MTD_PHY_READ_META:
-                MTD_INFO_READ("MTD READ META:page:%d\n", curOpa.page);
-                portMTDReadPage(curOpa.page, NULL);
+                MTD_INFO_READ("MTD READ META:page:%d\n", st.curOpa.page);
+                Gpmi::readPage(st.curOpa.page, NULL);
                 break;
 
 
             case MTD_PHY_ERASE:
-                MTD_INFO_ERASE("MTD ERASE:b %d\n", curOpa.page);
-                portMTDEraseBlock(curOpa.page);
+                MTD_INFO_ERASE("MTD ERASE:b %d\n", st.curOpa.page);
+                Gpmi::eraseBlock(st.curOpa.page);
                 break;
             case MTD_PHY_WRITE:
-                MTD_INFO_WRITE("MTD WRITE, page:%d,data:%08x, move:%d\n", curOpa.page, curOpa.buf, curOpa.needToMoveData);
-                if(curOpa.needToMoveData)
+                MTD_INFO_WRITE("MTD WRITE, page:%d,data:%08x, move:%d\n", st.curOpa.page, st.curOpa.buf, st.curOpa.needToMoveData);
+                if(st.curOpa.needToMoveData)
                 {
-                    memcpy(MTD_PageBuffer, curOpa.buf, mtdinfo.PageSize_B);
-                    portMTDWritePage(curOpa.page, MTD_PageBuffer);
+                    memcpy(pageBuffer, st.curOpa.buf, st.info.PageSize_B);
+                    Gpmi::writePage(st.curOpa.page, pageBuffer);
 
                 }else{
-                    portMTDWritePage(curOpa.page, curOpa.buf);
+                    Gpmi::writePage(st.curOpa.page, st.curOpa.buf);
                 }
-                
+
                 break;
             case MTD_PHY_WRITE_META:
-                MTD_INFO_WRITE("MTD WRITE META, page:%d,data:%08x, len:%d\n", curOpa.page, curOpa.metaDat, curOpa.len);
-                memset(portMTDGetMetaData(), 0xFF, mtdinfo.MetaSize_B);
-                memcpy(portMTDGetMetaData(), curOpa.metaDat, curOpa.len);
+                MTD_INFO_WRITE("MTD WRITE META, page:%d,data:%08x, len:%d\n", st.curOpa.page, st.curOpa.metaDat, st.curOpa.len);
+                memset(Gpmi::getMetaData(), 0xFF, st.info.MetaSize_B);
+                memcpy(Gpmi::getMetaData(), st.curOpa.metaDat, st.curOpa.len);
 
-                if(curOpa.needToMoveData)
+                if(st.curOpa.needToMoveData)
                 {
-                    memcpy(MTD_PageBuffer, curOpa.buf, mtdinfo.PageSize_B);
-                    portMTDWritePageMeta(curOpa.page, MTD_PageBuffer,portMTDGetMetaData());
+                    memcpy(pageBuffer, st.curOpa.buf, st.info.PageSize_B);
+                    Gpmi::writePageMeta(st.curOpa.page, pageBuffer, Gpmi::getMetaData());
 
                 }else{
-                    portMTDWritePageMeta(curOpa.page, curOpa.buf,portMTDGetMetaData());
+                    Gpmi::writePageMeta(st.curOpa.page, st.curOpa.buf, Gpmi::getMetaData());
                 }
 
-                
+
                 break;
 
             case MTD_PHY_COPY:
-                portMTDCopyPage(curOpa.page, curOpa.copyDstPage);
+                Gpmi::copyPage(st.curOpa.page, st.curOpa.copyDstPage);
                 break;
-                
+
             default:
                 MTD_WARN("UNEXPECTED MTD REC OPA!\n");
                 break;
             }
             uint32_t start_tick = xTaskGetTickCount();
-            while((int)mtd_opa_done == false)
+            while((int)st.opaDone == false)
             {
                 if(xTaskGetTickCount() - start_tick > pdMS_TO_TICKS(2000)){
-                    INFO("MTD Waiting Timeout! %u\n", retry_cnt);
-                    INFO("Cur opa:%d\n", curOpa.opa);
-                    INFO("Cur opa.page:%u\n", curOpa.page);
-                    INFO("Cur opa.offset:%u\n", curOpa.offset);
-                    INFO("Cur opa.needToMoveData:%d\n", curOpa.needToMoveData);
-                    INFO("Cur opa.buf:%p\n", curOpa.buf);
-                    if(retry_cnt)
+                    INFO("MTD Waiting Timeout! %u\n", st.retryCnt);
+                    INFO("Cur opa:%d\n", st.curOpa.opa);
+                    INFO("Cur opa.page:%u\n", st.curOpa.page);
+                    INFO("Cur opa.offset:%u\n", st.curOpa.offset);
+                    INFO("Cur opa.needToMoveData:%d\n", st.curOpa.needToMoveData);
+                    INFO("Cur opa.buf:%p\n", st.curOpa.buf);
+                    if(st.retryCnt)
                     {
-                        retry_cnt--;
+                        st.retryCnt--;
                         goto retry;
                     }else{
-                        mtd_opa_done = true;
-                        ECCResult = 0x0E0E0E0E;
+                        st.opaDone = true;
+                        st.eccResult = 0x0E0E0E0E;
                     }
-                    
+
                     //while(1);
 
 
                 }
-                
-                
+
+
             }
             //xEventGroupWaitBits(MTDDriverOpaDone, 1, pdTRUE, pdFALSE, portMAX_DELAY);
 
 
-            switch (curOpa.opa)
+            switch (st.curOpa.opa)
             {
             case MTD_PHY_READ_META:
-                memcpy(curOpa.buf, portMTDGetMetaData(), curOpa.len);
+                memcpy(st.curOpa.buf, Gpmi::getMetaData(), st.curOpa.len);
             case MTD_PHY_READ:
-                if(curOpa.needToMoveData)
+                if(st.curOpa.needToMoveData)
                 {
-                    if(curOpa.len > mtdinfo.PageSize_B - curOpa.offset){
-                        MTD_WARN("MTD READ DATA Corrupted.page:%u len:%u offset:%u\n",curOpa.page, curOpa.len, curOpa.offset);
-                        curOpa.len = mtdinfo.PageSize_B - curOpa.offset;
+                    if(st.curOpa.len > st.info.PageSize_B - st.curOpa.offset){
+                        MTD_WARN("MTD READ DATA Corrupted.page:%u len:%u offset:%u\n",st.curOpa.page, st.curOpa.len, st.curOpa.offset);
+                        st.curOpa.len = st.info.PageSize_B - st.curOpa.offset;
                     }
-                    MTD_INFO("Read Move Data,dst:%p,src:%p,len:%d\n",curOpa.buf, MTD_PageBuffer + curOpa.offset, curOpa.len);
-                    memcpy(curOpa.buf, MTD_PageBuffer + curOpa.offset, curOpa.len);
-                }
-                
-                if( 
-                    (((ECCResult ) & 0xF)      == 0xE) || 
-                    (((ECCResult >> 8) & 0xF)  == 0xE) || 
-                    (((ECCResult >> 16) & 0xF) == 0xE) || 
-                    (((ECCResult >> 24) & 0xF) == 0xE) 
-                ){
-                    MTD_WARN("BAD BLOCK:%u\n", curOpa.page);
-                    //*curOpa.StatusBuf =  -1;
-                    xTaskNotify(curOpa.task, -1, eSetValueWithOverwrite);
-                }else if(ECCResult == 0x0F0F0F0F){
-                    xTaskNotify(curOpa.task, 1, eSetValueWithOverwrite);
-                    MTD_INFO_READ("EMPTY PAGE\n");
-                    //*curOpa.StatusBuf = 1;          //EMPTY
-                }else {
-                    xTaskNotify(curOpa.task, 0, eSetValueWithOverwrite);
-                    //*curOpa.StatusBuf = 0;
+                    MTD_INFO("Read Move Data,dst:%p,src:%p,len:%d\n",st.curOpa.buf, pageBuffer + st.curOpa.offset, st.curOpa.len);
+                    memcpy(st.curOpa.buf, pageBuffer + st.curOpa.offset, st.curOpa.len);
                 }
 
-                if((ECCResult > 1) && (ECCResult < 0x0F0F0F0F)){
-                //if((ECCResult != 0))
-                    //printf("ECC Err found:%08lX, PhySector:%ld\n",ECCResult, curOpa.page);
-                    g_mtd_ecc_cnt++;
-                
+                if(
+                    (((st.eccResult ) & 0xF)      == 0xE) ||
+                    (((st.eccResult >> 8) & 0xF)  == 0xE) ||
+                    (((st.eccResult >> 16) & 0xF) == 0xE) ||
+                    (((st.eccResult >> 24) & 0xF) == 0xE)
+                ){
+                    MTD_WARN("BAD BLOCK:%u\n", st.curOpa.page);
+                    //*st.curOpa.StatusBuf =  -1;
+                    xTaskNotify(st.curOpa.task, -1, eSetValueWithOverwrite);
+                }else if(st.eccResult == 0x0F0F0F0F){
+                    xTaskNotify(st.curOpa.task, 1, eSetValueWithOverwrite);
+                    MTD_INFO_READ("EMPTY PAGE\n");
+                    //*st.curOpa.StatusBuf = 1;          //EMPTY
+                }else {
+                    xTaskNotify(st.curOpa.task, 0, eSetValueWithOverwrite);
+                    //*st.curOpa.StatusBuf = 0;
                 }
-                last_read_page = curOpa.page;
+
+                if((st.eccResult > 1) && (st.eccResult < 0x0F0F0F0F)){
+                //if((st.eccResult != 0))
+                    //printf("ECC Err found:%08lX, PhySector:%ld\n",st.eccResult, st.curOpa.page);
+                    g_mtd_ecc_cnt++;
+
+                }
+                lastReadPage = st.curOpa.page;
 
                 break;
-            
-                
+
+
 
                 case MTD_PHY_ERASE:
-                    //*curOpa.StatusBuf = ECCResult;
-                    xTaskNotify(curOpa.task, ECCResult, eSetValueWithOverwrite);
+                    //*st.curOpa.StatusBuf = st.eccResult;
+                    xTaskNotify(st.curOpa.task, st.eccResult, eSetValueWithOverwrite);
                     break;
 
                 case MTD_PHY_WRITE_META:
                 case MTD_PHY_WRITE:
-                    xTaskNotify(curOpa.task, ECCResult, eSetValueWithOverwrite);
-                    //*curOpa.StatusBuf = ECCResult;
+                    xTaskNotify(st.curOpa.task, st.eccResult, eSetValueWithOverwrite);
+                    //*st.curOpa.StatusBuf = st.eccResult;
                     break;
 
                 case MTD_PHY_COPY:
-                    if( 
-                        (((ECCResult ) & 0xF)      == 0xE) || 
-                        (((ECCResult >> 8) & 0xF)  == 0xE) || 
-                        (((ECCResult >> 16) & 0xF) == 0xE) || 
-                        (((ECCResult >> 24) & 0xF) == 0xE) 
+                    if(
+                        (((st.eccResult ) & 0xF)      == 0xE) ||
+                        (((st.eccResult >> 8) & 0xF)  == 0xE) ||
+                        (((st.eccResult >> 16) & 0xF) == 0xE) ||
+                        (((st.eccResult >> 24) & 0xF) == 0xE)
                     ){
                         g_mtd_ecc_fatal_cnt++;
-                        MTD_WARN("BAD BLOCK:%u\n", curOpa.page);
-                        //*curOpa.StatusBuf =  -1;
-                        xTaskNotify(curOpa.task, -1, eSetValueWithOverwrite);
-                    }else if(ECCResult == 0x0F0F0F0F){
-                        xTaskNotify(curOpa.task, 0, eSetValueWithOverwrite);
-                        //*curOpa.StatusBuf = 0;      //EMPTY
+                        MTD_WARN("BAD BLOCK:%u\n", st.curOpa.page);
+                        //*st.curOpa.StatusBuf =  -1;
+                        xTaskNotify(st.curOpa.task, -1, eSetValueWithOverwrite);
+                    }else if(st.eccResult == 0x0F0F0F0F){
+                        xTaskNotify(st.curOpa.task, 0, eSetValueWithOverwrite);
+                        //*st.curOpa.StatusBuf = 0;      //EMPTY
                     }else {
-                        xTaskNotify(curOpa.task, 0, eSetValueWithOverwrite);
-                        //*curOpa.StatusBuf = 0;
+                        xTaskNotify(st.curOpa.task, 0, eSetValueWithOverwrite);
+                        //*st.curOpa.StatusBuf = 0;
                     }
 
                     break;
@@ -256,9 +250,9 @@ void MTD_Task()
                 break;
             }
 
-            //xEventGroupSetBits(MTDLockEventGroup , (1 << curOpa.BLock));
+            //xEventGroupSetBits(MTDLockEventGroup , (1 << st.curOpa.BLock));
             Clk::exitSlow();
-            
+
         }
 
     }
@@ -271,7 +265,7 @@ static EventBits_t MTD_getLock()
     EventBits_t curBits;
 
     taskENTER_CRITICAL();
-    
+
     GroupBits = xEventGroupGetBits(MTDLockEventGroup);
 
     curBits = (GroupBits >> MTDLockBit) & 1;
@@ -294,7 +288,7 @@ static EventBits_t MTD_getLock()
     {
         MTDLockBit = 0;
     }
-    
+
     taskEXIT_CRITICAL();
     return bit;
 
@@ -327,7 +321,7 @@ static uint32_t *MTD_GetStatusBuf()
 
 */
 
-int MTD_ReadPhyPage(uint32_t page, uint32_t offset, uint32_t len, uint8_t *buffer)
+int Mtd::readPhyPage(uint32_t page, uint32_t offset, uint32_t len, uint8_t *buffer)
 {
     MTD_Operates newOpa;
     int retVal = 0;
@@ -341,32 +335,32 @@ int MTD_ReadPhyPage(uint32_t page, uint32_t offset, uint32_t len, uint8_t *buffe
     newOpa.task = xTaskGetCurrentTaskHandle();
 
 
-    if((offset != 0) || (len != mtdinfo.PageSize_B) || (((uint32_t)buffer & 3) != 0)){
+    if((offset != 0) || (len != st.info.PageSize_B) || (((uint32_t)buffer & 3) != 0)){
         newOpa.needToMoveData = true;
     }
     if(buffer == NULL){
         newOpa.needToMoveData = false;
     }
-    while (!deviceInited)
+    while (!st.deviceInited)
     {
         vTaskDelay(2);
     }
-    MTD_INFO("POST READ CMD, queue num:%lx\n",uxQueueGetQueueNumber(MTD_Operates_Queue));
-    
+    MTD_INFO("POST READ CMD, queue num:%lx\n",uxQueueGetQueueNumber(st.opQueue));
+
     g_mtd_read_cnt++;
     xTaskNotifyStateClear(NULL);
 
-    xQueueSend(MTD_Operates_Queue, &newOpa, portMAX_DELAY);
+    xQueueSend(st.opQueue, &newOpa, portMAX_DELAY);
 
-    MTD_INFO("POST READ CMD END:%lx\n", uxQueueGetQueueNumber(MTD_Operates_Queue));
+    MTD_INFO("POST READ CMD END:%lx\n", uxQueueGetQueueNumber(st.opQueue));
 
     xTaskNotifyWait(0, 0xFFFFFFFF, (uint32_t *)&retVal, portMAX_DELAY);
-    
+
     MTD_INFO("POST READ RET:%d\n", retVal);
     return retVal;
 }
 
-int MTD_WritePhyPage(uint32_t page,uint8_t *buffer)
+int Mtd::writePhyPage(uint32_t page,uint8_t *buffer)
 {
     MTD_Operates newOpa;
     int retVal = 0;
@@ -392,22 +386,22 @@ int MTD_WritePhyPage(uint32_t page,uint8_t *buffer)
     if(buffer == NULL){
         newOpa.needToMoveData = false;
     }
-    
-    while (!deviceInited)
+
+    while (!st.deviceInited)
     {
         vTaskDelay(2);
     }
-    
+
     g_mtd_write_cnt++;
     xTaskNotifyStateClear(NULL);
-    xQueueSend(MTD_Operates_Queue, &newOpa, portMAX_DELAY);
+    xQueueSend(st.opQueue, &newOpa, portMAX_DELAY);
     /*
     xEventGroupWaitBits(MTDLockEventGroup, (1 << newOpa.BLock), pdTRUE, pdFALSE, portMAX_DELAY);
     if(*newOpa.StatusBuf){
         retVal = -1;
     }
     *newOpa.StatusBuf = -5;*/
-    
+
     xTaskNotifyWait(0, 0xFFFFFFFF, (uint32_t *)&retVal, portMAX_DELAY);
 
     //MTD_WARN("BAD BLOCK 2:%d\n", retVal);
@@ -418,7 +412,7 @@ int MTD_WritePhyPage(uint32_t page,uint8_t *buffer)
 
 
 
-int MTD_ErasePhyBlock(uint32_t block)
+int Mtd::erasePhyBlock(uint32_t block)
 {
     MTD_Operates newOpa;
     int retVal = 0;
@@ -428,14 +422,14 @@ int MTD_ErasePhyBlock(uint32_t block)
     //newOpa.BLock = MTD_getLock();
     //newOpa.StatusBuf = MTD_GetStatusBuf();
     newOpa.task = xTaskGetCurrentTaskHandle();
-    while (!deviceInited)
+    while (!st.deviceInited)
     {
         vTaskDelay(2);
     }
-    
+
     g_mtd_erase_cnt++;
     xTaskNotifyStateClear(NULL);
-    xQueueSend(MTD_Operates_Queue, &newOpa, portMAX_DELAY);
+    xQueueSend(st.opQueue, &newOpa, portMAX_DELAY);
 
     xTaskNotifyWait(0, 0xFFFFFFFF, (uint32_t *)&retVal, portMAX_DELAY);
 /*
@@ -449,11 +443,11 @@ int MTD_ErasePhyBlock(uint32_t block)
     return retVal;
 }
 
-int MTD_EraseAllBLock(void)
+int Mtd::eraseAllBlock(void)
 {
     int ret = 0;
-    for(int i=0; i<mtdinfo.Blocks; i++){
-        ret = MTD_ErasePhyBlock(i);
+    for(int i=0; i<st.info.Blocks; i++){
+        ret = erasePhyBlock(i);
         MTD_WARN("Erase Block:%d ret:%d\n",i , ret);
         if(ret)
         {
@@ -463,7 +457,7 @@ int MTD_EraseAllBLock(void)
     return ret;
 }
 
-int MTD_ReadPhyPageMeta(uint32_t page, uint32_t len, uint8_t *buffer)
+int Mtd::readPhyPageMeta(uint32_t page, uint32_t len, uint8_t *buffer)
 {
     MTD_Operates newOpa;
     int retVal = 0;
@@ -472,19 +466,19 @@ int MTD_ReadPhyPageMeta(uint32_t page, uint32_t len, uint8_t *buffer)
     newOpa.page = page;
     newOpa.offset = 0;
     newOpa.buf = buffer;
-    newOpa.len = len > mtdinfo.MetaSize_B ? mtdinfo.MetaSize_B : len;
+    newOpa.len = len > st.info.MetaSize_B ? st.info.MetaSize_B : len;
     //newOpa.BLock = MTD_getLock();
     //newOpa.StatusBuf = MTD_GetStatusBuf();
     newOpa.needToMoveData = false;
     newOpa.task = xTaskGetCurrentTaskHandle();
 
     g_mtd_read_cnt++;
-    while (!deviceInited)
+    while (!st.deviceInited)
     {
         vTaskDelay(2);
     }
     xTaskNotifyStateClear(NULL);
-    xQueueSend(MTD_Operates_Queue, &newOpa, portMAX_DELAY);
+    xQueueSend(st.opQueue, &newOpa, portMAX_DELAY);
     /*
     xEventGroupWaitBits(MTDLockEventGroup, (1 << newOpa.BLock), pdTRUE, pdFALSE, portMAX_DELAY);
 
@@ -524,14 +518,14 @@ int MTD_WritePhyPageMeta(uint32_t page, uint32_t len, uint8_t *buffer)
 }
 */
 
-int MTD_WritePhyPageWithMeta(uint32_t page, uint32_t meta_len, uint8_t *buffer, uint8_t *meta)
+int Mtd::writePhyPageWithMeta(uint32_t page, uint32_t meta_len, uint8_t *buffer, uint8_t *meta)
 {
     MTD_Operates newOpa;
     int retVal = 0;
 
     newOpa.opa = MTD_PHY_WRITE_META;
     newOpa.page = page;
-    newOpa.len = meta_len > mtdinfo.MetaSize_B ? mtdinfo.MetaSize_B : meta_len  ;
+    newOpa.len = meta_len > st.info.MetaSize_B ? st.info.MetaSize_B : meta_len  ;
     newOpa.buf = buffer;
     newOpa.metaDat = meta;
     //newOpa.BLock = MTD_getLock();
@@ -545,12 +539,12 @@ int MTD_WritePhyPageWithMeta(uint32_t page, uint32_t meta_len, uint8_t *buffer, 
 
     g_mtd_write_cnt++;
 
-    while (!deviceInited)
+    while (!st.deviceInited)
     {
         vTaskDelay(2);
     }
     xTaskNotifyStateClear(NULL);
-    xQueueSend(MTD_Operates_Queue, &newOpa, portMAX_DELAY);
+    xQueueSend(st.opQueue, &newOpa, portMAX_DELAY);
 /*
     xEventGroupWaitBits(MTDLockEventGroup, (1 << newOpa.BLock), pdTRUE, pdFALSE, portMAX_DELAY);
     if(*newOpa.StatusBuf){
@@ -564,10 +558,10 @@ int MTD_WritePhyPageWithMeta(uint32_t page, uint32_t meta_len, uint8_t *buffer, 
 }
 
 
-int MTD_CopyPhyPage(uint32_t srcPage, uint32_t dstPage)
+int Mtd::copyPhyPage(uint32_t srcPage, uint32_t dstPage)
 {
 
-    
+
     MTD_Operates newOpa;
     int retVal = 0;
 
@@ -578,13 +572,13 @@ int MTD_CopyPhyPage(uint32_t srcPage, uint32_t dstPage)
     //newOpa.StatusBuf = MTD_GetStatusBuf();
     newOpa.task = xTaskGetCurrentTaskHandle();
 
-    while (!deviceInited)
+    while (!st.deviceInited)
     {
         vTaskDelay(2);
     }
 
     xTaskNotifyStateClear(NULL);
-    xQueueSend(MTD_Operates_Queue, &newOpa, portMAX_DELAY);
+    xQueueSend(st.opQueue, &newOpa, portMAX_DELAY);
 
     g_mtd_read_cnt++;
     g_mtd_write_cnt++;
@@ -599,13 +593,13 @@ int MTD_CopyPhyPage(uint32_t srcPage, uint32_t dstPage)
 }
 
 
-void MTD_DeviceInit()
+void Mtd::deviceInit()
 {
-    MTD_Operates_Queue = xQueueCreate(4, sizeof(MTD_Operates));
-    printf("MTD_Operates_Queue:%p\n", MTD_Operates_Queue);
-    portMTDDeviceInit(&mtdinfo);
+    st.opQueue = xQueueCreate(4, sizeof(MTD_Operates));
+    printf("MTD_Operates_Queue:%p\n", st.opQueue);
+    Gpmi::deviceInit(&st.info);
 
-    
+
     //MTDLockEventGroup = xEventGroupCreate();
 //    MTDDriverOpaDone = xEventGroupCreate();
 /*
@@ -615,6 +609,5 @@ void MTD_DeviceInit()
     }
     pMTDStatus = 0;
     */
-    pMetadata = portMTDGetMetaData();
-    deviceInited = true;
+    st.deviceInited = true;
 }

@@ -478,7 +478,7 @@ void parseCDCCommand(char *cmd) {
         sscanf(cmd, "ERASEB:%d", &erase_blk);
         printf("ERASEB:%u\n", erase_blk);
 
-        MTD_ErasePhyBlock(erase_blk);
+        Mtd::erasePhyBlock(erase_blk);
 
         MscSetCmd("EROK\n");
 
@@ -504,9 +504,9 @@ void parseCDCCommand(char *cmd) {
 
         for (int i = 0; i < CDC_BINMODE_BUFSIZE / 2048; i++) {
             if (wrMeta) {
-                MTD_WritePhyPageWithMeta(prog_page + i, 6, (uint8_t *)&binBuf[i * 2048], mtbuff);
+                Mtd::writePhyPageWithMeta(prog_page + i, 6, (uint8_t *)&binBuf[i * 2048], mtbuff);
             } else {
-                MTD_WritePhyPage(prog_page + i, (uint8_t *)&binBuf[i * 2048]);
+                Mtd::writePhyPage(prog_page + i, (uint8_t *)&binBuf[i * 2048]);
             }
         }
 
@@ -538,7 +538,7 @@ void parseCDCCommand(char *cmd) {
     }
 
     if (strcmp(cmd, "ERASEALL") == 0) {
-        MTD_EraseAllBLock();
+        Mtd::eraseAllBlock();
         return;
     }
 
@@ -656,7 +656,7 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
     Clk::setCPUDivider(2);
 
     // Lradc::enable(true, 7);
-    //  MTD_EraseAllBLock();
+    //  Mtd::eraseAllBlock();
     //  while (g_FTL_status == 10) {
     //     vTaskDelay(pdMS_TO_TICKS(1000));
     // }
@@ -740,7 +740,7 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
 
                         // vTaskDelay(pdMS_TO_TICKS(500));
                         for (int i = FLASH_DATA_BLOCK; i < 1024; i++) {
-                            MTD_ErasePhyBlock(i);
+                            Mtd::erasePhyBlock(i);
                             Display::fillBox(52, 84, 52 + i * 0.15, 92, 16);
                         }
                         op = 1;
@@ -764,7 +764,7 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
 
                         // vTaskDelay(pdMS_TO_TICKS(500));
                         for (int i = 0; i < 1024; i++) {
-                            MTD_ErasePhyBlock(i);
+                            Mtd::erasePhyBlock(i);
                             Display::fillBox(52, 84, 52 + i * 0.15, 92, 16);
                         }
 

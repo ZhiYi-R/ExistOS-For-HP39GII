@@ -161,7 +161,7 @@ void checkFlash()
     printf("FLASH TEST START\n");
     for(int block = 0; block < 1024; block++){
       printf("ERASE BLOCK:%d\n", block);
-      MTD_ErasePhyBlock(block);
+      Mtd::erasePhyBlock(block);
       printf("START WRITE BLOCK...\n");
       
       _randSetSeed(1);
@@ -176,7 +176,7 @@ void checkFlash()
       for(int page = 0; page < 64; page++)
       {
         startTime = portBoardGetTime_us();
-        MTD_WritePhyPage(page + block*64, buf);
+        Mtd::writePhyPage(page + block*64, buf);
         endTime = portBoardGetTime_us();
         sumTime += (endTime - startTime);
       }
@@ -191,7 +191,7 @@ void checkFlash()
         _randSetSeed(1);
         for(int ptr = 0; ptr < 2048/4; ptr++){
           volatile uint32_t testVal = _rand();
-          MTD_ReadPhyPage(page + block*64, ptr * 4, 4, (uint8_t *)&RB_DAT);
+          Mtd::readPhyPage(page + block*64, ptr * 4, 4, (uint8_t *)&RB_DAT);
           if(RB_DAT != testVal){
             printf("   TEST ERROR:[block:%d, page:%d, off:%ld][%08lx != %08lx]\n",block, page, ptr*4, testVal, RB_DAT);
           }
