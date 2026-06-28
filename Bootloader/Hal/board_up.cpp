@@ -13,8 +13,8 @@
 
 #include "stmp_board.hpp"
 #include "stmp_audioout.hpp"
-#include "mtd_up.h"
-#include "display_up.h"
+#include "mtd_up.hpp"
+#include "display_up.hpp"
 #include "keyboard_up.h"
 #include "stmp_gpio.hpp"
 #include "stmp_rtc.hpp"

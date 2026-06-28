@@ -14,7 +14,7 @@
 #include "stmp_clkctrl.hpp"
 #include "stmp_power.hpp"
 #include "stmp_board.hpp"
-#include "display_up.h"
+#include "display_up.hpp"
 #include "keyboard_up.h"
 
 #include "llapi.h"
@@ -22,7 +22,7 @@
 
 #include "debug.h"
 
-#include "FTL_up.h"
+#include "FTL_up.hpp"
 #include "mmu.h"
 #include "vmMgr.h"
 

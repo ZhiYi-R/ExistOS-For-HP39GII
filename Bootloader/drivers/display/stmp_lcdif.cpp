@@ -13,7 +13,8 @@
 
 #include "stmp_lcdif.hpp"
 #include "stmp_board.hpp"
-#include "display_up.h"
+
+#include <string.h>   // memset/memcpy -- were pulled in transitively via the old display_up.h
 
 #include "reg_model.hpp"
 #include "reg_values.hpp"

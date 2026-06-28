@@ -3,7 +3,8 @@
  * @brief MTD service layer — pure-static @c Mtd singleton over the @c Gpmi driver.
  *
  * Phase 3.5b of the HAL C++23 migration folds the former free @c MTD_*() service
- * API (declared @c extern "C" in mtd_up.h) onto this class. @c Mtd is the
+ * API (formerly declared @c extern "C" in the now-removed mtd_up.h) onto this
+ * class. @c Mtd is the
  * operation-queue / task layer: each public physical-op method marshals an
  * @c MTD_Operates request onto @c st.opQueue and blocks on a task notification;
  * @c Mtd::task() drains the queue and drives the @c Gpmi hardware class

@@ -4,7 +4,7 @@
  */
 
 #include "services.h"
-#include "FTL_up.h"
+#include "FTL_up.hpp"
 
 extern uint32_t g_FTL_status;
 

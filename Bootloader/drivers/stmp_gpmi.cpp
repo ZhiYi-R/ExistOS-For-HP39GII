@@ -3,7 +3,7 @@
  * @brief GPMI NAND flash controller driver
  */
 
-#include "mtd_up.h"
+#include "mtd_up.hpp"
 #include "interrupt_up.h"
 
 #include <string.h>

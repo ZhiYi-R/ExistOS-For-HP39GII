@@ -30,8 +30,8 @@
 
 #include "tusb.h"
 
-#include "FTL_up.h"
-#include "mtd_up.h"
+#include "FTL_up.hpp"
+#include "mtd_up.hpp"
 
 #if CFG_TUD_MSC
 

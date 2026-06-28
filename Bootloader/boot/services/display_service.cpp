@@ -4,7 +4,7 @@
  */
 
 #include "services.h"
-#include "display_up.h"
+#include "display_up.hpp"
 
 void vDispSvc(void *pvParameters)
 {

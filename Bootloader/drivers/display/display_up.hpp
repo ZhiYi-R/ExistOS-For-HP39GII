@@ -3,7 +3,8 @@
  * @brief Display graphics / operation-queue layer — pure-static @c Display singleton.
  *
  * Phase 3.5a of the HAL C++23 migration folds the former free @c DisplayXxx()
- * API (declared @c extern "C" in Hal/display_up.h) onto this class. @c Display
+ * API (formerly declared @c extern "C" in the now-removed Hal/display_up.h) onto
+ * this class. @c Display
  * is the graphics + operation-queue layer; it sits over the @c Lcdif hardware
  * class (drivers/display/stmp_lcdif.hpp) and is reached only from C++ translation
  * units, so no @c extern "C" seam is needed — every former @c DisplayXxx caller

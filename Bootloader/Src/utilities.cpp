@@ -16,8 +16,8 @@
 #include "tusb.h"
 
 #include "stmp_board.hpp"
-#include "mtd_up.h"
-#include "FTL_up.h"
+#include "mtd_up.hpp"
+#include "FTL_up.hpp"
 
 #include "debug.h"
 

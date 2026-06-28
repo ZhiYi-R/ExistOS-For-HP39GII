@@ -10,9 +10,9 @@
 #include "queue.h"
 #include "task.h"
 
-#include "mtd_up.h"
-#include "FTL_up.h"
-#include "display_up.h"
+#include "mtd_up.hpp"
+#include "FTL_up.hpp"
+#include "display_up.hpp"
 #include "keyboard_up.h"
 
 uint8_t LDLB2[144] = {

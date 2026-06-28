@@ -7,9 +7,9 @@
 
 #include "SystemConfig.h"
 //#include "ff.h"
-#include "FTL_up.h"
-#include "display_up.h"
-#include "mtd_up.h"
+#include "FTL_up.hpp"
+#include "display_up.hpp"
+#include "mtd_up.hpp"
 
 #include "debug.h"
 

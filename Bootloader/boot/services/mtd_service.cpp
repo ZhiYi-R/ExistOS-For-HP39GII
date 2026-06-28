@@ -4,7 +4,7 @@
  */
 
 #include "services.h"
-#include "mtd_up.h"
+#include "mtd_up.hpp"
 
 void vMTDSvc(void *pvParameters)
 {
