@@ -264,7 +264,33 @@ typedef struct {
     dcd_qtd_t qtd[QHD_MAX] TU_ATTR_ALIGNED(32); // for portability, TinyUSB only queue 1 TD for each Qhd
 } dcd_data_t;
 
-CFG_TUSB_MEM_SECTION TU_ATTR_ALIGNED(2048) static dcd_data_t _dcd_data;
+// bus_reset is a file-local helper that touches the (now private) _dcd_data; it
+// is forward-declared here so UsbDcd can befriend it. It stays a file-scope
+// `static` (internal-linkage) function so -Os keeps inlining it into its sole
+// caller (dcd_int_handler) and discarding the out-of-line copy -- making it a
+// member would give it external linkage and force a standalone emission.
+static void bus_reset(uint8_t rhport);
+
+// USB device-controller driver -- pure-static singleton owning the one piece of
+// mutable state: the QHD/QTD DMA list shared between the ISR (dcd_int_handler)
+// and thread context (dcd_init / dcd_edpt_open / dcd_edpt_xfer). Hence the
+// friend-ISR pattern: _dcd_data is private, and the seams that touch it are
+// granted friendship. The TinyUSB DCD porting entry points (dcd_*) are a vendor
+// FFI contract reached by name from the stack, so -- exactly like AudioOut's
+// ISR/SWI seams -- they stay free extern "C" functions granted friend access
+// rather than methods behind shims (byte-identical bodies, no trampolines). The
+// const controller table and the stateless usb_phy_* / ep_idx2bit / qtd_init
+// leaves hold no shared state, so (like board.cpp's nsToCycles / portDelay*) they
+// stay at file scope; folding them into a HAL facade is left to the merge phase.
+class UsbDcd {
+    CFG_TUSB_MEM_SECTION TU_ATTR_ALIGNED(2048) static inline dcd_data_t _dcd_data;
+
+    friend void ::bus_reset(uint8_t rhport);
+    friend void ::dcd_init(uint8_t rhport);
+    friend void ::dcd_int_handler(uint8_t rhport);
+    friend bool ::dcd_edpt_open(uint8_t rhport, tusb_desc_endpoint_t const* p_endpoint_desc);
+    friend bool ::dcd_edpt_xfer(uint8_t rhport, uint8_t ep_addr, uint8_t* buffer, uint16_t total_bytes);
+};
 
 
 //--------------------------------------------------------------------+
@@ -322,13 +348,13 @@ static void bus_reset(uint8_t rhport) {
     // read reset bit in portsc
 
     //------------- Queue Head & Queue TD -------------//
-    tu_memclr(&_dcd_data, sizeof(dcd_data_t));
+    tu_memclr(&UsbDcd::_dcd_data, sizeof(dcd_data_t));
     //------------- Set up Control Endpoints (0 OUT, 1 IN) -------------//
-    _dcd_data.qhd[0].zero_length_termination = _dcd_data.qhd[1].zero_length_termination = 1;
-    _dcd_data.qhd[0].max_package_size = _dcd_data.qhd[1].max_package_size = CFG_TUD_ENDPOINT0_SIZE;
-    _dcd_data.qhd[0].qtd_overlay.next = _dcd_data.qhd[1].qtd_overlay.next = QTD_NEXT_INVALID;
+    UsbDcd::_dcd_data.qhd[0].zero_length_termination = UsbDcd::_dcd_data.qhd[1].zero_length_termination = 1;
+    UsbDcd::_dcd_data.qhd[0].max_package_size = UsbDcd::_dcd_data.qhd[1].max_package_size = CFG_TUD_ENDPOINT0_SIZE;
+    UsbDcd::_dcd_data.qhd[0].qtd_overlay.next = UsbDcd::_dcd_data.qhd[1].qtd_overlay.next = QTD_NEXT_INVALID;
 
-    _dcd_data.qhd[0].int_on_setup = 1; // OUT only
+    UsbDcd::_dcd_data.qhd[0].int_on_setup = 1; // OUT only
 }
 
 
@@ -434,14 +460,14 @@ void dcd_int_handler(uint8_t rhport) {
             // 23.10.10.2 Operational model for setup transfers
             dcd_reg->ENDPTSETUPSTAT = dcd_reg->ENDPTSETUPSTAT; // acknowledge
 
-            dcd_event_setup_received(rhport, (uint8_t *)&_dcd_data.qhd[0].setup_request, true);
+            dcd_event_setup_received(rhport, (uint8_t *)&UsbDcd::_dcd_data.qhd[0].setup_request, true);
         }
 
         if (edpt_complete) {
             for (uint8_t ep_idx = 0; ep_idx < QHD_MAX; ep_idx++) {
                 if (tu_bit_test(edpt_complete, ep_idx2bit(ep_idx))) {
                     // 23.10.12.3 Failed QTD also get ENDPTCOMPLETE set
-                    dcd_qtd_t *p_qtd = &_dcd_data.qtd[ep_idx];
+                    dcd_qtd_t *p_qtd = &UsbDcd::_dcd_data.qtd[ep_idx];
 
                     uint8_t result = p_qtd->halted ? XFER_RESULT_STALLED : (p_qtd->xact_err || p_qtd->buffer_err) ? XFER_RESULT_FAILED
                                                                                                                   : XFER_RESULT_SUCCESS;
@@ -475,7 +501,7 @@ extern "C" void usb_dcd_isr(void)
 void dcd_init (uint8_t rhport)
 {
 
-    tu_memclr(&_dcd_data, sizeof(dcd_data_t));
+    tu_memclr(&UsbDcd::_dcd_data, sizeof(dcd_data_t));
     dcd_registers_t *dcd_reg = _dcd_controller[rhport].regs;
 
     portEnableIRQ(HW_IRQ_USB_CTRL, true);
@@ -492,8 +518,8 @@ void dcd_init (uint8_t rhport)
     dcd_reg->OTGSC = OTGSC_VBUS_DISCHARGE | OTGSC_OTG_TERMINATION;
     //REG_DEVICEADDR = 0;
 
-    dcd_reg->ENDPTLISTADDR = (uint32_t)((uint8_t *)_dcd_data.qhd); // Endpoint List Address has to be 2K alignment
-    //printf("ep addr %08x %08x\n",_dcd_data.qhd,dcd_reg->ENDPTLISTADDR);
+    dcd_reg->ENDPTLISTADDR = (uint32_t)((uint8_t *)UsbDcd::_dcd_data.qhd); // Endpoint List Address has to be 2K alignment
+    //printf("ep addr %08x %08x\n",UsbDcd::_dcd_data.qhd,dcd_reg->ENDPTLISTADDR);
 
     dcd_reg->USBSTS = dcd_reg->USBSTS;
     dcd_reg->USBINTR = INTR_USB | INTR_ERROR | INTR_PORT_CHANGE | INTR_RESET | INTR_SUSPEND /*| INTR_SOF*/;
@@ -575,14 +601,14 @@ bool dcd_edpt_open (uint8_t rhport, tusb_desc_endpoint_t const * p_endpoint_desc
     TU_ASSERT(epnum < _dcd_controller[rhport].ep_count);
 
     //------------- Prepare Queue Head -------------//
-    dcd_qhd_t *p_qhd = &_dcd_data.qhd[ep_idx];
+    dcd_qhd_t *p_qhd = &UsbDcd::_dcd_data.qhd[ep_idx];
     tu_memclr(p_qhd, sizeof(dcd_qhd_t));
 
     p_qhd->zero_length_termination = 1;
     p_qhd->max_package_size = p_endpoint_desc->wMaxPacketSize.size;
     p_qhd->qtd_overlay.next = QTD_NEXT_INVALID;
 
-    //CleanInvalidateDCache_by_Addr((uint32_t*) &_dcd_data, sizeof(dcd_data_t));
+    //CleanInvalidateDCache_by_Addr((uint32_t*) &UsbDcd::_dcd_data, sizeof(dcd_data_t));
     // Enable EP Control
     dcd_registers_t *dcd_reg = _dcd_controller[rhport].regs;
     dcd_reg->ENDPTCTRL[epnum] |= ((p_endpoint_desc->bmAttributes.xfer << 2) | ENDPTCTRL_ENABLE | ENDPTCTRL_TOGGLE_RESET) << (dir ? 16 : 0);
@@ -612,8 +638,8 @@ bool dcd_edpt_xfer (uint8_t rhport, uint8_t ep_addr, uint8_t * buffer, uint16_t 
         }
     }
 
-    dcd_qhd_t *p_qhd = &_dcd_data.qhd[ep_idx];
-    dcd_qtd_t *p_qtd = &_dcd_data.qtd[ep_idx];
+    dcd_qhd_t *p_qhd = &UsbDcd::_dcd_data.qhd[ep_idx];
+    dcd_qtd_t *p_qtd = &UsbDcd::_dcd_data.qtd[ep_idx];
 
     // Force the CPU to flush the buffer. We increase the size by 32 because the call aligns the
     // address to 32-byte boundaries.
@@ -624,7 +650,7 @@ bool dcd_edpt_xfer (uint8_t rhport, uint8_t ep_addr, uint8_t * buffer, uint16_t 
     p_qtd->int_on_complete = true;
     p_qhd->qtd_overlay.next = (uint32_t)((uint8_t *)p_qtd); // link qtd to qhd
 
-    //CleanInvalidateDCache_by_Addr((uint32_t*) &_dcd_data, sizeof(dcd_data_t));
+    //CleanInvalidateDCache_by_Addr((uint32_t*) &UsbDcd::_dcd_data, sizeof(dcd_data_t));
     // start transfer
     dcd_reg->ENDPTPRIME = TU_BIT(ep_idx2bit(ep_idx));
 

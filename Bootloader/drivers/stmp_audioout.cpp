@@ -1,6 +1,25 @@
 /**
- * @file Bootloader/drivers/stmp_audioout.c
- * @brief Audio output driver
+ * @file Bootloader/drivers/stmp_audioout.cpp
+ * @brief Audio output driver — pure-static singleton class.
+ *
+ * Phase 2 of the HAL C++23 migration: the file-scope state of the audio driver
+ * (the two PCM ping-pong buffers, their completion flags, the play flag and the
+ * DMA descriptor) is encapsulated as @c AudioOut private @c static @c inline
+ * members. This peripheral is the migration's dual-context case: the same
+ * private state is touched from two unrelated execution contexts ---
+ *   - @c portDAC_IRQ — the DAC DMA completion interrupt, dispatched by name from
+ *     up_isr() in interrupt_up.cpp (hence C linkage);
+ *   - @c is_pcm_buffer_idle / @c pcm_buffer_load — the arm_do_swi audio fast path,
+ *     forward-declared and called by name from the C translation unit vectors.c
+ *     (hence C linkage).
+ * All three are granted @c friend access so they can operate on that private
+ * state directly. The class itself has no external consumer (the @c
+ * stmp_audio_init entry survives as a thin forwarding shim called from
+ * board_up.cpp), so it is defined here rather than in a header.
+ *
+ * The whole driver is gated on @c ENABLE_AUIDIOOUT, which is not defined in any
+ * current build; the encapsulation is purely structural and changes no codegen
+ * in the shipped image.
  */
 
 #include <stdio.h>
@@ -18,6 +37,9 @@
 
 #ifdef ENABLE_AUIDIOOUT
 
+// ---------------------------------------------------------------------------
+// DMA command descriptor types (file scope; only used by AudioOut below).
+// ---------------------------------------------------------------------------
 struct apb_dma_command_t
 {
     struct apb_dma_command_t *next;
@@ -33,27 +55,58 @@ struct pcm_dma_command_t
     uint32_t pad[5];
 } __attribute__((packed));
 
-uint32_t pcm_buffer1[4096] __attribute__((aligned(4)));
-uint32_t pcm_buffer2[4096] __attribute__((aligned(4)));
+// ---------------------------------------------------------------------------
+// Dual-context seams: the DAC completion IRQ (dispatched by name from up_isr())
+// and the two arm_do_swi fast-path entries (called by name from the C unit
+// vectors.c) all share AudioOut's private buffer state. They keep C linkage and
+// are declared before the class so it can friend them.
+// ---------------------------------------------------------------------------
+extern "C" {
+void portDAC_IRQ(uint32_t IRQn);
+bool is_pcm_buffer_idle();
+void pcm_buffer_load(void *pcmdat);
+}
 
-volatile bool pcm_buffer_1_fin = true;
-volatile bool pcm_buffer_2_fin = true; 
+class AudioOut {
+public:
+    static void init();
 
-volatile bool pcm_playing = false;
+private:
+    // ---- ping-pong sample buffers and the DMA descriptor ----------------
+    static inline uint32_t pcm_buffer1[4096] __attribute__((aligned(4)));
+    static inline uint32_t pcm_buffer2[4096] __attribute__((aligned(4)));
+    static inline pcm_dma_command_t dac_dma;
 
-volatile void *cur_pcm_buffer;
+    // ---- shared scalar runtime state -----------------------------------
+    // Touched by the DAC IRQ *and* the two vectors.c SWI entries. Grouped into
+    // one object so this originally-contiguous block keeps its section-anchor
+    // base+offset codegen: separate `static inline` members are distinct COMDAT
+    // symbols the compiler cannot prove adjacent, so each would cost its own
+    // address load. The seams reach these through friendship as AudioOut::st.* .
+    struct SharedState {
+        volatile bool  pcm_buffer_1_fin;
+        volatile bool  pcm_buffer_2_fin;
+        volatile bool  pcm_playing;
+        volatile void *cur_pcm_buffer;
+    };
+    static inline SharedState st{ true, true, false, nullptr };
 
-static struct pcm_dma_command_t dac_dma;
+    // ---- internal helper (was a file-scope `inline static` function) ----
+    static void pcm_dma_load();
 
+    // ---- dual-context friends: the DAC IRQ and the two vectors.c SWI
+    //      entries operate on the shared state above ----------------------
+    friend void ::portDAC_IRQ(uint32_t);
+    friend bool ::is_pcm_buffer_idle();
+    friend void ::pcm_buffer_load(void *);
+};
 
-inline static void pcm_dma_load()
+inline void AudioOut::pcm_dma_load()
 {
-    dac_dma.dma.buffer = (void *)cur_pcm_buffer;
+    dac_dma.dma.buffer = (void *)st.cur_pcm_buffer;
 
     reg::APBX_CHn_NXTCMDAR::B(1).CMD_ADDR = (uint32_t)&dac_dma;
     reg::APBX_CHn_SEMA::B(1).INCREMENT_SEMA = 1;
-    
-
 }
 
 void portDAC_IRQ(uint32_t IRQn)
@@ -66,57 +119,54 @@ void portDAC_IRQ(uint32_t IRQn)
 
     }
 
-    if(pcm_buffer_1_fin)
+    if(AudioOut::st.pcm_buffer_1_fin)
     {
-        if(!pcm_buffer_2_fin)
+        if(!AudioOut::st.pcm_buffer_2_fin)
         {
-            pcm_buffer_2_fin = true;
-            cur_pcm_buffer = pcm_buffer2;
-            pcm_dma_load();
+            AudioOut::st.pcm_buffer_2_fin = true;
+            AudioOut::st.cur_pcm_buffer = AudioOut::pcm_buffer2;
+            AudioOut::pcm_dma_load();
         }else{
             //all buffers played.
-            pcm_playing = false;
+            AudioOut::st.pcm_playing = false;
 
         }
     }else{
-            pcm_buffer_1_fin = true;
-            cur_pcm_buffer = pcm_buffer1;
-            pcm_dma_load();
+            AudioOut::st.pcm_buffer_1_fin = true;
+            AudioOut::st.cur_pcm_buffer = AudioOut::pcm_buffer1;
+            AudioOut::pcm_dma_load();
     }
-    
+
 }
 
-// is_pcm_buffer_idle / pcm_buffer_load have no shared header; they are
-// forward-declared and called by name from the C translation unit vectors.c
-// (arm_do_swi audio fast path), so their definitions keep C linkage.
-extern "C" bool is_pcm_buffer_idle()
+bool is_pcm_buffer_idle()
 {
-    return pcm_buffer_1_fin || pcm_buffer_2_fin;
+    return AudioOut::st.pcm_buffer_1_fin || AudioOut::st.pcm_buffer_2_fin;
 }
 
-extern "C" void pcm_buffer_load(void *pcmdat)
+void pcm_buffer_load(void *pcmdat)
 {
-    if(pcm_buffer_1_fin)
+    if(AudioOut::st.pcm_buffer_1_fin)
     {
-        memcpy(pcm_buffer1, pcmdat, sizeof(pcm_buffer1));
-        pcm_buffer_1_fin = false;
-    }else if(pcm_buffer_2_fin)
+        memcpy(AudioOut::pcm_buffer1, pcmdat, sizeof(AudioOut::pcm_buffer1));
+        AudioOut::st.pcm_buffer_1_fin = false;
+    }else if(AudioOut::st.pcm_buffer_2_fin)
     {
-        memcpy(pcm_buffer2, pcmdat, sizeof(pcm_buffer2));
-        pcm_buffer_2_fin = false;
+        memcpy(AudioOut::pcm_buffer2, pcmdat, sizeof(AudioOut::pcm_buffer2));
+        AudioOut::st.pcm_buffer_2_fin = false;
     }else{
         return;
     }
-    
-    if(!pcm_playing)
+
+    if(!AudioOut::st.pcm_playing)
     {
-        pcm_playing = true;
+        AudioOut::st.pcm_playing = true;
         portDAC_IRQ(HW_IRQ_ADC_DMA);
     }
 }
 
 
-void stmp_audio_init()
+void AudioOut::init()
 {
     reg::AUDIOOUT_CTRL::clr(reg::AUDIOOUT_CTRL_::SFTRST::mask);
     reg::AUDIOOUT_CTRL::clr(reg::AUDIOOUT_CTRL_::CLKGATE::mask);
@@ -226,12 +276,14 @@ void stmp_audio_init()
 
 
     reg::AUDIOOUT_DACVOLUME::wr(0x00ff00ff);
+}
 
-    
-
-
+// Named entry shim: board_up.cpp (C++) still calls stmp_audio_init() by its
+// legacy name (declared extern "C" in board_up.h); forward to the class.
+// Caller migration onto AudioOut::init() is deferred to the layer-merge phase.
+void stmp_audio_init()
+{
+    AudioOut::init();
 }
 
 #endif
-
-

@@ -1,11 +1,17 @@
 /**
  * @file Bootloader/drivers/stmp_lradc.cpp
- * @brief LRADC driver
+ * @brief LRADC driver — pure-static singleton class.
  *
- * Migrated to the typed register model. LRADC_CTRL1 and the multi-instance
- * LRADC_CHn carry MMIO atomic SET/CLR aliases -> reg::*::set/clr (and the
- * channel-indexed set(n,..)/clr(n,..)). BW_LRADC_CTRL0_SCHEDULE is a plain
- * bitfield write, so BF_WR(LRADC_CTRL0,SCHEDULE,v) maps to reg::*::B().SCHEDULE.
+ * Phase 2 of the HAL C++23 migration: the LRADC driver becomes the @c Lradc
+ * pure-static singleton. The peripheral is stateless, so the class is the typed
+ * home for its three operations; @c port_LRADC_IRQ touches no class state and so
+ * stays a plain @c extern @c "C" free function (it is dispatched by name from the
+ * C interrupt unit and holds its own logic).
+ *
+ * The legacy @c portLRADC* entry points survive as thin @c extern @c "C"
+ * forwarding shims (board_up.h declares them @c extern @c "C"); the methods are
+ * always_inline so each shim folds back to the pre-class body bit-for-bit.
+ * Caller migration onto @c Lradc:: is deferred to the layer-merge phase.
  */
 
 
@@ -22,8 +28,17 @@
 #include "board_up.h"
 
 
+class Lradc {
+public:
+    // Each method has a single caller (its extern "C" shim); always_inline folds
+    // the body straight into that named entry so it is bit-for-bit the pre-class
+    // function. Phase 3 migrates callers onto Lradc:: directly.
+    [[gnu::always_inline]] static void init();
+    [[gnu::always_inline]] static void enable(bool enable, uint32_t ch);
+    [[gnu::always_inline]] static uint32_t convCh(uint32_t ch, uint32_t samples);
+};
 
-void portLRADC_init()
+inline void Lradc::init()
 {
 
     reg::LRADC_CONVERSION::B().AUTOMATIC = 1;
@@ -41,7 +56,7 @@ void portLRADC_init()
 
 }
 
-void portLRADCEnable(bool enable ,uint32_t ch)
+inline void Lradc::enable(bool enable, uint32_t ch)
 {
     INFO("Enable LRADC:%u,%d\n",ch, enable);
 
@@ -56,7 +71,7 @@ void portLRADCEnable(bool enable ,uint32_t ch)
 
 }
 
-uint32_t portLRADCConvCh(uint32_t ch, uint32_t samples)
+inline uint32_t Lradc::convCh(uint32_t ch, uint32_t samples)
 {
     if(!samples)
     {
@@ -82,7 +97,26 @@ uint32_t portLRADCConvCh(uint32_t ch, uint32_t samples)
 
 }
 
-// Dispatched by name from interrupt_up.c (stays C); keep C linkage.
+// ---------------------------------------------------------------------------
+// extern "C" seams. The portLRADC* entries (board_up.h) forward to the class.
+// port_LRADC_IRQ is dispatched by name from interrupt_up.c (stays C); it touches
+// no Lradc state, so it stays a free function holding its logic directly.
+// ---------------------------------------------------------------------------
+extern "C" void portLRADC_init()
+{
+    Lradc::init();
+}
+
+extern "C" void portLRADCEnable(bool enable, uint32_t ch)
+{
+    Lradc::enable(enable, ch);
+}
+
+extern "C" uint32_t portLRADCConvCh(uint32_t ch, uint32_t samples)
+{
+    return Lradc::convCh(ch, samples);
+}
+
 extern "C" void port_LRADC_IRQ(uint32_t ch)
 {
 

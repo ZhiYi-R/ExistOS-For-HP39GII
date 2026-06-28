@@ -1,12 +1,19 @@
 /**
  * @file Bootloader/drivers/stmp_power.cpp
- * @brief Power management driver
+ * @brief Power management driver — pure-static singleton class.
  *
- * Migrated to the typed register model. POWER_CTRL and POWER_RESET carry MMIO
- * atomic SET/CLR aliases (-> reg::*::set/clr); POWER_DCLIMITS/VDDxCTRL only have
- * software-RMW SET/CLR macros, so their BF_WR(=BF_CS1) expansions become
- * read-modify-write via wr(rd() & ~mask) / wr(rd() | val). Plain HW_*.B.F writes
- * map straight to reg::*::B().F.
+ * Phase 2 of the HAL C++23 migration: the power driver becomes the @c Power
+ * pure-static singleton. Its only piece of cross-cutting state, @c g_chargeEnable,
+ * is intentionally NOT encapsulated: vectors.c (which stays C) and start.cpp read
+ * it by name via `extern bool g_chargeEnable`, so it must remain a global-scope
+ * (unmangled) symbol -- a data seam, the moral twin of the extern "C" function
+ * seams. @c portPowerIRQ is dispatched by name from the C interrupt unit and
+ * touches no class state, so it stays a plain @c extern @c "C" free function.
+ *
+ * The legacy @c portPowerInit / @c portChargeEnable / @c portBoardPowerOff entries
+ * survive as thin @c extern @c "C" forwarding shims (board_up.h); the methods are
+ * always_inline so each shim folds back to the pre-class body bit-for-bit. Caller
+ * migration onto @c Power:: is deferred to the layer-merge phase.
  */
 
 #include "board_up.h"
@@ -17,9 +24,19 @@
 
 #include "debug.h"
 
+// Cross-TU data seam (see file banner): must stay a global-scope symbol.
 bool g_chargeEnable = false;
 
-void portChargeEnable(bool enable)
+class Power {
+public:
+    // Single-caller entries; always_inline folds each body into its extern "C"
+    // shim so the named entry is bit-for-bit the pre-class function.
+    [[gnu::always_inline]] static void init();
+    [[gnu::always_inline]] static void chargeEnable(bool enable);
+    [[gnu::always_inline]] static void powerOff();
+};
+
+inline void Power::chargeEnable(bool enable)
 {
     g_chargeEnable = enable;
     if(g_chargeEnable)
@@ -34,47 +51,7 @@ void portChargeEnable(bool enable)
     }
 }
 
-// Dispatched by name from interrupt_up.c (stays C); keep C linkage.
-extern "C" void portPowerIRQ(uint32_t nirq)
-{
-    switch (nirq)
-    {
-    case HW_IRQ_VDD5V:
-        INFO("USB 5V Connect\\Disconnect\n");
-        break;
-    case HW_IRQ_VDD18_BRNOUT:
-        INFO("VDD 1.8v Brownout\n");
-        break;
-    case HW_IRQ_VDDD_BRNOUT:
-        INFO("VDDD Brownout\n");
-        break;
-    case HW_IRQ_VDDIO_BRNOUT:
-        INFO("VDDIO Brownout\n");
-        break;
-    case HW_IRQ_BATT_BRNOUT:
-        INFO("BAT Brownout\n");
-        break;
-    case 63:
-
-        reg::POWER_CTRL::B().DC_OK_IRQ = 0;
-        reg::POWER_CTRL::B().VBUSVALID_IRQ = 0;
-        reg::POWER_CTRL::B().LINREG_OK_IRQ = 0;
-        reg::POWER_CTRL::B().POLARITY_LINREG_OK = 0;
-        reg::POWER_CTRL::B().POLARITY_PSWITCH = 0;
-        reg::POWER_CTRL::B().POLARITY_VBUSVALID = 0;
-        reg::POWER_CTRL::B().POLARITY_VDD5V_GT_VDDIO = 0;
-        reg::POWER_CTRL::B().VDDA_BO_IRQ = 0;
-        reg::POWER_CTRL::B().VDDD_BO_IRQ = 0;
-        reg::POWER_CTRL::B().VDDIO_BO_IRQ = 0;
-        reg::POWER_CTRL::B().BATT_BO_IRQ = 0;
-        INFO("portPowerIRQ\n");
-        break;
-    }
-
-}
-
-
-void portBoardPowerOff()
+inline void Power::powerOff()
 {
 
     //HW_POWER_VDDIOCTRL.B.DISABLE_FET = 0;
@@ -89,8 +66,7 @@ void portBoardPowerOff()
 
 }
 
-
-void portPowerInit()
+inline void Power::init()
 {
 
     INFO("PWR Init.\n");
@@ -276,5 +252,63 @@ void portPowerInit()
     INFO("VDDIO LDO VAL:0x%03x\n", reg::POWER_VDDIOCTRL::B().TRG );
     INFO("VDDD LDO VAL:0x%03x\n", reg::POWER_VDDDCTRL::B().TRG );
     INFO("VDDA LDO VAL:0x%03x\n", reg::POWER_VDDACTRL::B().TRG );
+
+}
+
+// ---------------------------------------------------------------------------
+// extern "C" seams. portChargeEnable/portBoardPowerOff/portPowerInit (board_up.h)
+// forward to the class. portPowerIRQ is dispatched by name from interrupt_up.c
+// (stays C); it touches no Power state, so it stays a free function.
+// ---------------------------------------------------------------------------
+extern "C" void portChargeEnable(bool enable)
+{
+    Power::chargeEnable(enable);
+}
+
+extern "C" void portBoardPowerOff()
+{
+    Power::powerOff();
+}
+
+extern "C" void portPowerInit()
+{
+    Power::init();
+}
+
+extern "C" void portPowerIRQ(uint32_t nirq)
+{
+    switch (nirq)
+    {
+    case HW_IRQ_VDD5V:
+        INFO("USB 5V Connect\\Disconnect\n");
+        break;
+    case HW_IRQ_VDD18_BRNOUT:
+        INFO("VDD 1.8v Brownout\n");
+        break;
+    case HW_IRQ_VDDD_BRNOUT:
+        INFO("VDDD Brownout\n");
+        break;
+    case HW_IRQ_VDDIO_BRNOUT:
+        INFO("VDDIO Brownout\n");
+        break;
+    case HW_IRQ_BATT_BRNOUT:
+        INFO("BAT Brownout\n");
+        break;
+    case 63:
+
+        reg::POWER_CTRL::B().DC_OK_IRQ = 0;
+        reg::POWER_CTRL::B().VBUSVALID_IRQ = 0;
+        reg::POWER_CTRL::B().LINREG_OK_IRQ = 0;
+        reg::POWER_CTRL::B().POLARITY_LINREG_OK = 0;
+        reg::POWER_CTRL::B().POLARITY_PSWITCH = 0;
+        reg::POWER_CTRL::B().POLARITY_VBUSVALID = 0;
+        reg::POWER_CTRL::B().POLARITY_VDD5V_GT_VDDIO = 0;
+        reg::POWER_CTRL::B().VDDA_BO_IRQ = 0;
+        reg::POWER_CTRL::B().VDDD_BO_IRQ = 0;
+        reg::POWER_CTRL::B().VDDIO_BO_IRQ = 0;
+        reg::POWER_CTRL::B().BATT_BO_IRQ = 0;
+        INFO("portPowerIRQ\n");
+        break;
+    }
 
 }

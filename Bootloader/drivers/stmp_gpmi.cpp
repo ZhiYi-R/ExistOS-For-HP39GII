@@ -16,6 +16,9 @@
 
 #include "board_up.h"
 
+//#define PR_NAND_WR_TIMING_STATUS   // enable NAND read/write timing instrumentation
+#include "stmp_gpmi.hpp"
+
 #define CHIP_SEL  0
 #define NAND_DMA_Channel  4
 
@@ -33,86 +36,16 @@
 #define NAND_CMD_STATUS 0x70
 
 
-typedef struct GPMI_DMA_Desc
-{
-    // DMA related fields
-    uint32_t dma_nxtcmdar;
-    uint32_t dma_cmd;
-    uint32_t dma_bar;
-    // GPMI related fields
-    uint32_t gpmi_ctrl0;    //PIO 0
-    uint32_t gpmi_compare;  //PIO 1
-    uint32_t gpmi_eccctrl;  //PIO 2
-    uint32_t gpmi_ecccount; //PIO 3
-    uint32_t gpmi_data_ptr; //PIO 4
-    uint32_t gpmi_aux_ptr;  //PIO 5
-} GPMI_DMA_Desc;
-
-typedef struct GPMI_Timing_t {
-    uint32_t tPROG_us;
-    uint32_t tBERS_us;
-    uint32_t tREAD_us;
-    unsigned char DataSetup_ns;
-    unsigned char DataHold_ns;
-    unsigned char AddressSetup_ns;
-    float SampleDelay_cyc;
-} GPMI_Timing_t;
-
-static struct GPMI_Timing_t defaultTiming =
-{
-        .tPROG_us = 15,
-        .tBERS_us = 2000,
-        .tREAD_us = 7,
-        .DataSetup_ns = 6 + 2,
-        .DataHold_ns = 5 + 2,
-        .AddressSetup_ns = 6 + 2,
-        .SampleDelay_cyc = 3.0,
-};
-
-typedef enum {
-    GPMI_OPA_NONE,
-    GPMI_OPA_WRITE,
-    GPMI_OPA_READ,
-    GPMI_OPA_ERASE,
-    GPMI_OPA_COPY
-}GPMI_Operation;
-
-static uint64_t GPMIFreq;
-static uint64_t DeviceTimeOutCycles;
-
-static volatile GPMI_DMA_Desc chains_cmd[4];
-static volatile GPMI_DMA_Desc chains_read[8 + 1];
-static volatile GPMI_DMA_Desc chains_write[10 + 1];
-static volatile GPMI_DMA_Desc chains_erase[8 + 1];
-
-
-static uint32_t FlashSendCommandBuffer[8];
-static uint32_t FlashSendParaBuffer[4];
-static uint32_t FlashRecCommandBuffer[4];
-static uint32_t  ECCResult;
-
-static uint32_t GPMI_DataBuffer[ 2048 / 4 ] __attribute__((aligned(4)));
-static uint32_t GPMI_AuxiliaryBuffer[ 512 / 4 ] __attribute__((aligned(4)));
-
+// Write-only reserved-block scratch: filled with 0xFF by interfaceInit() and
+// never read. As a file-scope `static` it keeps internal linkage, so -Os proves
+// the fill dead and eliminates it exactly as the pre-class code did. Promoting
+// it to a `static inline` class member would give it vague (COMDAT) linkage, on
+// which the compiler can no longer prove deadness -- materialising a spurious
+// 128-byte memset. It holds no live state the class needs, so it stays here.
 static uint32_t ReserveBlock[32];
 
 
-static volatile bool ECC_FIN;
-
-static volatile GPMI_Operation GPMI_curOpa;
-static volatile uint32_t GPMI_CopyState = 0;
-static uint32_t CopyECCResult;
-
-static uint32_t LastProgTime = 0;
-static uint32_t LastEraseTime = 0;
-static uint32_t LastReadTime = 0;
-static uint32_t LastOpa = 0;
-//#define PR_NAND_WR_TIMING_STATUS
-#ifdef PR_NAND_WR_TIMING_STATUS
-static uint32_t pgwdt;
-static uint32_t pgrdt;
-#endif
-static void GPMI_EnableDMAChannel(bool enable)
+void Gpmi::GPMI_EnableDMAChannel(bool enable)
 {
     if(enable){
         reg::APBH_CTRL0::clr(reg::APBH_CTRL0_::CLKGATE_CHANNEL::val(0x10));
@@ -121,12 +54,12 @@ static void GPMI_EnableDMAChannel(bool enable)
     }
 }
 
-static void GPMI_ResetDMAChannel()
+void Gpmi::GPMI_ResetDMAChannel()
 {
     reg::APBH_CTRL0::set(reg::APBH_CTRL0_::RESET_CHANNEL::val(0x10));
 }
 
-static void GPMI_SetAccessTiming(GPMI_Timing_t timing)
+void Gpmi::GPMI_SetAccessTiming(GPMI_Timing_t timing)
 {
 
     uint32_t dh;
@@ -157,7 +90,7 @@ static void GPMI_SetAccessTiming(GPMI_Timing_t timing)
 
 }
 
-static void GPMI_ClockConfigure()
+void Gpmi::GPMI_ClockConfigure()
 {
     reg::CLKCTRL_GPMI::wr(reg::CLKCTRL_GPMI::rd() & ~reg::CLKCTRL_GPMI_::CLKGATE::mask);
     reg::CLKCTRL_FRAC::clr(reg::CLKCTRL_FRAC_::CLKGATEIO::mask);
@@ -173,7 +106,7 @@ static void GPMI_ClockConfigure()
 
 }
 
-static void GPMI_DMAChainsInit()
+void Gpmi::GPMI_DMAChainsInit()
 {
     // ============================================Command Chains================================================
     //  Phase 1: Wait for ready;
@@ -866,7 +799,7 @@ static void GPMI_DMAChainsInit()
 
 }
 
-void GPMIConfigure()
+void Gpmi::GPMIConfigure()
 {
     GPMI_ClockConfigure();
     GPMI_EnableDMAChannel(true);
@@ -883,7 +816,7 @@ void GPMIConfigure()
 
     GPMI_DMAChainsInit();
 
-    GPMI_curOpa = GPMI_OPA_NONE;
+    st.GPMI_curOpa = GPMI_OPA_NONE;
 
     portEnableIRQ(HW_IRQ_GPMI, true);
     portEnableIRQ(HW_IRQ_GPMI_DMA, true);
@@ -898,15 +831,15 @@ void GPMIConfigure()
 
 }
 
-static inline void waitLastOpa()
+inline void Gpmi::waitLastOpa()
 {
-    switch (LastOpa)
+    switch (st.LastOpa)
     {
     case GPMI_OPA_READ:
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).APB_BYTES);
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).AHB_BYTES);
 /*
-        while(reg::DIGCTL_MICROSECONDS::rd() - LastReadTime < defaultTiming.tREAD_us)
+        while(reg::DIGCTL_MICROSECONDS::rd() - st.LastReadTime < defaultTiming.tREAD_us)
         {
             ;
         }*/
@@ -916,7 +849,7 @@ static inline void waitLastOpa()
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).AHB_BYTES);
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).APB_BYTES);
 /*
-        while(reg::DIGCTL_MICROSECONDS::rd() - LastProgTime < defaultTiming.tPROG_us)
+        while(reg::DIGCTL_MICROSECONDS::rd() - st.LastProgTime < defaultTiming.tPROG_us)
         {
             ;
         }*/
@@ -928,7 +861,7 @@ static inline void waitLastOpa()
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).AHB_BYTES);
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).APB_BYTES);
         
-        while(reg::DIGCTL_MICROSECONDS::rd() - LastEraseTime < defaultTiming.tBERS_us)
+        while(reg::DIGCTL_MICROSECONDS::rd() - st.LastEraseTime < defaultTiming.tBERS_us)
         {
             ;
         }
@@ -940,7 +873,7 @@ static inline void waitLastOpa()
     }
 }
 
-static inline void    GPMI_sendCommand(uint32_t *cmd, uint32_t *para, uint16_t paraLen, uint32_t *buf, uint32_t RBlen, bool block)
+inline void Gpmi::GPMI_sendCommand(uint32_t *cmd, uint32_t *para, uint16_t paraLen, uint32_t *buf, uint32_t RBlen, bool block)
 {
     
     while (reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA)
@@ -976,14 +909,14 @@ static inline void    GPMI_sendCommand(uint32_t *cmd, uint32_t *para, uint16_t p
 
 }
 
-static inline void   GPMI_ReadPage(uint32_t ColumnAddress, uint32_t RowAddress, uint32_t *data, uint32_t *auxData, bool block)
+inline void Gpmi::GPMI_ReadPage(uint32_t ColumnAddress, uint32_t RowAddress, uint32_t *data, uint32_t *auxData, bool block)
 {
     volatile uint8_t *probe = NULL;
     waitLastOpa();
     //INFO("Start READ\n");
     volatile uint8_t *cmdBuf = (uint8_t *)FlashSendCommandBuffer;
 
-    while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && !ECC_FIN)
+    while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && !st.ECC_FIN)
         ;
 
     cmdBuf[0] = NAND_CMD_READ0;
@@ -1010,12 +943,12 @@ static inline void   GPMI_ReadPage(uint32_t ColumnAddress, uint32_t RowAddress, 
     probe = (uint8_t *)chains_read[4].gpmi_aux_ptr;
     probe[16] = 0x23;
 
-    ECC_FIN = false;
-    ECCResult = 0x0E0E0E0E;
+    st.ECC_FIN = false;
+    st.ECCResult = 0x0E0E0E0E;
 
-    GPMI_curOpa = GPMI_OPA_READ;
+    st.GPMI_curOpa = GPMI_OPA_READ;
 #ifdef PR_NAND_WR_TIMING_STATUS
-    pgrdt = reg::DIGCTL_MICROSECONDS::rd();
+    st.pgrdt = reg::DIGCTL_MICROSECONDS::rd();
 #endif
     reg::APBH_CHn_NXTCMDAR::B(NAND_DMA_Channel).CMD_ADDR = (uint32_t)&chains_read[0]; 
     reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA = 1;  
@@ -1023,14 +956,14 @@ static inline void   GPMI_ReadPage(uint32_t ColumnAddress, uint32_t RowAddress, 
     MTD_INFO("MTD READ OPA SENT\n");
 
     if(block){
-        while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && !ECC_FIN)
+        while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && !st.ECC_FIN)
             ;
     }
 
     MTD_INFO("MTD READ OPA SENT FIN\n");
 
-    LastReadTime = reg::DIGCTL_MICROSECONDS::rd();
-    LastOpa = GPMI_OPA_READ;
+    st.LastReadTime = reg::DIGCTL_MICROSECONDS::rd();
+    st.LastOpa = GPMI_OPA_READ;
 
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).AHB_BYTES);
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).APB_BYTES);
@@ -1040,13 +973,13 @@ static inline void   GPMI_ReadPage(uint32_t ColumnAddress, uint32_t RowAddress, 
             ;
 }
 
-static inline void    GPMI_EraseBlock(uint32_t blockAddress, bool block)
+inline void Gpmi::GPMI_EraseBlock(uint32_t blockAddress, bool block)
 {
     waitLastOpa();
 
     volatile uint8_t *cmdBuf = (uint8_t *)FlashSendCommandBuffer;
 
-    while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && !ECC_FIN)
+    while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && !st.ECC_FIN)
         ;
 
     cmdBuf[0] = NAND_CMD_ERASE1;
@@ -1060,20 +993,20 @@ static inline void    GPMI_EraseBlock(uint32_t blockAddress, bool block)
 
 
     
-    LastEraseTime = reg::DIGCTL_MICROSECONDS::rd();
+    st.LastEraseTime = reg::DIGCTL_MICROSECONDS::rd();
 
-    GPMI_curOpa = GPMI_OPA_ERASE;
+    st.GPMI_curOpa = GPMI_OPA_ERASE;
 
     reg::APBH_CHn_NXTCMDAR::B(NAND_DMA_Channel).CMD_ADDR = (uint32_t)&chains_erase[0]; 
     reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA = 1; 
 
     if(block){
-        while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && !ECC_FIN)
+        while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && !st.ECC_FIN)
             ;
     }
 
-    LastEraseTime = reg::DIGCTL_MICROSECONDS::rd();
-    LastOpa = GPMI_OPA_ERASE;
+    st.LastEraseTime = reg::DIGCTL_MICROSECONDS::rd();
+    st.LastOpa = GPMI_OPA_ERASE;
 
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).AHB_BYTES);
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).APB_BYTES);
@@ -1081,7 +1014,7 @@ static inline void    GPMI_EraseBlock(uint32_t blockAddress, bool block)
         //portDelayms(4);
 }
 
-static inline void    GPMI_WritePage(uint32_t ColumnAddress, uint32_t RowAddress, uint32_t *data, uint32_t *auxData, bool block)
+inline void Gpmi::GPMI_WritePage(uint32_t ColumnAddress, uint32_t RowAddress, uint32_t *data, uint32_t *auxData, bool block)
 {
     waitLastOpa();
 
@@ -1117,22 +1050,22 @@ static inline void    GPMI_WritePage(uint32_t ColumnAddress, uint32_t RowAddress
 
 
 
-    GPMI_curOpa = GPMI_OPA_WRITE;
+    st.GPMI_curOpa = GPMI_OPA_WRITE;
 #ifdef PR_NAND_WR_TIMING_STATUS
-    pgwdt = reg::DIGCTL_MICROSECONDS::rd();
+    st.pgwdt = reg::DIGCTL_MICROSECONDS::rd();
 #endif
     reg::APBH_CHn_NXTCMDAR::B(NAND_DMA_Channel).CMD_ADDR = (uint32_t)&chains_write[0]; 
     reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA = 1; 
 
-    LastProgTime = reg::DIGCTL_MICROSECONDS::rd();
+    st.LastProgTime = reg::DIGCTL_MICROSECONDS::rd();
 
     if(block){
         while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA))
             ;
     }
 
-    LastEraseTime = reg::DIGCTL_MICROSECONDS::rd();
-    LastOpa = GPMI_OPA_WRITE;
+    st.LastEraseTime = reg::DIGCTL_MICROSECONDS::rd();
+    st.LastOpa = GPMI_OPA_WRITE;
 
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).AHB_BYTES);
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).APB_BYTES);
@@ -1141,12 +1074,12 @@ static inline void    GPMI_WritePage(uint32_t ColumnAddress, uint32_t RowAddress
 }
 
 
-static inline void    GPMI_CopyPage(uint32_t srcPage, uint32_t dstPage)
+inline void Gpmi::GPMI_CopyPage(uint32_t srcPage, uint32_t dstPage)
 {
     waitLastOpa();
     
     volatile uint8_t *cmdBuf = (uint8_t *)FlashSendCommandBuffer;
-    while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && !ECC_FIN)
+    while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && !st.ECC_FIN)
         ;
 
     cmdBuf[0] = NAND_CMD_READ0;
@@ -1159,15 +1092,15 @@ static inline void    GPMI_CopyPage(uint32_t srcPage, uint32_t dstPage)
     chains_read[4].gpmi_data_ptr    =   (uint32_t)GPMI_DataBuffer;
     chains_read[4].gpmi_aux_ptr     =   (uint32_t)GPMI_AuxiliaryBuffer; 
     
-    ECC_FIN = false;
-    GPMI_curOpa = GPMI_OPA_COPY;
-    GPMI_CopyState = 0;
+    st.ECC_FIN = false;
+    st.GPMI_curOpa = GPMI_OPA_COPY;
+    st.GPMI_CopyState = 0;
 
     reg::APBH_CHn_NXTCMDAR::B(NAND_DMA_Channel).CMD_ADDR = (uint32_t)&chains_read[0]; 
     reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA = 1;
 
     
-    while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && (!ECC_FIN))
+    while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && (!st.ECC_FIN))
         ;
 
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).AHB_BYTES);
@@ -1179,11 +1112,11 @@ static inline void    GPMI_CopyPage(uint32_t srcPage, uint32_t dstPage)
     
         //portDelayus(100);
 
-    while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && (!ECC_FIN))
+    while ((reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA) && (!st.ECC_FIN))
         ;
 
-    GPMI_curOpa = GPMI_OPA_COPY;
-    GPMI_CopyState = 1;
+    st.GPMI_curOpa = GPMI_OPA_COPY;
+    st.GPMI_CopyState = 1;
 
     cmdBuf[0] = NAND_CMD_SEQIN;
     cmdBuf[1] = 0;
@@ -1199,8 +1132,8 @@ static inline void    GPMI_CopyPage(uint32_t srcPage, uint32_t dstPage)
     reg::APBH_CHn_NXTCMDAR::B(NAND_DMA_Channel).CMD_ADDR = (uint32_t)&chains_write[0]; 
     reg::APBH_CHn_SEMA::B(NAND_DMA_Channel).INCREMENT_SEMA = 1; 
 
-    LastProgTime = reg::DIGCTL_MICROSECONDS::rd();
-    LastOpa = GPMI_OPA_WRITE;
+    st.LastProgTime = reg::DIGCTL_MICROSECONDS::rd();
+    st.LastOpa = GPMI_OPA_WRITE;
 
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).AHB_BYTES);
         while(reg::APBH_CHn_DEBUG2::B(NAND_DMA_Channel).APB_BYTES);
@@ -1208,14 +1141,14 @@ static inline void    GPMI_CopyPage(uint32_t srcPage, uint32_t dstPage)
         //portDelayus(200);
 }
 
-static void NAND_Reset()
+void Gpmi::NAND_Reset()
 {
     FlashSendCommandBuffer[0] = 0xFF;
     GPMI_sendCommand(FlashSendCommandBuffer, 0, 0, 0, 0, true);
     portDelayus(10);
 }
 
-static void GPMI_GetNANDInfo(mtdInfo_t *mtdinfo)
+void Gpmi::GPMI_GetNANDInfo(mtdInfo_t *mtdinfo)
 {
 
     FlashSendCommandBuffer[0] = 0x90;
@@ -1277,22 +1210,22 @@ extern "C" void portMTD_DMA_ISR()
 
 
 
-    switch (GPMI_curOpa)
+    switch (Gpmi::st.GPMI_curOpa)
     {
     case GPMI_OPA_READ:
 #ifdef PR_NAND_WR_TIMING_STATUS
-        INFO("prd=%ld\n", reg::DIGCTL_MICROSECONDS::rd() - pgrdt);
+        INFO("prd=%ld\n", reg::DIGCTL_MICROSECONDS::rd() - Gpmi::st.pgrdt);
 #endif
-        if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&chains_read[8]){
+        if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&Gpmi::chains_read[8]){
             INFO("GPMI_OPA_READ psense compare ERROR\n");
         }
 
         break;
     case GPMI_OPA_WRITE:
 #ifdef PR_NAND_WR_TIMING_STATUS
-        INFO("pwr=%ld\n", reg::DIGCTL_MICROSECONDS::rd() - pgwdt);
+        INFO("pwr=%ld\n", reg::DIGCTL_MICROSECONDS::rd() - Gpmi::st.pgwdt);
 #endif
-        if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&chains_read[8]){
+        if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&Gpmi::chains_read[8]){
             INFO("GPMI_OPA_WRITE psense compare ERROR\n");
             MTD_upOpaFin(1);
         }else{
@@ -1300,7 +1233,7 @@ extern "C" void portMTD_DMA_ISR()
         }
         break;
     case GPMI_OPA_ERASE:
-        if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&chains_read[8]){
+        if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&Gpmi::chains_read[8]){
             INFO("GPMI_OPA_ERASE psense compare ERROR\n");
             MTD_upOpaFin(1);
         }else{
@@ -1309,19 +1242,19 @@ extern "C" void portMTD_DMA_ISR()
         break;  
 
     case GPMI_OPA_COPY:
-        if(GPMI_CopyState == 0)
+        if(Gpmi::st.GPMI_CopyState == 0)
         {
-            if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&chains_read[8]){
+            if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&Gpmi::chains_read[8]){
                 INFO("GPMI_OPA_COPY_READ psense compare ERROR\n");
             }
             return;
         }
-        if(GPMI_CopyState == 1){
-            if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&chains_read[8]){
+        if(Gpmi::st.GPMI_CopyState == 1){
+            if(reg::APBH_CHn_CURCMDAR::B(NAND_DMA_Channel).CMD_ADDR == (uint32_t)&Gpmi::chains_read[8]){
                 INFO("GPMI_OPA_COPY_WRITE psense compare ERROR\n");
                 MTD_upOpaFin(0x0E0E0E0E);
             }else{
-                MTD_upOpaFin(CopyECCResult);
+                MTD_upOpaFin(Gpmi::st.CopyECCResult);
             }
         }
 
@@ -1331,7 +1264,7 @@ extern "C" void portMTD_DMA_ISR()
         break;
     }
     
-    GPMI_curOpa = GPMI_OPA_NONE;
+    Gpmi::st.GPMI_curOpa = GPMI_OPA_NONE;
     
 }
 
@@ -1339,7 +1272,7 @@ extern "C" bool portMTD_ECC_ISR()
 {
 
 
-    ECCResult = reg::ECC8_STATUS1::B().STATUS_PAYLOAD0            |
+    Gpmi::st.ECCResult = reg::ECC8_STATUS1::B().STATUS_PAYLOAD0            |
                 (reg::ECC8_STATUS1::B().STATUS_PAYLOAD1 << 8)     |
                 (reg::ECC8_STATUS1::B().STATUS_PAYLOAD2 << 16)    |
                 (reg::ECC8_STATUS1::B().STATUS_PAYLOAD3 << 24)    ;
@@ -1350,31 +1283,31 @@ extern "C" bool portMTD_ECC_ISR()
     
     //INFO("portMTD_ECC_ISR\n");
 
-    if((GPMI_curOpa == GPMI_OPA_COPY) && (GPMI_CopyState == 0)){
-        CopyECCResult = ECCResult;
-        ECC_FIN = true;
+    if((Gpmi::st.GPMI_curOpa == GPMI_OPA_COPY) && (Gpmi::st.GPMI_CopyState == 0)){
+        Gpmi::st.CopyECCResult = Gpmi::st.ECCResult;
+        Gpmi::st.ECC_FIN = true;
         return false;
     }
 
-    ECC_FIN = true;
+    Gpmi::st.ECC_FIN = true;
 
-    return MTD_upOpaFin(ECCResult);
+    return MTD_upOpaFin(Gpmi::st.ECCResult);
 
 }
 
 
-void portMTDInterfaceInit()
+inline void Gpmi::interfaceInit()
 {
     for(int i =0; i < 32; i++)
     {
         ReserveBlock[i] = 0xFFFFFFFF;
     }
     GPMIConfigure();
-    ECC_FIN = true;
+    st.ECC_FIN = true;
     
 }
 
-void portMTDDeviceInit(mtdInfo_t *mtdinfo)
+inline void Gpmi::deviceInit(mtdInfo_t *mtdinfo)
 {
     NAND_Reset();
     GPMI_GetNANDInfo(mtdinfo);
@@ -1385,12 +1318,12 @@ void portMTDDeviceInit(mtdInfo_t *mtdinfo)
 }
 //static uint32_t lastRDPage = 0xFFFFFFFF;
 
-void portMTDReadPage(uint32_t page, uint8_t *buf)
+inline void Gpmi::readPage(uint32_t page, uint8_t *buf)
 {
     /*
-    if((LastOpa == GPMI_OPA_READ) && (lastRDPage == page)){
+    if((st.LastOpa == GPMI_OPA_READ) && (lastRDPage == page)){
         //INFO("RD:%d\n", page);
-        MTD_upOpaFin(ECCResult);
+        MTD_upOpaFin(st.ECCResult);
         return;
     }*/
     
@@ -1399,30 +1332,44 @@ void portMTDReadPage(uint32_t page, uint8_t *buf)
     //lastRDPage = page;
 }
 
-void portMTDWritePage(uint32_t page, uint8_t *buf)
+inline void Gpmi::writePage(uint32_t page, uint8_t *buf)
 {
     //NFO("WR:%d\n", page);
     GPMI_WritePage(0, page, (uint32_t *)buf, NULL, false);
 }
 
-void portMTDWritePageMeta(uint32_t page, uint8_t *buf, uint8_t *metaBuf)
+inline void Gpmi::writePageMeta(uint32_t page, uint8_t *buf, uint8_t *metaBuf)
 {
     //INFO("WRM:%d\n", page);
     GPMI_WritePage(0, page, (uint32_t *)buf, (uint32_t *)metaBuf, false);
 }
 
-uint8_t *portMTDGetMetaData()
+inline uint8_t *Gpmi::getMetaData()
 {
     return (uint8_t *)GPMI_AuxiliaryBuffer;
 }
 
 
-void portMTDEraseBlock(uint32_t block)
+inline void Gpmi::eraseBlock(uint32_t block)
 {
     GPMI_EraseBlock(block, false);
 }
 
-void portMTDCopyPage(uint32_t src, uint32_t dst)
+inline void Gpmi::copyPage(uint32_t src, uint32_t dst)
 {
     GPMI_CopyPage(src, dst);
 }
+
+// ---------------------------------------------------------------------------
+// Legacy extern "C" entry points: the MTD upper layer (mtd_up.c) still calls
+// these by name. They forward to the Gpmi methods above and will be removed
+// once the callers migrate to Gpmi:: directly (layer-merge phase).
+// ---------------------------------------------------------------------------
+extern "C" void portMTDInterfaceInit()                              { Gpmi::interfaceInit(); }
+extern "C" void portMTDDeviceInit(mtdInfo_t *mtdinfo)               { Gpmi::deviceInit(mtdinfo); }
+extern "C" void portMTDReadPage(uint32_t page, uint8_t *buf)        { Gpmi::readPage(page, buf); }
+extern "C" void portMTDWritePage(uint32_t page, uint8_t *buf)       { Gpmi::writePage(page, buf); }
+extern "C" void portMTDWritePageMeta(uint32_t page, uint8_t *buf, uint8_t *metaBuf) { Gpmi::writePageMeta(page, buf, metaBuf); }
+extern "C" uint8_t *portMTDGetMetaData()                           { return Gpmi::getMetaData(); }
+extern "C" void portMTDEraseBlock(uint32_t block)                  { Gpmi::eraseBlock(block); }
+extern "C" void portMTDCopyPage(uint32_t src, uint32_t dst)         { Gpmi::copyPage(src, dst); }
