@@ -24,6 +24,7 @@
 #include "stmp_power.hpp"
 #include "stmp_gpio.hpp"
 #include "display_up.h"
+#include "stmp_lcdif.hpp"
 #include "keyboard_up.h"
 #include "llapi.h"
 #include "llapi_code.h"
@@ -695,7 +696,7 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
         if (contrast_adj) {
             extern uint32_t g_lcd_contrast;
             g_lcd_contrast += contrast_adj;
-            portDispSetContrast(g_lcd_contrast);
+            Lcdif::setContrast(g_lcd_contrast);
         }
 
         if (eraseDataMenu) {

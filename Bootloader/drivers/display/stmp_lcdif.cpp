@@ -11,6 +11,7 @@
  * synthesis (BV_FLD -> reg::APBH_CHn_CMD_::COMMAND::val(... _sym ...)), never MMIO.
  */
 
+#include "stmp_lcdif.hpp"
 #include "stmp_board.hpp"
 #include "display_up.h"
 
@@ -88,58 +89,14 @@ static struct LCDIF_Timing_t defaultTiming =
 static LCDIF_DMADesc chains_wr;
 static LCDIF_DMADesc chains_emitIRQ;
 
-// Dispatched by name from interrupt_up.cpp (stays C linkage); forward-declared
-// here so Lcdif can befriend it for access to the private opaFinish flag.
-extern "C" void portDISP_ISR();
-
-// LCDIF display-controller driver -- pure-static singleton. The observable driver
-// state (the clock cache, the line buffer and the indicator latches) becomes
-// private static inline members; opaFinish is the one piece shared with the ISR,
-// so portDISP_ISR is a friend reaching it directly (byte-identical body, no shim).
-// defaultTiming stays a file-scope const-config table (read-only -- -Os folds it
-// away) exactly as before. The DMA-descriptor scratch chains and the register-
-// driving transfer/poll leaves (LCDIF_LCDIF_WriteCMD/LCDIF_WriteDAT/LCDIF_ReadDAT, LCDIF_check* taken
-// by address as driverWaitTrueF callbacks, the channel enable/reset) hold no
+// Lcdif pure-static singleton is declared in stmp_lcdif.hpp (which also forward-
+// declares its ISR friend portDISP_ISR). The file-scope DMA-descriptor scratch
+// chains above and the register-driving transfer/poll leaves below hold no
 // observable state, so -- like board.cpp's nsToCycles -- they stay file-scope
-// statics; this also keeps LCDIF_LCDIF_WriteCMD's len==1 constprop clone, which a private
-// member + qualified access would spill into a register move at every command site.
-// The legacy portDisp* / Display* entries survive as thin extern "C" forwarding
-// shims (display_up.h declares them extern "C"); single-caller entries always_inline
-// back into their shim so the named entry is bit-for-bit the pre-class function,
-// while clean / setContrast (also called internally by deviceInit) stay out-of-line
-// methods behind shims.
-class Lcdif {
-public:
-    [[gnu::always_inline]] static void interfaceInit();
-    [[gnu::always_inline]] static void setIndicate(int indicateBit, int batteryBit);
-    [[gnu::always_inline]] static void readBackVRAM(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf);
-    [[gnu::always_inline]] static void flushAreaBuf(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf);
-    [[gnu::always_inline]] static void prepareBatchIn(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1);
-    [[gnu::always_inline]] static void batchIn(uint8_t *dat, uint32_t len);
-    [[gnu::always_inline]] static void deviceInit();
+// statics here; this also keeps LCDIF_WriteCMD's len==1 constprop clone, which a
+// private member + qualified access would spill into a register move per command.
 
-    // Also called internally by deviceInit -> kept out-of-line (one shared body)
-    // rather than always_inline, which would duplicate the body into deviceInit.
-    static void clean();
-    static void setContrast(uint8_t contrast);
-
-private:
-    static inline uint64_t LCDIFFreq;
-    static inline volatile bool opaFinish;
-    static inline uint8_t lineBuffer[SCREEN_WIDTH + 4] __aligned(4);
-    static inline int save_bat = 0;
-    static inline int save_ind_bit = 0;
-
-    // Single (deviceInit) call site that -Os folded; always_inline preserves
-    // that fold as members. SetTiming caches the pixel clock into LCDIFFreq;
-    // DMAChainsInit primes the file-scope DMA-descriptor scratch chains.
-    [[gnu::always_inline]] static void DMAChainsInit();
-    [[gnu::always_inline]] static void SetTiming();
-
-    friend void ::portDISP_ISR();
-};
-
-inline void Lcdif::interfaceInit() {
+void Lcdif::interfaceInit() {
     reg::PINCTRL_MUXSEL2::clr(
         reg::PINCTRL_MUXSEL2_::BANK1_PIN07::mask |
         reg::PINCTRL_MUXSEL2_::BANK1_PIN06::mask |
@@ -440,7 +397,7 @@ void Lcdif::clean() {
     }
 }
 
-inline void Lcdif::setIndicate(int indicateBit, int batteryBit) {
+void Lcdif::setIndicate(int indicateBit, int batteryBit) {
     uint32_t sx;
     uint32_t sy;
     uint32_t ex;
@@ -522,7 +479,7 @@ inline void Lcdif::setIndicate(int indicateBit, int batteryBit) {
     }
 }
 
-inline void Lcdif::readBackVRAM(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf) {
+void Lcdif::readBackVRAM(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf) {
     uint32_t xstart = x_start;
     uint32_t xend = x_end;
     uint32_t ystart = (y_start + SCREEN_START_Y);
@@ -546,7 +503,7 @@ inline void Lcdif::readBackVRAM(uint32_t x_start, uint32_t y_start, uint32_t x_e
     }
 }
 uint32_t dummy;
-inline void Lcdif::flushAreaBuf(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf) {
+void Lcdif::flushAreaBuf(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf) {
 
     uint32_t xstart = x_start;
     uint32_t xend = x_end;
@@ -594,24 +551,12 @@ inline void Lcdif::flushAreaBuf(uint32_t x_start, uint32_t y_start, uint32_t x_e
     // INFO("ed\n");
 }
 
-inline void Lcdif::prepareBatchIn(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1) {
-    LCDIF_CMD8(0x2A);
-    LCDIF_DAT32(BigEnd16(x0 / 3) | (BigEnd16(x1 / 3) << 16));
-    LCDIF_CMD8(0x2B);
-    LCDIF_DAT32(BigEnd16(y0) | (BigEnd16(y1) << 16));
-}
-
-inline void Lcdif::batchIn(uint8_t *dat, uint32_t len) {
-    LCDIF_CMD8(0x2C);
-    LCDIF_WriteDAT(dat, len);
-}
-
 void Lcdif::setContrast(uint8_t contrast) {
     LCDIF_CMD8(0x25);
     LCDIF_DAT8(contrast & 0x7F);
 }
 
-inline void Lcdif::deviceInit() {
+void Lcdif::deviceInit() {
     DMAChainsInit();
     LCDIF_EnableDMAChannel(true);
     LCDIF_ResetDMAChannel();
@@ -725,18 +670,3 @@ inline void Lcdif::deviceInit() {
 
     clean();
 }
-
-// ---------------------------------------------------------------------------
-// extern "C" seams (display_up.h declares the interface extern "C"; portDISP_ISR
-// is dispatched by name from interrupt_up.cpp). Caller migration onto Lcdif:: is
-// deferred to the layer-merge phase.
-// ---------------------------------------------------------------------------
-extern "C" void portDispInterfaceInit()                              { Lcdif::interfaceInit(); }
-extern "C" void portDispClean()                                      { Lcdif::clean(); }
-extern "C" void portDispSetIndicate(int indicateBit, int batteryBit) { Lcdif::setIndicate(indicateBit, batteryBit); }
-extern "C" void portDispReadBackVRAM(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf) { Lcdif::readBackVRAM(x_start, y_start, x_end, y_end, buf); }
-extern "C" void portDispFlushAreaBuf(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf) { Lcdif::flushAreaBuf(x_start, y_start, x_end, y_end, buf); }
-extern "C" void DisplayPrepareBatchIn(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1) { Lcdif::prepareBatchIn(x0, y0, x1, y1); }
-extern "C" void DisplayBatchIn(uint8_t *dat, uint32_t len)           { Lcdif::batchIn(dat, len); }
-extern "C" void portDispSetContrast(uint8_t contrast)                { Lcdif::setContrast(contrast); }
-extern "C" void portDispDeviceInit()                                 { Lcdif::deviceInit(); }

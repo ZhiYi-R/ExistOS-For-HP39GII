@@ -32,17 +32,7 @@
 extern "C" {
 #endif
 
-void portDispInterfaceInit(void);
-void portDispDeviceInit(void);
-void portDispFlushAreaBuf(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf);
-void portDispReadBackVRAM(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf);
-void portDispSetIndicate(int indicateBit, int batteryBit);
-void portDispClean(void);
-void portDispSetContrast(uint8_t contrast);
-
 bool DisplayOperatesFin();
-void DisplayPrepareBatchIn(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1);
-void DisplayBatchIn(uint8_t *dat, uint32_t len);
 void DisplayReadArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf, bool *fin);
 void DisplayFlushArea(uint32_t x_start, uint32_t y_start, uint32_t x_end, uint32_t y_end, uint8_t *buf, bool block);
 void DisplayPutChar(uint32_t x, uint32_t y, char c, uint8_t fg, uint8_t bg, uint8_t fontSize);

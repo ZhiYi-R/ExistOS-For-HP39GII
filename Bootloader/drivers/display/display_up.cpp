@@ -13,6 +13,7 @@
 
 #include "debug.h"
 #include "display_up.h"
+#include "stmp_lcdif.hpp"
 #include "font_ascii.h"
 
 uint32_t g_lcd_contrast = 62;
@@ -288,14 +289,14 @@ static void innerDispHLine(uint32_t x0, uint32_t x1, uint32_t y, uint8_t c) {
     }
     uint8_t *buf = (uint8_t *)pvPortMalloc(x1 - x0 + 1);
     memset(buf, c, x1 - x0 + 1);
-    portDispFlushAreaBuf(x0, y, x1, y, buf);
+    Lcdif::flushAreaBuf(x0, y, x1, y, buf);
     vPortFree(buf);
 }
 
 static void innerDispVLine(uint32_t y0, uint32_t y1, uint32_t x, uint8_t c) {
     uint8_t *buf = (uint8_t *)pvPortMalloc(y1 - y0 + 1);
     memset(buf, c, y1 - y0 + 1);
-    portDispFlushAreaBuf(x, y0, x, y1, buf);
+    Lcdif::flushAreaBuf(x, y0, x, y1, buf);
     vPortFree(buf);
 }
 
@@ -309,7 +310,7 @@ static void innerDispPoint(uint32_t x0, uint32_t y0, uint8_t c) {
 */
 
 void Display_InterfaceInit() {
-    portDispInterfaceInit();
+    Lcdif::interfaceInit();
 }
 /**
 volatile static bool led_refresh = false;
@@ -334,7 +335,7 @@ void DisplayTask() {
 
     for (;;) {
         if ((Last_DispBatteryBit != DispBatteryBit) || (Last_DispIndicatorBit != DispIndicatorBit)) {
-            portDispSetIndicate(DispIndicatorBit, DispBatteryBit);
+            Lcdif::setIndicate(DispIndicatorBit, DispBatteryBit);
         }
         Last_DispBatteryBit = DispBatteryBit;
         Last_DispIndicatorBit = DispIndicatorBit;
@@ -346,7 +347,7 @@ void DisplayTask() {
 
             switch (curOpa.opa) {
             case DISPOPA_CLEAN:
-                portDispClean();
+                Lcdif::clean();
                 break;
             case DISPOPA_FLUSH_AREA: {
                 uint32_t x_start = curOpa.pars[0];
@@ -355,7 +356,7 @@ void DisplayTask() {
                 uint32_t y_end = curOpa.pars[3];
                 uint8_t *buf = (uint8_t *)curOpa.pars[4];
                 
-                portDispFlushAreaBuf(x_start, y_start, x_end, y_end, buf);
+                Lcdif::flushAreaBuf(x_start, y_start, x_end, y_end, buf);
 
                 bool *fin = (bool *)curOpa.pars[5];
                 *fin = true;
@@ -383,7 +384,7 @@ void DisplayTask() {
                         buf[8 * y + x] = ((p[y] >> (7 - x)) & 1) ? fg : bg;
                     }
                 }
-                portDispFlushAreaBuf(x, y, x + (8 - 1), y + (fontSize - 1), buf);
+                Lcdif::flushAreaBuf(x, y, x + (8 - 1), y + (fontSize - 1), buf);
                 vPortFree(buf);
                 vPortFree(curOpa.pars);
             }
@@ -428,7 +429,7 @@ void DisplayTask() {
                     x0 += fontWidth;
                 }
 
-                portDispFlushAreaBuf(x, y, x + fontWidth * str_len - 1, y + (fontSize - 1), buf);
+                Lcdif::flushAreaBuf(x, y, x + fontWidth * str_len - 1, y + (fontSize - 1), buf);
 
                 vPortFree(buf);
                 vPortFree(curOpa.pars);
@@ -500,7 +501,7 @@ void DisplayTask() {
                 uint32_t y_end = curOpa.pars[3];
                 uint8_t *buf = (uint8_t *)curOpa.pars[4];
                 bool *fin = (bool *)curOpa.pars[5];
-                portDispReadBackVRAM(x_start, y_start, x_end, y_end, buf);
+                Lcdif::readBackVRAM(x_start, y_start, x_end, y_end, buf);
 
                 vPortFree(curOpa.pars);
                 *fin = true;
@@ -561,7 +562,7 @@ void DisplayTask() {
 
 void DisplayInit() {
     DisplayOpaQueue = xQueueCreate(4, sizeof(DisplayOpaQueue_t));
-    portDispDeviceInit();
+    Lcdif::deviceInit();
 }
 
 /*
