@@ -59,7 +59,7 @@ class Field:
 class Register:
     __slots__ = ("name", "module", "multi", "addr", "stride", "count",
                  "set_addr", "clr_addr", "tog_addr", "atomic",
-                 "writable", "union_text", "fields")
+                 "writable", "union_text", "union_tname", "fields")
 
     def __init__(self, name):
         self.name = name         # e.g. RTC_CTRL  or  APBH_CHn_CMD
@@ -74,6 +74,7 @@ class Register:
         self.atomic = False
         self.writable = False
         self.union_text = None
+        self.union_tname = None  # exact legacy 'hw_<name>_t' inner name (case-preserving)
         self.fields = []         # list[Field]
 
 
@@ -115,6 +116,10 @@ RE_TOG_ADDR = re.compile(
     r"#define\s+HW_(\w+)_TOG_ADDR\s+\((.*?)\)\s*$", re.MULTILINE)
 RE_SET_ADDR_N = re.compile(
     r"#define\s+HW_(\w+)_SET_ADDR\(n\)\s+\((.*?)\)\s*$", re.MULTILINE)
+RE_CLR_ADDR_N = re.compile(
+    r"#define\s+HW_(\w+)_CLR_ADDR\(n\)\s+\((.*?)\)\s*$", re.MULTILINE)
+RE_TOG_ADDR_N = re.compile(
+    r"#define\s+HW_(\w+)_TOG_ADDR\(n\)\s+\((.*?)\)\s*$", re.MULTILINE)
 RE_COUNT = re.compile(
     r"#define\s+HW_(\w+)_COUNT\s+(\d+)\s*$", re.MULTILINE)
 RE_WR = re.compile(r"#define\s+HW_(\w+)_WR\b")
@@ -193,22 +198,29 @@ def parse_header(path, bases, regs):
                     setattr(regs[name], attr, eval_addr(expr2, bases))
                 else:
                     setattr(regs[name], attr, eval_addr(expr, bases))
-    for m in RE_SET_ADDR_N.finditer(code):
-        name, expr = m.group(1), m.group(2)
-        if name in regs:
-            base_expr, _ = split_n_expr(expr)
-            regs[name].set_addr = eval_addr(base_expr, bases)
+    for rex, attr in ((RE_SET_ADDR_N, "set_addr"),
+                      (RE_CLR_ADDR_N, "clr_addr"),
+                      (RE_TOG_ADDR_N, "tog_addr")):
+        for m in rex.finditer(code):
+            name, expr = m.group(1), m.group(2)
+            if name in regs:
+                base_expr, _ = split_n_expr(expr)
+                setattr(regs[name], attr, eval_addr(base_expr, bases))
 
     for m in RE_WR.finditer(code):
         if m.group(1) in regs:
             regs[m.group(1)].writable = True
 
     # unions (from raw text to preserve exact field layout & comments-free body)
+    # Register keys keep the multi-instance lower-case trailing 'n'
+    # (e.g. TIMROT_TIMCTRLn), so match union names case-insensitively.
+    upper_to_reg = {rn.upper(): rn for rn in regs}
     for m in RE_UNION.finditer(RE_LINE_COMMENT.sub("", raw)):
         uname = m.group("name")          # lower-case, == reg name lower
-        rname = uname.upper()
-        if rname in regs:
+        rname = upper_to_reg.get(uname.upper())
+        if rname is not None:
             regs[rname].union_text = m.group("body").strip("\n")
+            regs[rname].union_tname = m.group("name")  # exact case, e.g. icoll_PRIORITYn
 
     # fields: BP_/BM_ keyed by the longest matching register prefix
     reg_names_sorted = sorted(regs.keys(), key=len, reverse=True)
@@ -284,7 +296,7 @@ def emit_types(regs):
         if r.union_text is None or r.name in seen:
             continue
         seen.add(r.name)
-        lname = r.name.lower()
+        lname = r.union_tname or r.name.lower()
         out.append("typedef union {")
         out.append(r.union_text)
         out.append("} hw_%s_t;" % lname)
@@ -328,7 +340,7 @@ def emit_model(regs):
            "};", "",
            "// Multi-instance register: address(n) = Base + n*Stride.",
            "template<uintptr_t Base, typename T, Access A, uintptr_t Stride, unsigned Count,",
-           "         uintptr_t Set = 0>",
+           "         uintptr_t Set = 0, uintptr_t Clr = 0, uintptr_t Tog = 0>",
            "struct MultiRegister {",
            "    static constexpr unsigned count = Count;",
            "    static constexpr bool has_atomic = (Set != 0);",
@@ -343,6 +355,12 @@ def emit_model(regs):
            "        { return *reinterpret_cast<volatile uint32_t*>(Base + n * Stride); }",
            "    [[gnu::always_inline]] static auto& B(unsigned n) noexcept",
            "        { return reinterpret_cast<volatile T*>(Base + n * Stride)->B; }",
+           "    [[gnu::always_inline]] static void set(unsigned n, uint32_t v) noexcept requires (Set != 0)",
+           "        { *reinterpret_cast<volatile uint32_t*>(Set + n * Stride) = v; }",
+           "    [[gnu::always_inline]] static void clr(unsigned n, uint32_t v) noexcept requires (Clr != 0)",
+           "        { *reinterpret_cast<volatile uint32_t*>(Clr + n * Stride) = v; }",
+           "    [[gnu::always_inline]] static void tog(unsigned n, uint32_t v) noexcept requires (Tog != 0)",
+           "        { *reinterpret_cast<volatile uint32_t*>(Tog + n * Stride) = v; }",
            "};", "",
            "// Per-field geometry helper.",
            "template<unsigned Pos, uint32_t Mask>",
@@ -358,7 +376,7 @@ def emit_model(regs):
     for r in regs:
         if r.addr is None:
             continue
-        tname = "hw_%s_t" % r.name.lower() if r.union_text else "uint32_t"
+        tname = "hw_%s_t" % (r.union_tname or r.name.lower()) if r.union_text else "uint32_t"
         # field descriptors namespace
         if r.fields:
             out.append("namespace %s_ {" % r.name)
@@ -367,11 +385,14 @@ def emit_model(regs):
                            (f.name, f.pos, hexu(f.mask)))
             out.append("}")
         if r.multi:
-            extra = (", " + addru(r.set_addr)) if r.set_addr else ""
-            out.append(
-                "using %s = MultiRegister<%s, %s, %s, %s, %u%s>;" %
-                (r.name, addru(r.addr), tname, access_of(r),
-                 hexu(r.stride), r.count, extra))
+            margs = [addru(r.addr), tname, access_of(r), hexu(r.stride),
+                     str(r.count)]
+            if r.set_addr or r.clr_addr or r.tog_addr:
+                margs.append(addru(r.set_addr) if r.set_addr else "0")
+                margs.append(addru(r.clr_addr) if r.clr_addr else "0")
+                margs.append(addru(r.tog_addr) if r.tog_addr else "0")
+            out.append("using %s = MultiRegister<%s>;" %
+                       (r.name, ", ".join(margs)))
         else:
             args = [addru(r.addr), tname, access_of(r)]
             if r.set_addr or r.clr_addr or r.tog_addr:
@@ -445,8 +466,9 @@ def emit_verify(regs, headers):
                 out.append("static_assert(reg::%s::has_atomic);" % r.name)
                 n += 2
         if r.union_text:
+            tn = r.union_tname or r.name.lower()
             out.append("static_assert(sizeof(reg::hw_%s_t) == sizeof(hw_%s_t));" %
-                       (r.name.lower(), r.name.lower()))
+                       (tn, tn))
             n += 1
         for f in r.fields:
             out.append("static_assert(reg::%s_::%s::mask == BM_%s_%s);" %

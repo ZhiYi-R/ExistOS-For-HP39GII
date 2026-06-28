@@ -6,6 +6,8 @@
 
 #include <stdio.h>
 
+#include "reg_model.hpp"
+
 #include "SystemConfig.h"
 
 #include "FreeRTOS.h"
@@ -30,10 +32,7 @@
 #include "stmp37xxNandConf.h"
 #include "stmp_NandControlBlock.h"
 
-#include "regs.h"
-#include "regspower.h"
-
-#include "regsdigctl.h"
+#include "reg_model.hpp"
 
 #include "logo.h"
 #include "boot/core/boot_manager.h"
@@ -133,8 +132,8 @@ void printTaskList() {
     printf("Flash IO_Erases:%u\n", g_mtd_erase_cnt);
     printf("Flash ECC Count:%u\n", g_mtd_ecc_cnt);
     printf("Flash ECC FATAL:%u\n", g_mtd_ecc_fatal_cnt);
-    printf("Batt Charge:%d\n", HW_POWER_STS.B.CHRGSTS);
-    printf("PWD_BATTCHRG:%d\n", HW_POWER_CHARGE.B.PWD_BATTCHRG);
+    printf("Batt Charge:%d\n", reg::POWER_STS::B().CHRGSTS);
+    printf("PWD_BATTCHRG:%d\n", reg::POWER_CHARGE::B().PWD_BATTCHRG);
     printf("RTC:%u\n", rtc_get_seconds());
 
     for (int i = 0; i < 16; i++) {
@@ -672,18 +671,18 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
 
     vTaskDelay(pdMS_TO_TICKS(1000));
 
-    HW_POWER_5VCTRL.B.ENABLE_DCDC = 0;
+    reg::POWER_5VCTRL::B().ENABLE_DCDC = 0;
 
-    HW_POWER_CHARGE.B.CHRG_STS_OFF = 0;
+    reg::POWER_CHARGE::B().CHRG_STS_OFF = 0;
 
-    HW_POWER_CHARGE.B.BATTCHRG_I = 1 << 5;
-    HW_POWER_CHARGE.B.STOP_ILIMIT = 0;
+    reg::POWER_CHARGE::B().BATTCHRG_I = 1 << 5;
+    reg::POWER_CHARGE::B().STOP_ILIMIT = 0;
 
-    HW_POWER_CHARGE.B.PWD_BATTCHRG = 1;
-    HW_POWER_VDDDCTRL.B.DISABLE_FET = 1;
+    reg::POWER_CHARGE::B().PWD_BATTCHRG = 1;
+    reg::POWER_VDDDCTRL::B().DISABLE_FET = 1;
 
-    // HW_POWER_VDDACTRL.B.DISABLE_FET = 1;
-    // HW_POWER_VDDIOCTRL.B.DISABLE_FET = 1;
+    // reg::POWER_VDDACTRL::B().DISABLE_FET = 1;
+    // reg::POWER_VDDIOCTRL::B().DISABLE_FET = 1;
 
     for (;;) {
 
@@ -918,7 +917,7 @@ void vBatteryMon(void *__n) {
         if (g_chargeEnable) {
             if (batt_voltage >= 1420) {
 
-                HW_POWER_5VCTRL.B.ENABLE_DCDC = 0;
+                reg::POWER_5VCTRL::B().ENABLE_DCDC = 0;
                 printf("Disable DCDC\n");
 
                 extern bool g_chargeEnable;
@@ -1017,12 +1016,11 @@ void TaskUSBLog(void *_) {
     }
 }
 extern int g_slowdown_enable;
-#include "regsclkctrl.h"
 void waitIRQ(int r) {
 
     enterSlowDown();
     if (g_slowdown_enable) {
-        HW_CLKCTRL_CPU.B.INTERRUPT_WAIT = 1;
+        reg::CLKCTRL_CPU::B().INTERRUPT_WAIT = 1;
 
         asm volatile("mov r0, #0");           // Rd SBZ (should be 0)
         asm volatile("mcr p15,0,r0,c7,c0,4"); // Drain write buffers, idle CPU clock & processor, and stop processor at this instruction

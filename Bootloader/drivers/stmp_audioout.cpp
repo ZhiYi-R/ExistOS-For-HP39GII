@@ -10,10 +10,8 @@
 #include "board_up.h"
 #include "interrupt_up.h"
 
-#include "regsaudioout.h"
-#include "regsclkctrl.h"
-#include "regsclkctrl.h"
-#include "regsapbx.h"
+#include "reg_model.hpp"
+#include "reg_values.hpp"
 #include "hw_irq.h"
 
 #include "SystemConfig.h"
@@ -52,8 +50,8 @@ inline static void pcm_dma_load()
 {
     dac_dma.dma.buffer = (void *)cur_pcm_buffer;
 
-    HW_APBX_CHn_NXTCMDAR(1).B.CMD_ADDR = (uint32_t)&dac_dma;
-    HW_APBX_CHn_SEMA(1).B.INCREMENT_SEMA = 1;
+    reg::APBX_CHn_NXTCMDAR::B(1).CMD_ADDR = (uint32_t)&dac_dma;
+    reg::APBX_CHn_SEMA::B(1).INCREMENT_SEMA = 1;
     
 
 }
@@ -61,7 +59,7 @@ inline static void pcm_dma_load()
 void portDAC_IRQ(uint32_t IRQn)
 {
     //printf("DAC_IRQ\n");
-    BF_CLR(APBX_CTRL1, CH1_CMDCMPLT_IRQ);
+    reg::APBX_CTRL1::clr(reg::APBX_CTRL1_::CH1_CMDCMPLT_IRQ::mask);
     if(IRQn == HW_IRQ_ADC_ERROR)
     {
         printf("DAC ERROR!\n");
@@ -120,71 +118,74 @@ extern "C" void pcm_buffer_load(void *pcmdat)
 
 void stmp_audio_init()
 {
-    BF_CLR(AUDIOOUT_CTRL, SFTRST);
-    BF_CLR(AUDIOOUT_CTRL, CLKGATE);
+    reg::AUDIOOUT_CTRL::clr(reg::AUDIOOUT_CTRL_::SFTRST::mask);
+    reg::AUDIOOUT_CTRL::clr(reg::AUDIOOUT_CTRL_::CLKGATE::mask);
 
-    BF_SET(AUDIOOUT_CTRL, SFTRST);
-    while(BF_RD(AUDIOOUT_CTRL, CLKGATE) == 0)
+    reg::AUDIOOUT_CTRL::set(reg::AUDIOOUT_CTRL_::SFTRST::mask);
+    while(reg::AUDIOOUT_CTRL::B().CLKGATE == 0)
     {
         ;
     }
-    BF_CLR(AUDIOOUT_CTRL, SFTRST);
-    BF_CLR(AUDIOOUT_CTRL, CLKGATE);
+    reg::AUDIOOUT_CTRL::clr(reg::AUDIOOUT_CTRL_::SFTRST::mask);
+    reg::AUDIOOUT_CTRL::clr(reg::AUDIOOUT_CTRL_::CLKGATE::mask);
 
-    BF_CLR(CLKCTRL_XTAL, FILT_CLK24M_GATE);
+    reg::CLKCTRL_XTAL::clr(reg::CLKCTRL_XTAL_::FILT_CLK24M_GATE::mask);
 
 
 
     /* Enable DAC */
-    BF_CLR(AUDIOOUT_ANACLKCTRL, CLKGATE);
+    reg::AUDIOOUT_ANACLKCTRL::clr(reg::AUDIOOUT_ANACLKCTRL_::CLKGATE::mask);
 
-    BF_CLR(AUDIOOUT_PWRDN, CAPLESS);
+    reg::AUDIOOUT_PWRDN::clr(reg::AUDIOOUT_PWRDN_::CAPLESS::mask);
 
     /* Set word-length to 16-bit */
-    BF_SET(AUDIOOUT_CTRL, WORD_LENGTH);
+    reg::AUDIOOUT_CTRL::set(reg::AUDIOOUT_CTRL_::WORD_LENGTH::mask);
 
     /* Power up DAC */
-    BF_CLR(AUDIOOUT_PWRDN, DAC);
+    reg::AUDIOOUT_PWRDN::clr(reg::AUDIOOUT_PWRDN_::DAC::mask);
     /* Hold HP to ground to avoid pop, then release and power up HP */
-    BF_SET(AUDIOOUT_ANACTRL, HP_HOLD_GND);
-    BF_CLR(AUDIOOUT_PWRDN, HEADPHONE);
+    reg::AUDIOOUT_ANACTRL::set(reg::AUDIOOUT_ANACTRL_::HP_HOLD_GND::mask);
+    reg::AUDIOOUT_PWRDN::clr(reg::AUDIOOUT_PWRDN_::HEADPHONE::mask);
 
 
     /* Set HP mode to AB */
-    BF_SET(AUDIOOUT_ANACTRL, HP_CLASSAB);
-    
+    reg::AUDIOOUT_ANACTRL::set(reg::AUDIOOUT_ANACTRL_::HP_CLASSAB::mask);
+
     /* change bias to -50% */
-    
-    BF_WR(AUDIOOUT_TEST, HP_I1_ADJ, (1));
-    BF_WR(AUDIOOUT_REFCTRL, BIAS_CTRL, (1));
-    BF_SET(AUDIOOUT_REFCTRL, RAISE_REF);
-    BF_SET(AUDIOOUT_REFCTRL, XTAL_BGR_BIAS);
+
+    reg::AUDIOOUT_TEST::clr(reg::AUDIOOUT_TEST_::HP_I1_ADJ::mask);
+    reg::AUDIOOUT_TEST::set(reg::AUDIOOUT_TEST_::HP_I1_ADJ::val(1));
+    reg::AUDIOOUT_REFCTRL::clr(reg::AUDIOOUT_REFCTRL_::BIAS_CTRL::mask);
+    reg::AUDIOOUT_REFCTRL::set(reg::AUDIOOUT_REFCTRL_::BIAS_CTRL::val(1));
+    reg::AUDIOOUT_REFCTRL::set(reg::AUDIOOUT_REFCTRL_::RAISE_REF::mask);
+    reg::AUDIOOUT_REFCTRL::set(reg::AUDIOOUT_REFCTRL_::XTAL_BGR_BIAS::mask);
 
 
 
 
     /* Stop holding to ground */
-    BF_CLR(AUDIOOUT_ANACTRL, HP_HOLD_GND);
+    reg::AUDIOOUT_ANACTRL::clr(reg::AUDIOOUT_ANACTRL_::HP_HOLD_GND::mask);
 
-    
+
     /* Set dmawait count to 31 (see errata, workaround random stop) */
-    BF_WR(AUDIOOUT_CTRL, DMAWAIT_COUNT, (31));
+    reg::AUDIOOUT_CTRL::clr(reg::AUDIOOUT_CTRL_::DMAWAIT_COUNT::mask);
+    reg::AUDIOOUT_CTRL::set(reg::AUDIOOUT_CTRL_::DMAWAIT_COUNT::val(31));
     /* start converting audio */
-    BF_SET(AUDIOOUT_CTRL, RUN);
+    reg::AUDIOOUT_CTRL::set(reg::AUDIOOUT_CTRL_::RUN::mask);
     /* unmute DAC */
-    BF_CLR(AUDIOOUT_DACVOLUME, MUTE_LEFT);
-    BF_CLR(AUDIOOUT_DACVOLUME, MUTE_RIGHT);
+    reg::AUDIOOUT_DACVOLUME::clr(reg::AUDIOOUT_DACVOLUME_::MUTE_LEFT::mask);
+    reg::AUDIOOUT_DACVOLUME::clr(reg::AUDIOOUT_DACVOLUME_::MUTE_RIGHT::mask);
 
-    HW_AUDIOOUT_HPVOL.B.MUTE = 0;
-    
-    HW_AUDIOOUT_HPVOL.B.VOL_LEFT = 0x31;
-    HW_AUDIOOUT_HPVOL.B.VOL_RIGHT = 0x31;
+    reg::AUDIOOUT_HPVOL::B().MUTE = 0;
+
+    reg::AUDIOOUT_HPVOL::B().VOL_LEFT = 0x31;
+    reg::AUDIOOUT_HPVOL::B().VOL_RIGHT = 0x31;
     /*send a few samples to avoid pop*/
 
-    HW_AUDIOOUT_DATA.U = 0;
-    HW_AUDIOOUT_DATA.U = 0;
-    HW_AUDIOOUT_DATA.U = 0;
-    HW_AUDIOOUT_DATA.U = 0;
+    reg::AUDIOOUT_DATA::wr(0);
+    reg::AUDIOOUT_DATA::wr(0);
+    reg::AUDIOOUT_DATA::wr(0);
+    reg::AUDIOOUT_DATA::wr(0);
 
     printf("stmp_audio_init \n");
 
@@ -199,32 +200,32 @@ void stmp_audio_init()
     //32000 Hz
     HW_AUDIOOUT_DACSRR.B.BASEMULT = 0x1; // quad-rate
     HW_AUDIOOUT_DACSRR.B.SRC_HOLD = 0x0; // 0 for full- double- quad-rates
-    HW_AUDIOOUT_DACSRR.B.SRC_INT = 0x17; 
+    HW_AUDIOOUT_DACSRR.B.SRC_INT = 0x17;
     HW_AUDIOOUT_DACSRR.B.SRC_FRAC = 0x0E00; // the fractional portion
 */
     //22050 Hz
-    HW_AUDIOOUT_DACSRR.B.BASEMULT = 0x1; // quad-rate
-    HW_AUDIOOUT_DACSRR.B.SRC_HOLD = 0x1; // 0 for full- double- quad-rates
-    HW_AUDIOOUT_DACSRR.B.SRC_INT = 0x11; 
-    HW_AUDIOOUT_DACSRR.B.SRC_FRAC = 0x0037; // the fractional portion
+    reg::AUDIOOUT_DACSRR::B().BASEMULT = 0x1; // quad-rate
+    reg::AUDIOOUT_DACSRR::B().SRC_HOLD = 0x1; // 0 for full- double- quad-rates
+    reg::AUDIOOUT_DACSRR::B().SRC_INT = 0x11;
+    reg::AUDIOOUT_DACSRR::B().SRC_FRAC = 0x0037; // the fractional portion
 
 
-    HW_APBX_CTRL1.B.CH1_CMDCMPLT_IRQ_EN = 1;
-    HW_APBX_CTRL1.B.CH1_ERROR_IRQ = 1;
+    reg::APBX_CTRL1::B().CH1_CMDCMPLT_IRQ_EN = 1;
+    reg::APBX_CTRL1::B().CH1_ERROR_IRQ = 1;
 
 
-    
+
     dac_dma.dma.next = NULL;
-    dac_dma.dma.cmd = BF_APBX_CHn_CMD_XFER_COUNT(sizeof(pcm_buffer1)) | 
-                      BF_APBX_CHn_CMD_IRQONCMPLT(1) |
-                      BF_APBX_CHn_CMD_SEMAPHORE(1) |
-                      BV_FLD(APBX_CHn_CMD, COMMAND, DMA_READ);
+    dac_dma.dma.cmd = reg::APBX_CHn_CMD_::XFER_COUNT::val(sizeof(pcm_buffer1)) |
+                      reg::APBX_CHn_CMD_::IRQONCMPLT::val(1) |
+                      reg::APBX_CHn_CMD_::SEMAPHORE::val(1) |
+                      reg::APBX_CHn_CMD_::COMMAND::val(reg::APBX_CHn_CMD_sym::COMMAND__DMA_READ);
 
     portEnableIRQ(HW_IRQ_DAC_DMA, 1);
     portEnableIRQ(HW_IRQ_DAC_ERROR, 1);
 
 
-    HW_AUDIOOUT_DACVOLUME.U = 0x00ff00ff;
+    reg::AUDIOOUT_DACVOLUME::wr(0x00ff00ff);
 
     
 

@@ -16,7 +16,7 @@ static struct dhara_nand nandDevice;
 static struct dhara_map FTLmap;
 //#define PR_FTL_TIMING_STATUS
 #ifdef PR_FTL_TIMING_STATUS
-#include "regsdigctl.h"
+#include "reg_model.hpp"
 static uint32_t ftl_rdt;
 static uint32_t ftl_wrt;
 #endif
@@ -269,11 +269,11 @@ void FTL_task() {
             case FTL_SECTOR_READ:
                 for (int i = 0; i < curOpa.num; i++) {
                     #ifdef PR_FTL_TIMING_STATUS
-                    ftl_rdt = HW_DIGCTL_MICROSECONDS_RD();
+                    ftl_rdt = reg::DIGCTL_MICROSECONDS::rd();
                     #endif
                     ret = dhara_map_read(&FTLmap, curOpa.sector++, curOpa.buf, &err);
                     #ifdef PR_FTL_TIMING_STATUS
-                    INFO("frd=%ld\n",HW_DIGCTL_MICROSECONDS_RD() - ftl_rdt);
+                    INFO("frd=%ld\n",reg::DIGCTL_MICROSECONDS::rd() - ftl_rdt);
                     #endif
                     /* ECC-scrub hook (not implemented this round):
                      * The sector just read is (curOpa.sector - 1). To refresh a
@@ -297,11 +297,11 @@ void FTL_task() {
             case FTL_SECTOR_WRITE:
                 for (int i = 0; i < curOpa.num; i++) {
                     #ifdef PR_FTL_TIMING_STATUS
-                    ftl_wrt = HW_DIGCTL_MICROSECONDS_RD();
+                    ftl_wrt = reg::DIGCTL_MICROSECONDS::rd();
                     #endif
                     ret = dhara_map_write(&FTLmap, curOpa.sector++, curOpa.buf, &err);
                     #ifdef PR_FTL_TIMING_STATUS
-                    INFO("fwr=%ld\n",HW_DIGCTL_MICROSECONDS_RD() - ftl_wrt);
+                    INFO("fwr=%ld\n",reg::DIGCTL_MICROSECONDS::rd() - ftl_wrt);
                     #endif
                     curOpa.buf += pMtdinfo->PageSize_B;
                     if (ret) {

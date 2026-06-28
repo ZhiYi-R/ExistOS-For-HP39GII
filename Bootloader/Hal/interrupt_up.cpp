@@ -10,10 +10,9 @@
 #include "timer_up.h"
 
 #include "hw_irq.h"
-#include "regsicoll.h"
+#include "reg_model.hpp"
 
 #include "timer_up.h"
-#include "regstimrot.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -84,11 +83,11 @@ void up_isr(void) {
         break;
     }*/
 
-    CurrentIRQNumber = BF_RD(ICOLL_VECTOR, IRQVECTOR)  ;
+    CurrentIRQNumber = reg::ICOLL_VECTOR::B().IRQVECTOR  ;
     switch (CurrentIRQNumber)
     {
     case HW_IRQ_TIMER0:
-        BF_CLRn(TIMROT_TIMCTRLn, 0, IRQ);
+        reg::TIMROT_TIMCTRLn::clr(0, reg::TIMROT_TIMCTRLn_::IRQ::mask);
         //up_TimerTick();
         if( xTaskIncrementTick() != pdFALSE )
 	    {	

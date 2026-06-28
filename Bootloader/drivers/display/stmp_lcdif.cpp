@@ -1,15 +1,21 @@
 /**
- * @file Bootloader/drivers/display/stmp_lcdif.c
+ * @file Bootloader/drivers/display/stmp_lcdif.cpp
  * @brief LCDIF display controller driver
+ *
+ * Migrated to the typed register model. APBH_CTRL0/CTRL1, LCDIF_CTRL1 and the
+ * PINCTRL_MUXSEL* registers carry MMIO atomic SET/CLR -> reg::*::set/clr; the
+ * multi-field BF_CSk forms keep a single clr(|masks)+set(|vals) shape over them.
+ * LCDIF_TIMING and CLKCTRL_PIX have only software-RMW SET/CLR, so their BF_CSk /
+ * BF_CLR expand to wr(rd()&~..) / wr(rd()|..). APBH_CHn_NXTCMDAR/SEMA field
+ * writes are plain bitfield stores. DMA-descriptor command words are pure value
+ * synthesis (BV_FLD -> reg::APBH_CHn_CMD_::COMMAND::val(... _sym ...)), never MMIO.
  */
 
 #include "board_up.h"
 #include "display_up.h"
 
-#include "regsapbh.h"
-#include "regsclkctrl.h"
-#include "regslcdif.h"
-#include "regspinctrl.h"
+#include "reg_model.hpp"
+#include "reg_values.hpp"
 
 #include "debug.h"
 
@@ -54,7 +60,7 @@ typedef struct LCDIF_DMADesc {
         uint32_t DMA_CommandBits;
     };
     uint32_t pDMABuffer;
-    hw_lcdif_ctrl_t PioWord;
+    reg::hw_lcdif_ctrl_t PioWord;
 
 } LCDIF_DMADesc;
 
@@ -86,24 +92,37 @@ static volatile bool opaFinish;
 static uint8_t lineBuffer[SCREEN_WIDTH + 4] __aligned(4);
 
 void portDispInterfaceInit() {
-    BF_CS8(
-        PINCTRL_MUXSEL2,
-        BANK1_PIN07, 0,
-        BANK1_PIN06, 0,
-        BANK1_PIN05, 0,
-        BANK1_PIN04, 0,
-        BANK1_PIN03, 0,
-        BANK1_PIN02, 0,
-        BANK1_PIN01, 0,
-        BANK1_PIN00, 0);
+    reg::PINCTRL_MUXSEL2::clr(
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN07::mask |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN06::mask |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN05::mask |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN04::mask |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN03::mask |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN02::mask |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN01::mask |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN00::mask);
+    reg::PINCTRL_MUXSEL2::set(
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN07::val(0) |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN06::val(0) |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN05::val(0) |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN04::val(0) |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN03::val(0) |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN02::val(0) |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN01::val(0) |
+        reg::PINCTRL_MUXSEL2_::BANK1_PIN00::val(0));
 
-    BF_CS5(
-        PINCTRL_MUXSEL3,
-        BANK1_PIN20, 0,
-        BANK1_PIN19, 0,
-        BANK1_PIN18, 0,
-        BANK1_PIN17, 0,
-        BANK1_PIN16, 0);
+    reg::PINCTRL_MUXSEL3::clr(
+        reg::PINCTRL_MUXSEL3_::BANK1_PIN20::mask |
+        reg::PINCTRL_MUXSEL3_::BANK1_PIN19::mask |
+        reg::PINCTRL_MUXSEL3_::BANK1_PIN18::mask |
+        reg::PINCTRL_MUXSEL3_::BANK1_PIN17::mask |
+        reg::PINCTRL_MUXSEL3_::BANK1_PIN16::mask);
+    reg::PINCTRL_MUXSEL3::set(
+        reg::PINCTRL_MUXSEL3_::BANK1_PIN20::val(0) |
+        reg::PINCTRL_MUXSEL3_::BANK1_PIN19::val(0) |
+        reg::PINCTRL_MUXSEL3_::BANK1_PIN18::val(0) |
+        reg::PINCTRL_MUXSEL3_::BANK1_PIN17::val(0) |
+        reg::PINCTRL_MUXSEL3_::BANK1_PIN16::val(0));
 
     // LCDIFFreq = 96000000;
 
@@ -115,43 +134,48 @@ void portDispInterfaceInit() {
     // BF_CLR(CLKCTRL_CLKSEQ, BYPASS_PIX); //bypass 24MHz XTAL
     // BF_WR(CLKCTRL_FRAC, PIXFRAC, 18); //PLL Output (480 * (18/18)) MHz
 
-    BF_CLR(CLKCTRL_PIX, CLKGATE);
+    reg::CLKCTRL_PIX::wr(reg::CLKCTRL_PIX::rd() & ~reg::CLKCTRL_PIX_::CLKGATE::mask);
     // BF_WR(CLKCTRL_PIX, DIV, 5);
 }
 
 static bool LCDIF_checkSendFinish() {
-    return BF_RD(LCDIF_STAT, TXFIFO_EMPTY);
+    return reg::LCDIF_STAT::B().TXFIFO_EMPTY;
 }
 
 static bool LCDIF_checkReceiveFinish() {
 
-    return BF_RD(LCDIF_STAT, RXFIFO_EMPTY);
+    return reg::LCDIF_STAT::B().RXFIFO_EMPTY;
 }
 
 static bool LCDIF_checkDMAFin() {
-    return (!((HW_APBH_CHn_DEBUG2(0).B.AHB_BYTES) && (HW_APBH_CHn_DEBUG2(0).B.APB_BYTES))) != 0;
+    return (!((reg::APBH_CHn_DEBUG2::B(0).AHB_BYTES) && (reg::APBH_CHn_DEBUG2::B(0).APB_BYTES))) != 0;
     // return ((HW_APBH_CHn_SEMA(0).B.INCREMENT_SEMA)==0);
 }
 
 static void LCDIF_EnableDMAChannel(bool enable) {
     if (enable) {
-        BF_CLRV(APBH_CTRL0, RESET_CHANNEL, 0x1);
+        reg::APBH_CTRL0::clr(reg::APBH_CTRL0_::RESET_CHANNEL::val(0x1));
     } else {
-        BF_SETV(APBH_CTRL0, RESET_CHANNEL, 0x1);
+        reg::APBH_CTRL0::set(reg::APBH_CTRL0_::RESET_CHANNEL::val(0x1));
     }
 }
 
 static void LCDIF_ResetDMAChannel() {
-    BF_SETV(APBH_CTRL0, RESET_CHANNEL, 0x1);
+    reg::APBH_CTRL0::set(reg::APBH_CTRL0_::RESET_CHANNEL::val(0x1));
 }
 
 static void LCDIF_SetTiming() {
 
-    BF_CS4(LCDIF_TIMING,
-           DATA_SETUP, nsToCycles(defaultTiming.DataSetup_ns, 1000000000UL / LCDIFFreq, 1),
-           DATA_HOLD, nsToCycles(defaultTiming.DataHold_ns, 1000000000UL / LCDIFFreq, 1),
-           CMD_SETUP, nsToCycles(defaultTiming.CmdSetup_ns, 1000000000UL / LCDIFFreq, 1),
-           CMD_HOLD, nsToCycles(defaultTiming.CmdHold_ns, 1000000000UL / LCDIFFreq, 1));
+    reg::LCDIF_TIMING::wr(reg::LCDIF_TIMING::rd() & ~(
+        reg::LCDIF_TIMING_::DATA_SETUP::mask |
+        reg::LCDIF_TIMING_::DATA_HOLD::mask |
+        reg::LCDIF_TIMING_::CMD_SETUP::mask |
+        reg::LCDIF_TIMING_::CMD_HOLD::mask));
+    reg::LCDIF_TIMING::wr(reg::LCDIF_TIMING::rd() | (
+        reg::LCDIF_TIMING_::DATA_SETUP::val(nsToCycles(defaultTiming.DataSetup_ns, 1000000000UL / LCDIFFreq, 1)) |
+        reg::LCDIF_TIMING_::DATA_HOLD::val(nsToCycles(defaultTiming.DataHold_ns, 1000000000UL / LCDIFFreq, 1)) |
+        reg::LCDIF_TIMING_::CMD_SETUP::val(nsToCycles(defaultTiming.CmdSetup_ns, 1000000000UL / LCDIFFreq, 1)) |
+        reg::LCDIF_TIMING_::CMD_HOLD::val(nsToCycles(defaultTiming.CmdHold_ns, 1000000000UL / LCDIFFreq, 1))));
 }
 
 static void LCDIF_DMAChainsInit() {
@@ -161,7 +185,7 @@ static void LCDIF_DMAChainsInit() {
     chains_wr.pNext = NULL;
     // chains_wr.pNext = &chains_emitIRQ;
     chains_wr.DMA_Semaphore = 1;
-    chains_wr.DMA_Command = BV_FLD(APBH_CHn_CMD, COMMAND, DMA_READ);
+    chains_wr.DMA_Command = reg::APBH_CHn_CMD_::COMMAND::val(reg::APBH_CHn_CMD_sym::COMMAND__DMA_READ);
     chains_wr.DMA_Chain = 0;
     chains_wr.DMA_IRQOnCompletion = 1;
     chains_wr.DMA_NANDLock = 0;
@@ -179,7 +203,7 @@ static void LCDIF_DMAChainsInit() {
 
     chains_emitIRQ.pNext = NULL;
     chains_emitIRQ.DMA_Semaphore = 1;
-    chains_emitIRQ.DMA_Command = BV_FLD(APBH_CHn_CMD, COMMAND, NO_DMA_XFER);
+    chains_emitIRQ.DMA_Command = reg::APBH_CHn_CMD_::COMMAND::val(reg::APBH_CHn_CMD_sym::COMMAND__NO_DMA_XFER);
     chains_emitIRQ.DMA_Chain = 0;
     chains_emitIRQ.DMA_IRQOnCompletion = 1;
     chains_emitIRQ.DMA_NANDLock = 0;
@@ -208,15 +232,15 @@ static void LCDIF_WriteCMD(uint8_t *dat, uint32_t len) {
 
     // opaFinish = false;
 
-    chains_wr.DMA_Command = BV_FLD(APBH_CHn_CMD, COMMAND, DMA_READ);
+    chains_wr.DMA_Command = reg::APBH_CHn_CMD_::COMMAND::val(reg::APBH_CHn_CMD_sym::COMMAND__DMA_READ);
     chains_wr.PioWord.B.DATA_SELECT = 0; // 0:command mode   1:data mode
     chains_wr.PioWord.B.READ_WRITEB = 0; // 0:write mode     1:read mode
     chains_wr.pDMABuffer = (uint32_t)dat;
     chains_wr.DMA_XferBytes = len;
     chains_wr.PioWord.B.COUNT = len;
 
-    BF_WRn(APBH_CHn_NXTCMDAR, 0, CMD_ADDR, (reg32_t)&chains_wr);
-    BW_APBH_CHn_SEMA_INCREMENT_SEMA(0, 1);
+    reg::APBH_CHn_NXTCMDAR::B(0).CMD_ADDR = (uint32_t)&chains_wr;
+    reg::APBH_CHn_SEMA::B(0).INCREMENT_SEMA = 1;
 
     driverWaitTrueF(LCDIF_checkDMAFin, 1000);
     driverWaitTrueF(LCDIF_checkSendFinish, 1000);
@@ -243,15 +267,15 @@ static void LCDIF_WriteDAT(uint8_t *dat, uint32_t len) {
     //    ;
 
     // opaFinish = false;
-    chains_wr.DMA_Command = BV_FLD(APBH_CHn_CMD, COMMAND, DMA_READ);
+    chains_wr.DMA_Command = reg::APBH_CHn_CMD_::COMMAND::val(reg::APBH_CHn_CMD_sym::COMMAND__DMA_READ);
     chains_wr.PioWord.B.DATA_SELECT = 1; // 0:command mode   1:data mode
     chains_wr.PioWord.B.READ_WRITEB = 0; // 0:write mode     1:read mode
     chains_wr.pDMABuffer = (uint32_t)dat;
     chains_wr.DMA_XferBytes = len;
     chains_wr.PioWord.B.COUNT = len;
 
-    BF_WRn(APBH_CHn_NXTCMDAR, 0, CMD_ADDR, (reg32_t)&chains_wr);
-    BW_APBH_CHn_SEMA_INCREMENT_SEMA(0, 1);
+    reg::APBH_CHn_NXTCMDAR::B(0).CMD_ADDR = (uint32_t)&chains_wr;
+    reg::APBH_CHn_SEMA::B(0).INCREMENT_SEMA = 1;
 
     driverWaitTrueF(LCDIF_checkDMAFin, 1000);
     driverWaitTrueF(LCDIF_checkSendFinish, 1000);
@@ -278,15 +302,15 @@ static void LCDIF_ReadDAT(uint8_t *dat, uint32_t len) {
     //     ;
 
     // opaFinish = false;
-    chains_wr.DMA_Command = BV_FLD(APBH_CHn_CMD, COMMAND, DMA_WRITE);
+    chains_wr.DMA_Command = reg::APBH_CHn_CMD_::COMMAND::val(reg::APBH_CHn_CMD_sym::COMMAND__DMA_WRITE);
     chains_wr.PioWord.B.DATA_SELECT = 1; // 0:command mode   1:data mode
     chains_wr.PioWord.B.READ_WRITEB = 1; // 0:write mode     1:read mode
     chains_wr.pDMABuffer = (uint32_t)dat;
     chains_wr.DMA_XferBytes = len;
     chains_wr.PioWord.B.COUNT = len;
 
-    BF_WRn(APBH_CHn_NXTCMDAR, 0, CMD_ADDR, (reg32_t)&chains_wr);
-    BW_APBH_CHn_SEMA_INCREMENT_SEMA(0, 1);
+    reg::APBH_CHn_NXTCMDAR::B(0).CMD_ADDR = (uint32_t)&chains_wr;
+    reg::APBH_CHn_SEMA::B(0).INCREMENT_SEMA = 1;
 
     // while ((HW_APBH_CHn_SEMA(0).B.INCREMENT_SEMA))
     //     ;
@@ -332,15 +356,15 @@ static void LCDIF_ReadDAT(uint8_t *dat, uint32_t len) {
 
 // Dispatched by name from interrupt_up.c (stays C); keep C linkage.
 extern "C" void portDISP_ISR() {
-    if (!BF_RD(APBH_CTRL1, CH0_CMDCMPLT_IRQ)) {
+    if (!reg::APBH_CTRL1::B().CH0_CMDCMPLT_IRQ) {
         INFO("LCDIF ERR IRQ, Overflow:%d, Underflow:%d\n",
-             BF_RD(LCDIF_CTRL1, OVERFLOW_IRQ),
-             BF_RD(LCDIF_CTRL1, UNDERFLOW_IRQ));
-        BF_CLR(LCDIF_CTRL1, OVERFLOW_IRQ);
-        BF_CLR(LCDIF_CTRL1, UNDERFLOW_IRQ);
+             reg::LCDIF_CTRL1::B().OVERFLOW_IRQ,
+             reg::LCDIF_CTRL1::B().UNDERFLOW_IRQ);
+        reg::LCDIF_CTRL1::clr(reg::LCDIF_CTRL1_::OVERFLOW_IRQ::mask);
+        reg::LCDIF_CTRL1::clr(reg::LCDIF_CTRL1_::UNDERFLOW_IRQ::mask);
     }
 
-    BF_CLR(APBH_CTRL1, CH0_CMDCMPLT_IRQ);
+    reg::APBH_CTRL1::clr(reg::APBH_CTRL1_::CH0_CMDCMPLT_IRQ::mask);
 
     opaFinish = true;
 }
@@ -549,24 +573,28 @@ void portDispDeviceInit() {
 
     portEnableIRQ(HW_IRQ_LCDIF_DMA, true);
     portEnableIRQ(HW_IRQ_LCDIF_ERROR, true);
-    BF_CS1(APBH_CTRL1, CH0_CMDCMPLT_IRQ_EN, 1);
+    reg::APBH_CTRL1::clr(reg::APBH_CTRL1_::CH0_CMDCMPLT_IRQ_EN::mask);
+    reg::APBH_CTRL1::set(reg::APBH_CTRL1_::CH0_CMDCMPLT_IRQ_EN::val(1));
     ;
 
-    BF_CLR(LCDIF_CTRL1, MODE86);
-    BF_CLR(LCDIF_CTRL1, LCD_CS_CTRL);
+    reg::LCDIF_CTRL1::clr(reg::LCDIF_CTRL1_::MODE86::mask);
+    reg::LCDIF_CTRL1::clr(reg::LCDIF_CTRL1_::LCD_CS_CTRL::mask);
 
-    BF_SET(LCDIF_CTRL1, OVERFLOW_IRQ_EN);
-    BF_SET(LCDIF_CTRL1, UNDERFLOW_IRQ_EN);
+    reg::LCDIF_CTRL1::set(reg::LCDIF_CTRL1_::OVERFLOW_IRQ_EN::mask);
+    reg::LCDIF_CTRL1::set(reg::LCDIF_CTRL1_::UNDERFLOW_IRQ_EN::mask);
 
-    BF_SET(LCDIF_CTRL1, BUSY_ENABLE);
+    reg::LCDIF_CTRL1::set(reg::LCDIF_CTRL1_::BUSY_ENABLE::mask);
 
-    BF_CS1(LCDIF_CTRL1, BYTE_PACKING_FORMAT, 0xF);
-    BF_CS1(LCDIF_CTRL1, READ_MODE_NUM_PACKED_SUBWORDS, 4);
-    BF_CS1(LCDIF_CTRL1, FIRST_READ_DUMMY, 1);
+    reg::LCDIF_CTRL1::clr(reg::LCDIF_CTRL1_::BYTE_PACKING_FORMAT::mask);
+    reg::LCDIF_CTRL1::set(reg::LCDIF_CTRL1_::BYTE_PACKING_FORMAT::val(0xF));
+    reg::LCDIF_CTRL1::clr(reg::LCDIF_CTRL1_::READ_MODE_NUM_PACKED_SUBWORDS::mask);
+    reg::LCDIF_CTRL1::set(reg::LCDIF_CTRL1_::READ_MODE_NUM_PACKED_SUBWORDS::val(4));
+    reg::LCDIF_CTRL1::clr(reg::LCDIF_CTRL1_::FIRST_READ_DUMMY::mask);
+    reg::LCDIF_CTRL1::set(reg::LCDIF_CTRL1_::FIRST_READ_DUMMY::val(1));
 
-    BF_CLR(LCDIF_CTRL1, RESET);
+    reg::LCDIF_CTRL1::clr(reg::LCDIF_CTRL1_::RESET::mask);
     portDelayus(120000);
-    BF_SET(LCDIF_CTRL1, RESET);
+    reg::LCDIF_CTRL1::set(reg::LCDIF_CTRL1_::RESET::mask);
 
     opaFinish = true;
 

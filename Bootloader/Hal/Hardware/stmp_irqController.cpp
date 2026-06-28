@@ -5,33 +5,34 @@
 
 
 #include "interrupt_up.h"
-#include "regs.h"
+#include "reg_model.hpp"
+#include "reg_values.hpp"
 #include "hw_irq.h"
-#include "regsicoll.h"
 #include <stdint.h>
 #include "debug.h"
 
 void portIRQCtrlInit()
 {
-    BF_CLR(ICOLL_CTRL, SFTRST);
-    BF_CLR(ICOLL_CTRL, CLKGATE);
-    BF_SET(ICOLL_CTRL, SFTRST);
-    while (!BF_RD(ICOLL_CTRL, CLKGATE))
+    reg::ICOLL_CTRL::clr(reg::ICOLL_CTRL_::SFTRST::mask);
+    reg::ICOLL_CTRL::clr(reg::ICOLL_CTRL_::CLKGATE::mask);
+    reg::ICOLL_CTRL::set(reg::ICOLL_CTRL_::SFTRST::mask);
+    while (!reg::ICOLL_CTRL::B().CLKGATE)
     {
         ;
     }
-    BF_CLR(ICOLL_CTRL, SFTRST);
-    BF_CLR(ICOLL_CTRL, CLKGATE);
+    reg::ICOLL_CTRL::clr(reg::ICOLL_CTRL_::SFTRST::mask);
+    reg::ICOLL_CTRL::clr(reg::ICOLL_CTRL_::CLKGATE::mask);
 
-    HW_ICOLL_CTRL_CLR(BM_ICOLL_CTRL_BYPASS_FSM | BM_ICOLL_CTRL_NO_NESTING | BM_ICOLL_CTRL_ARM_RSE_MODE);
+    reg::ICOLL_CTRL::clr(reg::ICOLL_CTRL_::BYPASS_FSM::mask | reg::ICOLL_CTRL_::NO_NESTING::mask | reg::ICOLL_CTRL_::ARM_RSE_MODE::mask);
 
-    HW_ICOLL_CTRL_SET(BM_ICOLL_CTRL_FIQ_FINAL_ENABLE |
-                      BM_ICOLL_CTRL_IRQ_FINAL_ENABLE |
-                      BM_ICOLL_CTRL_ARM_RSE_MODE |
-                      BM_ICOLL_CTRL_NO_NESTING);
+    reg::ICOLL_CTRL::set(reg::ICOLL_CTRL_::FIQ_FINAL_ENABLE::mask |
+                      reg::ICOLL_CTRL_::IRQ_FINAL_ENABLE::mask |
+                      reg::ICOLL_CTRL_::ARM_RSE_MODE::mask |
+                      reg::ICOLL_CTRL_::NO_NESTING::mask);
 
-    BF_CS1(ICOLL_VBASE, TABLE_ADDRESS, 0);
-    BW_ICOLL_CTRL_VECTOR_PITCH(BV_ICOLL_CTRL_VECTOR_PITCH__DEFAULT_BY4);
+    reg::ICOLL_VBASE::clr(reg::ICOLL_VBASE_::TABLE_ADDRESS::mask);
+    reg::ICOLL_VBASE::set(reg::ICOLL_VBASE_::TABLE_ADDRESS::val(0));
+    reg::ICOLL_CTRL::B().VECTOR_PITCH = reg::ICOLL_CTRL_sym::VECTOR_PITCH__DEFAULT_BY4;
 
 }
 
@@ -130,14 +131,14 @@ void portAckIRQ(IRQNumber IRQNum)
 //    BF_SETV(ICOLL_VECTOR, IRQVECTOR, IRQNum);
     //BF_SETV(ICOLL_LEVELACK, IRQLEVELACK, 
     //   1 << ((*((volatile unsigned int *)HW_ICOLL_PRIORITYn_ADDR(HW_ICOLL_STAT.B.VECTOR_NUMBER / 4)) >> (8 * (HW_ICOLL_STAT.B.VECTOR_NUMBER % 4))) & 0x03)); 
-    BF_SETV(ICOLL_LEVELACK, IRQLEVELACK, 1);
+    reg::ICOLL_LEVELACK::B().IRQLEVELACK = 1;
 }
 
 void portEnableIRQ(unsigned int IRQNum, unsigned int enable) 
 {
     //if (IRQNum > 63)
      //   return;
-    volatile unsigned int *baseAddress = (unsigned int *)HW_ICOLL_PRIORITYn_ADDR((IRQNum / 4));
+    volatile unsigned int *baseAddress = (unsigned int *)reg::ICOLL_PRIORITYn::address(IRQNum / 4);
     if (enable){
         baseAddress[1] = (0x4 << ((IRQNum % 4) * 8));
     } else {

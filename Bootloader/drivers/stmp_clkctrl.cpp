@@ -5,10 +5,7 @@
 
 #include "board_up.h"
 #include "clkctrl_up.h"
-#include "regsclkctrl.h"
-#include "regsdigctl.h"
-
-#include "regspower.h"
+#include "reg_model.hpp"
 
 #include "debug.h"
 
@@ -20,19 +17,19 @@ int g_slowdown_enable = 0;
 static uint8_t min_cpu_frac_sd = CPU_DIVIDE_IDLE_INITIAL;
 
 static void PLLEnable(bool enable) {
-    BF_SETV(CLKCTRL_PLLCTRL0, POWER, enable);
+    reg::CLKCTRL_PLLCTRL0::set(reg::CLKCTRL_PLLCTRL0_::POWER::val(enable));
     portDelayus(20);
 }
 
-void setHCLKDivider(uint32_t div) 
+void setHCLKDivider(uint32_t div)
 {
     if (!div) {
         return;
     }
-    while(BF_RD(CLKCTRL_HBUS, BUSY));
-    BF_SETV(CLKCTRL_HBUS, DIV, div);
-    while(BF_RD(CLKCTRL_HBUS, BUSY));
-    BF_CLRV(CLKCTRL_HBUS, DIV, BF_RD(CLKCTRL_HBUS, DIV) ^ div);
+    while(reg::CLKCTRL_HBUS::B().BUSY);
+    reg::CLKCTRL_HBUS::set(reg::CLKCTRL_HBUS_::DIV::val(div));
+    while(reg::CLKCTRL_HBUS::B().BUSY);
+    reg::CLKCTRL_HBUS::clr(reg::CLKCTRL_HBUS_::DIV::val(reg::CLKCTRL_HBUS::B().DIV ^ div));
 
 }
 
@@ -89,9 +86,9 @@ void setCPUDivider(uint32_t div)
         return;
     }
     //while (BF_RD(CLKCTRL_CPU, BUSY_REF_CPU));
-    BF_SETV(CLKCTRL_CPU, DIV_CPU, div);
+    reg::CLKCTRL_CPU::set(reg::CLKCTRL_CPU_::DIV_CPU::val(div));
     //while (BF_RD(CLKCTRL_CPU, BUSY_REF_CPU));
-    BF_CLRV(CLKCTRL_CPU, DIV_CPU, BF_RD(CLKCTRL_CPU, DIV_CPU) ^ div);
+    reg::CLKCTRL_CPU::clr(reg::CLKCTRL_CPU_::DIV_CPU::val(reg::CLKCTRL_CPU::B().DIV_CPU ^ div));
 
     //INFO("CPU new Div:%d\n", BF_RD(CLKCTRL_CPU, DIV_CPU));
 }
@@ -102,28 +99,30 @@ void setCPUFracDivider(uint32_t div) {
         return;
     }
     bool bypass;
-    bypass = BF_RD(CLKCTRL_CLKSEQ, BYPASS_CPU);
-    BF_SET(CLKCTRL_CLKSEQ, BYPASS_CPU);
-    BF_WR(CLKCTRL_FRAC, CPUFRAC, div);
+    bypass = reg::CLKCTRL_CLKSEQ::B().BYPASS_CPU;
+    reg::CLKCTRL_CLKSEQ::set(reg::CLKCTRL_CLKSEQ_::BYPASS_CPU::mask);
+    // BW_CLKCTRL_FRAC_CPUFRAC == BF_CS1 (atomic clear-field-then-set-value).
+    reg::CLKCTRL_FRAC::clr(reg::CLKCTRL_FRAC_::CPUFRAC::mask);
+    reg::CLKCTRL_FRAC::set(reg::CLKCTRL_FRAC_::CPUFRAC::val(div));
     if(!bypass){
-        BF_CLR(CLKCTRL_CLKSEQ, BYPASS_CPU);
+        reg::CLKCTRL_CLKSEQ::clr(reg::CLKCTRL_CLKSEQ_::BYPASS_CPU::mask);
     }
 }
 
 static void setCPU_HFreqDomain(bool enable) {
     if (enable) {
-        
-        BF_CLR(CLKCTRL_CLKSEQ, BYPASS_CPU);
+
+        reg::CLKCTRL_CLKSEQ::clr(reg::CLKCTRL_CLKSEQ_::BYPASS_CPU::mask);
     } else {
-        BF_SET(CLKCTRL_CLKSEQ, BYPASS_CPU);
+        reg::CLKCTRL_CLKSEQ::set(reg::CLKCTRL_CLKSEQ_::BYPASS_CPU::mask);
     }
 }
 
 static void enableUSBClock(bool enable) {
     if (enable) {
-        BF_SET(CLKCTRL_PLLCTRL0, EN_USB_CLKS);
+        reg::CLKCTRL_PLLCTRL0::set(reg::CLKCTRL_PLLCTRL0_::EN_USB_CLKS::mask);
     } else {
-        BF_CLR(CLKCTRL_PLLCTRL0, EN_USB_CLKS);
+        reg::CLKCTRL_PLLCTRL0::clr(reg::CLKCTRL_PLLCTRL0_::EN_USB_CLKS::mask);
     }
 }
 
@@ -133,8 +132,8 @@ void portCLKCtrlInit(void) {
 
 
     PLLEnable(true);
-    
-    BF_CLR(CLKCTRL_FRAC, CLKGATECPU);
+
+    reg::CLKCTRL_FRAC::clr(reg::CLKCTRL_FRAC_::CLKGATECPU::mask);
     
 
     setCPUDivider(5);
@@ -150,7 +149,7 @@ void portCLKCtrlInit(void) {
 
 void portGetCoreFreqDIV(uint32_t *CPU_DIV, uint32_t *CPU_Frac, uint32_t *HCLK_DIV)
 {
-    *CPU_DIV = BF_RD(CLKCTRL_CPU, DIV_CPU);
-    *CPU_Frac = BF_RD(CLKCTRL_FRAC, CPUFRAC);
-    *HCLK_DIV = BF_RD(CLKCTRL_HBUS, DIV);
+    *CPU_DIV = reg::CLKCTRL_CPU::B().DIV_CPU;
+    *CPU_Frac = reg::CLKCTRL_FRAC::B().CPUFRAC;
+    *HCLK_DIV = reg::CLKCTRL_HBUS::B().DIV;
 }

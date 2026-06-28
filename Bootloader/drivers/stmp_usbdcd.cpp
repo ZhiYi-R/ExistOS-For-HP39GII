@@ -33,11 +33,7 @@
 
 #include "device/dcd.h"
 
-#include "regsusbctrl.h"
-#include "regsusbphy.h"
-#include "regspower.h"
-#include "regsclkctrl.h"
-#include "regsdigctl.h"
+#include "reg_model.hpp"
 
 #include "hw_irq.h"
 
@@ -251,6 +247,10 @@ typedef struct
 // Therefore QHD_MAX is 2 x max endpoint count
 #define QHD_MAX (4 * 2)
 
+// USB controller register block base (REGS_BASE 0x80000000 + 0x80000); this
+// MMIO overlay lives outside the typed reg model (accessed via dcd_registers_t).
+static constexpr uintptr_t REGS_USBCTRL_BASE = 0x80080000u;
+
 static const dcd_controller_t _dcd_controller[] =
 {
     {.regs = (dcd_registers_t *)REGS_USBCTRL_BASE, .irqnum = VECTOR_IRQ_USB_CTRL, .ep_count = 4}
@@ -338,37 +338,37 @@ static void bus_reset(uint8_t rhport) {
 
 void usb_phy_clkctrl_enable(bool enable) {
     if (enable)
-        BF_SET(CLKCTRL_PLLCTRL0, EN_USB_CLKS);
+        reg::CLKCTRL_PLLCTRL0::set(reg::CLKCTRL_PLLCTRL0_::EN_USB_CLKS::mask);
     else
-        BF_CLR(CLKCTRL_PLLCTRL0, EN_USB_CLKS);
+        reg::CLKCTRL_PLLCTRL0::clr(reg::CLKCTRL_PLLCTRL0_::EN_USB_CLKS::mask);
 }
 
 bool usb_phy_clkctrl_is_usb_enabled(void) {
-    return BF_RD(CLKCTRL_PLLCTRL0, EN_USB_CLKS);
+    return reg::CLKCTRL_PLLCTRL0::B().EN_USB_CLKS;
 }
 
 void usb_phy_enable_usb_controller(bool enable) {
     if (enable)
-        BF_CLR(DIGCTL_CTRL, USB_CLKGATE);
+        reg::DIGCTL_CTRL::clr(reg::DIGCTL_CTRL_::USB_CLKGATE::mask);
     else
-        BF_SET(DIGCTL_CTRL, USB_CLKGATE);
+        reg::DIGCTL_CTRL::set(reg::DIGCTL_CTRL_::USB_CLKGATE::mask);
 }
 
 void usb_phy_pwr_enable(bool enable) {
     if (enable) {
 
-        
-        HW_USBPHY_PWD_CLR(0xffffffff);
-        
+
+        reg::USBPHY_PWD::clr(0xffffffff);
+
     } else {
 
-        HW_USBPHY_PWD_SET(0xffffffff);
+        reg::USBPHY_PWD::set(0xffffffff);
 
     }
 }
 
 bool usb_phy_power_usb_detect(void) {
-    return BF_RD(POWER_STS, VDD5V_GT_VDDIO);
+    return reg::POWER_STS::B().VDD5V_GT_VDDIO;
 }
 
 void usb_phy_enable(bool on) {

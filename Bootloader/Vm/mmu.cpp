@@ -7,7 +7,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "regsdigctl.h"
+#include "reg_model.hpp"
 
 #include "SystemConfig.h"
 #include "mmu.h"
@@ -193,13 +193,13 @@ void mmu_enable(uint32_t base)
 static inline void SetMPTELoc(uint32_t mpte, uint32_t seg)
 {
     VM_INFO("mv mpte %d to seg %d\n", mpte, seg);
-    BF_WRn(DIGCTL_MPTEn_LOC, mpte, LOC, seg);
+    reg::DIGCTL_MPTEn_LOC::B(mpte).LOC = seg;
     
 }
 
 static inline uint32_t GetMPTELoc(uint32_t mpte)
 {
-    return BF_RDn(DIGCTL_MPTEn_LOC, mpte, LOC);
+    return reg::DIGCTL_MPTEn_LOC::B(mpte).LOC;
 }
 
 static inline void SetL1PTE(uint32_t pte, uint32_t interpret, uint32_t targetAddr, uint32_t domain, 

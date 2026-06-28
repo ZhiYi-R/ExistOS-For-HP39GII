@@ -6,7 +6,7 @@
 
 #include "keyboard_up.h"
 
-#include "regspinctrl.h"
+#include "reg_model.hpp"
 
 #include "debug.h"
 
@@ -22,78 +22,82 @@ void portKeyboardGPIOInit()
     unsigned int tmp_DOUT;
     unsigned int tmp_DOE;
     
-    BF_CS6(
-        PINCTRL_MUXSEL3,
-        BANK1_PIN22, 3,
-        BANK1_PIN23, 3,
-        BANK1_PIN24, 3,
-        BANK1_PIN25, 3,
-        BANK1_PIN26, 3,
-        BANK1_PIN27, 3);
-    BF_CS6(
-        PINCTRL_MUXSEL4,
-        BANK2_PIN02, 3,
-        BANK2_PIN03, 3,
-        BANK2_PIN04, 3,
-        BANK2_PIN05, 3,
-        BANK2_PIN06, 3,
-        BANK2_PIN07, 3);
-    BF_CS1(
-        PINCTRL_MUXSEL4,
-        BANK2_PIN08, 3);
+    reg::PINCTRL_MUXSEL3::clr(reg::PINCTRL_MUXSEL3_::BANK1_PIN22::mask |
+                              reg::PINCTRL_MUXSEL3_::BANK1_PIN23::mask |
+                              reg::PINCTRL_MUXSEL3_::BANK1_PIN24::mask |
+                              reg::PINCTRL_MUXSEL3_::BANK1_PIN25::mask |
+                              reg::PINCTRL_MUXSEL3_::BANK1_PIN26::mask |
+                              reg::PINCTRL_MUXSEL3_::BANK1_PIN27::mask);
+    reg::PINCTRL_MUXSEL3::set(reg::PINCTRL_MUXSEL3_::BANK1_PIN22::val(3) |
+                              reg::PINCTRL_MUXSEL3_::BANK1_PIN23::val(3) |
+                              reg::PINCTRL_MUXSEL3_::BANK1_PIN24::val(3) |
+                              reg::PINCTRL_MUXSEL3_::BANK1_PIN25::val(3) |
+                              reg::PINCTRL_MUXSEL3_::BANK1_PIN26::val(3) |
+                              reg::PINCTRL_MUXSEL3_::BANK1_PIN27::val(3));
+    reg::PINCTRL_MUXSEL4::clr(reg::PINCTRL_MUXSEL4_::BANK2_PIN02::mask |
+                              reg::PINCTRL_MUXSEL4_::BANK2_PIN03::mask |
+                              reg::PINCTRL_MUXSEL4_::BANK2_PIN04::mask |
+                              reg::PINCTRL_MUXSEL4_::BANK2_PIN05::mask |
+                              reg::PINCTRL_MUXSEL4_::BANK2_PIN06::mask |
+                              reg::PINCTRL_MUXSEL4_::BANK2_PIN07::mask);
+    reg::PINCTRL_MUXSEL4::set(reg::PINCTRL_MUXSEL4_::BANK2_PIN02::val(3) |
+                              reg::PINCTRL_MUXSEL4_::BANK2_PIN03::val(3) |
+                              reg::PINCTRL_MUXSEL4_::BANK2_PIN04::val(3) |
+                              reg::PINCTRL_MUXSEL4_::BANK2_PIN05::val(3) |
+                              reg::PINCTRL_MUXSEL4_::BANK2_PIN06::val(3) |
+                              reg::PINCTRL_MUXSEL4_::BANK2_PIN07::val(3));
+    reg::PINCTRL_MUXSEL4::clr(reg::PINCTRL_MUXSEL4_::BANK2_PIN08::mask);
+    reg::PINCTRL_MUXSEL4::set(reg::PINCTRL_MUXSEL4_::BANK2_PIN08::val(3));
 
-    BF_CS1(
-        PINCTRL_MUXSEL4,
-        BANK2_PIN14, 3);
+    reg::PINCTRL_MUXSEL4::clr(reg::PINCTRL_MUXSEL4_::BANK2_PIN14::mask);
+    reg::PINCTRL_MUXSEL4::set(reg::PINCTRL_MUXSEL4_::BANK2_PIN14::val(3));
 
-    BF_CS1(
-        PINCTRL_MUXSEL0,
-        BANK0_PIN14, 3);
+    reg::PINCTRL_MUXSEL0::clr(reg::PINCTRL_MUXSEL0_::BANK0_PIN14::mask);
+    reg::PINCTRL_MUXSEL0::set(reg::PINCTRL_MUXSEL0_::BANK0_PIN14::val(3));
 
-    BF_CS1(
-        PINCTRL_MUXSEL1,
-        BANK0_PIN20, 3);
+    reg::PINCTRL_MUXSEL1::clr(reg::PINCTRL_MUXSEL1_::BANK0_PIN20::mask);
+    reg::PINCTRL_MUXSEL1::set(reg::PINCTRL_MUXSEL1_::BANK0_PIN20::val(3));
 
     //col setting
-    tmp_DOUT = BF_RD(PINCTRL_DOUT1, DOUT);
-    tmp_DOE = BF_RD(PINCTRL_DOE1, DOE);
+    tmp_DOUT = reg::PINCTRL_DOUT1::B().DOUT;
+    tmp_DOE = reg::PINCTRL_DOE1::B().DOE;
     tmp_DOUT |= ((1 << 22) | (1 << 23) | (1 << 25) | (1 << 26) | (1 << 27));
     tmp_DOE &= ~((1 << 22) | (1 << 23) | (1 << 25) | (1 << 26) | (1 << 27));
-    BF_CS1(PINCTRL_DOUT1, DOUT, tmp_DOUT);
-    BF_CS1(PINCTRL_DOE1, DOE, tmp_DOE);
+    reg::PINCTRL_DOUT1::clr(reg::PINCTRL_DOUT1_::DOUT::mask); reg::PINCTRL_DOUT1::set(reg::PINCTRL_DOUT1_::DOUT::val(tmp_DOUT));
+    reg::PINCTRL_DOE1::clr(reg::PINCTRL_DOE1_::DOE::mask); reg::PINCTRL_DOE1::set(reg::PINCTRL_DOE1_::DOE::val(tmp_DOE));
 
     //row setting
-    tmp_DOUT = BF_RD(PINCTRL_DOUT2, DOUT);
-    tmp_DOE = BF_RD(PINCTRL_DOE2, DOE);
+    tmp_DOUT = reg::PINCTRL_DOUT2::B().DOUT;
+    tmp_DOE = reg::PINCTRL_DOE2::B().DOE;
     tmp_DOUT &= ~((1 << 14) | (1 << 8) | (1 << 7) | (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2));
     tmp_DOE |= ((1 << 14) | (1 << 8) | (1 << 7) | (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2));
-    BF_CS1(PINCTRL_DOUT2, DOUT, tmp_DOUT);
-    BF_CS1(PINCTRL_DOE2, DOE, tmp_DOE);
-    BF_CS1(PINCTRL_DOUT2, DOUT, tmp_DOUT);
+    reg::PINCTRL_DOUT2::clr(reg::PINCTRL_DOUT2_::DOUT::mask); reg::PINCTRL_DOUT2::set(reg::PINCTRL_DOUT2_::DOUT::val(tmp_DOUT));
+    reg::PINCTRL_DOE2::clr(reg::PINCTRL_DOE2_::DOE::mask); reg::PINCTRL_DOE2::set(reg::PINCTRL_DOE2_::DOE::val(tmp_DOE));
+    reg::PINCTRL_DOUT2::clr(reg::PINCTRL_DOUT2_::DOUT::mask); reg::PINCTRL_DOUT2::set(reg::PINCTRL_DOUT2_::DOUT::val(tmp_DOUT));
 
-    tmp_DOUT = BF_RD(PINCTRL_DOUT1, DOUT);
-    tmp_DOE = BF_RD(PINCTRL_DOE1, DOE);
+    tmp_DOUT = reg::PINCTRL_DOUT1::B().DOUT;
+    tmp_DOE = reg::PINCTRL_DOE1::B().DOE;
     tmp_DOUT &= ~((1 << 24));
     tmp_DOE |= ((1 << 24));
-    BF_CS1(PINCTRL_DOUT1, DOUT, tmp_DOUT);
-    BF_CS1(PINCTRL_DOE1, DOE, tmp_DOE);
-    BF_CS1(PINCTRL_DOUT1, DOUT, tmp_DOUT);
+    reg::PINCTRL_DOUT1::clr(reg::PINCTRL_DOUT1_::DOUT::mask); reg::PINCTRL_DOUT1::set(reg::PINCTRL_DOUT1_::DOUT::val(tmp_DOUT));
+    reg::PINCTRL_DOE1::clr(reg::PINCTRL_DOE1_::DOE::mask); reg::PINCTRL_DOE1::set(reg::PINCTRL_DOE1_::DOE::val(tmp_DOE));
+    reg::PINCTRL_DOUT1::clr(reg::PINCTRL_DOUT1_::DOUT::mask); reg::PINCTRL_DOUT1::set(reg::PINCTRL_DOUT1_::DOUT::val(tmp_DOUT));
 
-    tmp_DOUT = BF_RD(PINCTRL_DOUT0, DOUT);
-    tmp_DOE = BF_RD(PINCTRL_DOE0, DOE);
+    tmp_DOUT = reg::PINCTRL_DOUT0::B().DOUT;
+    tmp_DOE = reg::PINCTRL_DOE0::B().DOE;
     tmp_DOUT &= ~((1 << 20));
     tmp_DOE |= ((1 << 20));
-    BF_CS1(PINCTRL_DOUT0, DOUT, tmp_DOUT);
-    BF_CS1(PINCTRL_DOE0, DOE, tmp_DOE);
-    BF_CS1(PINCTRL_DOUT0, DOUT, tmp_DOUT);
+    reg::PINCTRL_DOUT0::clr(reg::PINCTRL_DOUT0_::DOUT::mask); reg::PINCTRL_DOUT0::set(reg::PINCTRL_DOUT0_::DOUT::val(tmp_DOUT));
+    reg::PINCTRL_DOE0::clr(reg::PINCTRL_DOE0_::DOE::mask); reg::PINCTRL_DOE0::set(reg::PINCTRL_DOE0_::DOE::val(tmp_DOE));
+    reg::PINCTRL_DOUT0::clr(reg::PINCTRL_DOUT0_::DOUT::mask); reg::PINCTRL_DOUT0::set(reg::PINCTRL_DOUT0_::DOUT::val(tmp_DOUT));
 
     //key ON
-    tmp_DOUT = BF_RD(PINCTRL_DOUT0, DOUT);
-    tmp_DOE = BF_RD(PINCTRL_DOE0, DOE);
+    tmp_DOUT = reg::PINCTRL_DOUT0::B().DOUT;
+    tmp_DOE = reg::PINCTRL_DOE0::B().DOE;
     tmp_DOUT |= ((1 << 14));
     tmp_DOE &= ~((1 << 14));
-    BF_CS1(PINCTRL_DOUT0, DOUT, tmp_DOUT);
-    BF_CS1(PINCTRL_DOE0, DOE, tmp_DOE);
+    reg::PINCTRL_DOUT0::clr(reg::PINCTRL_DOUT0_::DOUT::mask); reg::PINCTRL_DOUT0::set(reg::PINCTRL_DOUT0_::DOUT::val(tmp_DOUT));
+    reg::PINCTRL_DOE0::clr(reg::PINCTRL_DOE0_::DOE::mask); reg::PINCTRL_DOE0::set(reg::PINCTRL_DOE0_::DOE::val(tmp_DOE));
     
 }
 
@@ -101,52 +105,52 @@ static void set_row_line(int row_line) {
     unsigned int tmp_DOUT;
     unsigned int tmp_DOE;
 
-    tmp_DOUT = BF_RD(PINCTRL_DOUT2, DOUT);
-    tmp_DOE = BF_RD(PINCTRL_DOE2, DOE);
+    tmp_DOUT = reg::PINCTRL_DOUT2::B().DOUT;
+    tmp_DOE = reg::PINCTRL_DOE2::B().DOE;
     tmp_DOUT |= ((1 << 14) | (1 << 8) | (1 << 7) | (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2));
     tmp_DOE |= ((1 << 14) | (1 << 8) | (1 << 7) | (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2));
-    BF_CS1(PINCTRL_DOUT2, DOUT, tmp_DOUT);
-    BF_CS1(PINCTRL_DOE2, DOE, tmp_DOE);
-    BF_CS1(PINCTRL_DOUT2, DOUT, tmp_DOUT);
+    reg::PINCTRL_DOUT2::clr(reg::PINCTRL_DOUT2_::DOUT::mask); reg::PINCTRL_DOUT2::set(reg::PINCTRL_DOUT2_::DOUT::val(tmp_DOUT));
+    reg::PINCTRL_DOE2::clr(reg::PINCTRL_DOE2_::DOE::mask); reg::PINCTRL_DOE2::set(reg::PINCTRL_DOE2_::DOE::val(tmp_DOE));
+    reg::PINCTRL_DOUT2::clr(reg::PINCTRL_DOUT2_::DOUT::mask); reg::PINCTRL_DOUT2::set(reg::PINCTRL_DOUT2_::DOUT::val(tmp_DOUT));
 
-    tmp_DOUT = BF_RD(PINCTRL_DOUT1, DOUT);
-    tmp_DOE = BF_RD(PINCTRL_DOE1, DOE);
+    tmp_DOUT = reg::PINCTRL_DOUT1::B().DOUT;
+    tmp_DOE = reg::PINCTRL_DOE1::B().DOE;
     tmp_DOUT |= ((1 << 24));
     tmp_DOE |= ((1 << 24));
-    BF_CS1(PINCTRL_DOUT1, DOUT, tmp_DOUT);
-    BF_CS1(PINCTRL_DOE1, DOE, tmp_DOE);
-    BF_CS1(PINCTRL_DOUT1, DOUT, tmp_DOUT);
+    reg::PINCTRL_DOUT1::clr(reg::PINCTRL_DOUT1_::DOUT::mask); reg::PINCTRL_DOUT1::set(reg::PINCTRL_DOUT1_::DOUT::val(tmp_DOUT));
+    reg::PINCTRL_DOE1::clr(reg::PINCTRL_DOE1_::DOE::mask); reg::PINCTRL_DOE1::set(reg::PINCTRL_DOE1_::DOE::val(tmp_DOE));
+    reg::PINCTRL_DOUT1::clr(reg::PINCTRL_DOUT1_::DOUT::mask); reg::PINCTRL_DOUT1::set(reg::PINCTRL_DOUT1_::DOUT::val(tmp_DOUT));
 
-    tmp_DOUT = BF_RD(PINCTRL_DOUT0, DOUT);
-    tmp_DOE = BF_RD(PINCTRL_DOE0, DOE);
+    tmp_DOUT = reg::PINCTRL_DOUT0::B().DOUT;
+    tmp_DOE = reg::PINCTRL_DOE0::B().DOE;
     tmp_DOUT |= ((1 << 20));
     tmp_DOE |= ((1 << 20));
-    BF_CS1(PINCTRL_DOUT0, DOUT, tmp_DOUT);
-    BF_CS1(PINCTRL_DOE0, DOE, tmp_DOE);
-    BF_CS1(PINCTRL_DOUT0, DOUT, tmp_DOUT);
+    reg::PINCTRL_DOUT0::clr(reg::PINCTRL_DOUT0_::DOUT::mask); reg::PINCTRL_DOUT0::set(reg::PINCTRL_DOUT0_::DOUT::val(tmp_DOUT));
+    reg::PINCTRL_DOE0::clr(reg::PINCTRL_DOE0_::DOE::mask); reg::PINCTRL_DOE0::set(reg::PINCTRL_DOE0_::DOE::val(tmp_DOE));
+    reg::PINCTRL_DOUT0::clr(reg::PINCTRL_DOUT0_::DOUT::mask); reg::PINCTRL_DOUT0::set(reg::PINCTRL_DOUT0_::DOUT::val(tmp_DOUT));
 
     switch (row_line) {
     case 5:
-        tmp_DOUT = BF_RD(PINCTRL_DOUT1, DOUT);
-        tmp_DOE = BF_RD(PINCTRL_DOE1, DOE);
+        tmp_DOUT = reg::PINCTRL_DOUT1::B().DOUT;
+        tmp_DOE = reg::PINCTRL_DOE1::B().DOE;
         tmp_DOUT &= ~((1 << 24));
         tmp_DOE |= ((1 << 24));
-        BF_CS1(PINCTRL_DOUT1, DOUT, tmp_DOUT);
-        BF_CS1(PINCTRL_DOE1, DOE, tmp_DOE);
-        BF_CS1(PINCTRL_DOUT1, DOUT, tmp_DOUT);
+        reg::PINCTRL_DOUT1::clr(reg::PINCTRL_DOUT1_::DOUT::mask); reg::PINCTRL_DOUT1::set(reg::PINCTRL_DOUT1_::DOUT::val(tmp_DOUT));
+        reg::PINCTRL_DOE1::clr(reg::PINCTRL_DOE1_::DOE::mask); reg::PINCTRL_DOE1::set(reg::PINCTRL_DOE1_::DOE::val(tmp_DOE));
+        reg::PINCTRL_DOUT1::clr(reg::PINCTRL_DOUT1_::DOUT::mask); reg::PINCTRL_DOUT1::set(reg::PINCTRL_DOUT1_::DOUT::val(tmp_DOUT));
         break;
     case 8:
-        tmp_DOUT = BF_RD(PINCTRL_DOUT0, DOUT);
-        tmp_DOE = BF_RD(PINCTRL_DOE0, DOE);
+        tmp_DOUT = reg::PINCTRL_DOUT0::B().DOUT;
+        tmp_DOE = reg::PINCTRL_DOE0::B().DOE;
         tmp_DOUT &= ~((1 << 20));
         tmp_DOE |= ((1 << 20));
-        BF_CS1(PINCTRL_DOUT0, DOUT, tmp_DOUT);
-        BF_CS1(PINCTRL_DOE0, DOE, tmp_DOE);
-        BF_CS1(PINCTRL_DOUT0, DOUT, tmp_DOUT);
+        reg::PINCTRL_DOUT0::clr(reg::PINCTRL_DOUT0_::DOUT::mask); reg::PINCTRL_DOUT0::set(reg::PINCTRL_DOUT0_::DOUT::val(tmp_DOUT));
+        reg::PINCTRL_DOE0::clr(reg::PINCTRL_DOE0_::DOE::mask); reg::PINCTRL_DOE0::set(reg::PINCTRL_DOE0_::DOE::val(tmp_DOE));
+        reg::PINCTRL_DOUT0::clr(reg::PINCTRL_DOUT0_::DOUT::mask); reg::PINCTRL_DOUT0::set(reg::PINCTRL_DOUT0_::DOUT::val(tmp_DOUT));
         break;
     default:
-        tmp_DOUT = BF_RD(PINCTRL_DOUT2, DOUT);
-        tmp_DOE = BF_RD(PINCTRL_DOE2, DOE);
+        tmp_DOUT = reg::PINCTRL_DOUT2::B().DOUT;
+        tmp_DOE = reg::PINCTRL_DOE2::B().DOE;
         switch (row_line) {
         case 0:
             tmp_DOUT &= ~((1 << 6));
@@ -174,9 +178,9 @@ static void set_row_line(int row_line) {
             break;
         }
         tmp_DOE |= ((1 << 14) | (1 << 8) | (1 << 7) | (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2));
-        BF_CS1(PINCTRL_DOUT2, DOUT, tmp_DOUT);
-        BF_CS1(PINCTRL_DOE2, DOE, tmp_DOE);
-        BF_CS1(PINCTRL_DOUT2, DOUT, tmp_DOUT);
+        reg::PINCTRL_DOUT2::clr(reg::PINCTRL_DOUT2_::DOUT::mask); reg::PINCTRL_DOUT2::set(reg::PINCTRL_DOUT2_::DOUT::val(tmp_DOUT));
+        reg::PINCTRL_DOE2::clr(reg::PINCTRL_DOE2_::DOE::mask); reg::PINCTRL_DOE2::set(reg::PINCTRL_DOE2_::DOE::val(tmp_DOE));
+        reg::PINCTRL_DOUT2::clr(reg::PINCTRL_DOUT2_::DOUT::mask); reg::PINCTRL_DOUT2::set(reg::PINCTRL_DOUT2_::DOUT::val(tmp_DOUT));
         break;
     }
 }
@@ -185,15 +189,15 @@ static void set_row_line(int row_line) {
 static unsigned int read_col_line(int col_line) {
     switch (col_line) {
     case 0:
-        return (BF_RD(PINCTRL_DIN1, DIN) >> 23) & 1;
+        return (reg::PINCTRL_DIN1::B().DIN >> 23) & 1;
     case 1:
-        return (BF_RD(PINCTRL_DIN1, DIN) >> 25) & 1;
+        return (reg::PINCTRL_DIN1::B().DIN >> 25) & 1;
     case 2:
-        return (BF_RD(PINCTRL_DIN1, DIN) >> 27) & 1;
+        return (reg::PINCTRL_DIN1::B().DIN >> 27) & 1;
     case 3:
-        return (BF_RD(PINCTRL_DIN1, DIN) >> 26) & 1;
+        return (reg::PINCTRL_DIN1::B().DIN >> 26) & 1;
     case 4:
-        return (BF_RD(PINCTRL_DIN1, DIN) >> 22) & 1;
+        return (reg::PINCTRL_DIN1::B().DIN >> 22) & 1;
     default:
         break;
     }
@@ -234,7 +238,7 @@ void portKeyScan()
         }
     }
 
-    key_matrix[0][10] = ((BF_RD(PINCTRL_DIN0, DIN) >> 14) & 1);
+    key_matrix[0][10] = ((reg::PINCTRL_DIN0::B().DIN >> 14) & 1);
 
     if(key_matrix_last[0][10] != key_matrix[0][10])
     {

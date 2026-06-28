@@ -83,6 +83,86 @@ typedef union {
     reg32_t  U;
     struct
     {
+        reg32_t  CMD_ADDR;
+    } B;
+} hw_apbh_chn_curcmdar_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        reg32_t  CMD_ADDR;
+    } B;
+} hw_apbh_chn_nxtcmdar_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned COMMAND         :  2;
+        unsigned CHAIN           :  1;
+        unsigned IRQONCMPLT      :  1;
+        unsigned NANDLOCK        :  1;
+        unsigned NANDWAIT4READY  :  1;
+        unsigned SEMAPHORE       :  1;
+        unsigned WAIT4ENDCMD     :  1;
+        unsigned RSVD1           :  4;
+        unsigned CMDWORDS        :  4;
+        reg16_t  XFER_COUNT;
+    } B;
+} hw_apbh_chn_cmd_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        reg32_t  ADDRESS;
+    } B;
+} hw_apbh_chn_bar_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        reg8_t   INCREMENT_SEMA;
+        reg8_t   RSVD1;
+        reg8_t   PHORE;
+        reg8_t   RSVD2;
+    } B;
+} hw_apbh_chn_sema_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned STATEMACHINE      :  5;
+        unsigned RSVD1             : 15;
+        unsigned WR_FIFO_FULL      :  1;
+        unsigned WR_FIFO_EMPTY     :  1;
+        unsigned RD_FIFO_FULL      :  1;
+        unsigned RD_FIFO_EMPTY     :  1;
+        unsigned NEXTCMDADDRVALID  :  1;
+        unsigned RSVD2             :  3;
+        unsigned END               :  1;
+        unsigned KICK              :  1;
+        unsigned BURST             :  1;
+        unsigned REQ               :  1;
+    } B;
+} hw_apbh_chn_debug1_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        reg16_t  AHB_BYTES;
+        reg16_t  APB_BYTES;
+    } B;
+} hw_apbh_chn_debug2_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
         unsigned RSVD0    : 30;
         unsigned CLKGATE  :  1;
         unsigned SFTRST   :  1;
@@ -174,6 +254,14 @@ typedef union {
     reg32_t  U;
     struct
     {
+        unsigned CMD_ADDR  : 32;
+    } B;
+} hw_apbx_chn_curcmdar_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
         unsigned CH0   :  2;
         unsigned CH1   :  2;
         unsigned CH2   :  2;
@@ -192,6 +280,78 @@ typedef union {
         unsigned CH15  :  2;
     } B;
 } hw_apbx_devsel_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned CMD_ADDR  : 32;
+    } B;
+} hw_apbx_chn_nxtcmdar_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned COMMAND          :  2;
+        unsigned CHAIN            :  1;
+        unsigned IRQONCMPLT       :  1;
+        unsigned RSVD0            :  2;
+        unsigned SEMAPHORE        :  1;
+        unsigned WAIT4ENDCMD      :  1;
+        unsigned HALTONTERMINATE  :  1;
+        unsigned RSVD1            :  3;
+        unsigned CMDWORDS         :  4;
+        unsigned XFER_COUNT       : 16;
+    } B;
+} hw_apbx_chn_cmd_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned ADDRESS  : 32;
+    } B;
+} hw_apbx_chn_bar_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned INCREMENT_SEMA  :  8;
+        unsigned RSVD1           :  8;
+        unsigned PHORE           :  8;
+        unsigned RSVD2           :  8;
+    } B;
+} hw_apbx_chn_sema_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned STATEMACHINE      :  5;
+        unsigned RSVD1             : 15;
+        unsigned WR_FIFO_FULL      :  1;
+        unsigned WR_FIFO_EMPTY     :  1;
+        unsigned RD_FIFO_FULL      :  1;
+        unsigned RD_FIFO_EMPTY     :  1;
+        unsigned NEXTCMDADDRVALID  :  1;
+        unsigned RSVD2             :  3;
+        unsigned END               :  1;
+        unsigned KICK              :  1;
+        unsigned BURST             :  1;
+        unsigned REQ               :  1;
+    } B;
+} hw_apbx_chn_debug1_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned AHB_BYTES  : 16;
+        unsigned APB_BYTES  : 16;
+    } B;
+} hw_apbx_chn_debug2_t;
 
 typedef union {
     reg32_t  U;
@@ -1291,6 +1451,15 @@ typedef union {
     reg32_t  U;
     struct
     {
+        unsigned LOC    : 12;
+        unsigned RSVD0  : 20;
+    } B;
+} hw_digctl_mpten_loc_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
         unsigned NUM_TAPS  :  5;
         unsigned RSVD0     : 27;
     } B;
@@ -1688,6 +1857,37 @@ typedef union {
     reg32_t  U;
     struct
     {
+        reg32_t  RAW_IRQS;
+    } B;
+} hw_icoll_rawn_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned PRIORITY0  :  2;
+        unsigned ENABLE0    :  1;
+        unsigned SOFTIRQ0   :  1;
+        unsigned RSRVD1     :  4;
+        unsigned PRIORITY1  :  2;
+        unsigned ENABLE1    :  1;
+        unsigned SOFTIRQ1   :  1;
+        unsigned RSRVD2     :  4;
+	    unsigned PRIORITY2  :  2;
+        unsigned ENABLE2    :  1;
+        unsigned SOFTIRQ2   :  1;
+        unsigned RSRVD3     :  4;
+	    unsigned PRIORITY3  :  2;
+        unsigned ENABLE3    :  1;
+        unsigned SOFTIRQ3   :  1;
+        unsigned RSRVD4     :  4;
+    } B;
+} hw_icoll_PRIORITYn_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
         unsigned RSRVD1         :  2;
         unsigned TABLE_ADDRESS  : 30;
     } B;
@@ -1732,6 +1932,14 @@ typedef union {
         reg16_t  RSRVD1;
     } B;
 } hw_icoll_dbgflag_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        reg32_t  BITS;
+    } B;
+} hw_icoll_dbgrequestn_t;
 
 typedef union {
     reg32_t  U;
@@ -2278,6 +2486,19 @@ typedef union {
         unsigned RSRVD2       :  1;
         unsigned TOGGLE       :  1;
     } B;
+} hw_lradc_chn_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned VALUE        : 18;
+        unsigned RSRVD1       :  6;
+        unsigned NUM_SAMPLES  :  5;
+        unsigned ACCUMULATE   :  1;
+        unsigned RSRVD2       :  1;
+        unsigned TOGGLE       :  1;
+    } B;
 } hw_lradc_ch6_t;
 
 typedef union {
@@ -2292,6 +2513,19 @@ typedef union {
         unsigned TOGGLE           :  1;
     } B;
 } hw_lradc_ch7_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned DELAY           : 11;
+        unsigned LOOP_COUNT      :  5;
+        unsigned TRIGGER_DELAYS  :  4;
+        unsigned KICK            :  1;
+        unsigned RSRVD2          :  3;
+        reg8_t   TRIGGER_LRADCS;
+    } B;
+} hw_lradc_delayn_t;
 
 typedef union {
     reg32_t  U;
@@ -3932,6 +4166,31 @@ typedef union {
     reg32_t  U;
     struct
     {
+        unsigned SELECT    :  4;
+        unsigned PRESCALE  :  2;
+        unsigned RELOAD    :  1;
+        unsigned UPDATE    :  1;
+        unsigned POLARITY  :  1;
+        unsigned RSRVD1    :  5;
+        unsigned IRQ_EN    :  1;
+        unsigned IRQ       :  1;
+        unsigned RSRVD2    : 16;
+    } B;
+} hw_timrot_timctrln_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned FIXED_COUNT    : 16;
+        unsigned RUNNING_COUNT  : 16;
+    } B;
+} hw_timrot_timcountn_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
         unsigned SELECT       :  4;
         unsigned PRESCALE     :  2;
         unsigned RELOAD       :  1;
@@ -4730,6 +4989,29 @@ typedef union {
         reg8_t   RSVD6;
     } B;
 } hw_usbctrl_endptctrl0_t;
+
+typedef union {
+    reg32_t  U;
+    struct
+    {
+        unsigned RXS    :  1;
+        unsigned RXD    :  1;
+        unsigned RXT    :  2;
+        unsigned RSVD2  :  1;
+        unsigned RXI    :  1;
+        unsigned RXR    :  1;
+        unsigned RXE    :  1;
+        reg8_t   RSVD3;
+        unsigned TXS    :  1;
+        unsigned TXD    :  1;
+        unsigned TXT    :  2;
+        unsigned RSVD5  :  1;
+        unsigned TXI    :  1;
+        unsigned TXR    :  1;
+        unsigned TXE    :  1;
+        reg8_t   RSVD6;
+    } B;
+} hw_usbctrl_endptctrln_t;
 
 typedef union {
     reg32_t  U;

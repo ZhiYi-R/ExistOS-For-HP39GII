@@ -38,7 +38,7 @@ struct Register {
 
 // Multi-instance register: address(n) = Base + n*Stride.
 template<uintptr_t Base, typename T, Access A, uintptr_t Stride, unsigned Count,
-         uintptr_t Set = 0>
+         uintptr_t Set = 0, uintptr_t Clr = 0, uintptr_t Tog = 0>
 struct MultiRegister {
     static constexpr unsigned count = Count;
     static constexpr bool has_atomic = (Set != 0);
@@ -53,6 +53,12 @@ struct MultiRegister {
         { return *reinterpret_cast<volatile uint32_t*>(Base + n * Stride); }
     [[gnu::always_inline]] static auto& B(unsigned n) noexcept
         { return reinterpret_cast<volatile T*>(Base + n * Stride)->B; }
+    [[gnu::always_inline]] static void set(unsigned n, uint32_t v) noexcept requires (Set != 0)
+        { *reinterpret_cast<volatile uint32_t*>(Set + n * Stride) = v; }
+    [[gnu::always_inline]] static void clr(unsigned n, uint32_t v) noexcept requires (Clr != 0)
+        { *reinterpret_cast<volatile uint32_t*>(Clr + n * Stride) = v; }
+    [[gnu::always_inline]] static void tog(unsigned n, uint32_t v) noexcept requires (Tog != 0)
+        { *reinterpret_cast<volatile uint32_t*>(Tog + n * Stride) = v; }
 };
 
 // Per-field geometry helper.
@@ -130,12 +136,12 @@ using APBH_DEVSEL = Register<0x80004020u, hw_apbh_devsel_t, Access::RO>;
 namespace APBH_CHn_CURCMDAR_ {
     using CMD_ADDR = Field<0, 0xFFFFFFFFu>;
 }
-using APBH_CHn_CURCMDAR = MultiRegister<0x80004040u, uint32_t, Access::RO, 0x00000070u, 8>;
+using APBH_CHn_CURCMDAR = MultiRegister<0x80004040u, hw_apbh_chn_curcmdar_t, Access::RO, 0x00000070u, 8>;
 
 namespace APBH_CHn_NXTCMDAR_ {
     using CMD_ADDR = Field<0, 0xFFFFFFFFu>;
 }
-using APBH_CHn_NXTCMDAR = MultiRegister<0x80004050u, uint32_t, Access::RW, 0x00000070u, 8>;
+using APBH_CHn_NXTCMDAR = MultiRegister<0x80004050u, hw_apbh_chn_nxtcmdar_t, Access::RW, 0x00000070u, 8>;
 
 namespace APBH_CHn_CMD_ {
     using XFER_COUNT = Field<16, 0xFFFF0000u>;
@@ -148,18 +154,18 @@ namespace APBH_CHn_CMD_ {
     using CHAIN = Field<2, 0x00000004u>;
     using COMMAND = Field<0, 0x00000003u>;
 }
-using APBH_CHn_CMD = MultiRegister<0x80004060u, uint32_t, Access::RO, 0x00000070u, 8>;
+using APBH_CHn_CMD = MultiRegister<0x80004060u, hw_apbh_chn_cmd_t, Access::RO, 0x00000070u, 8>;
 
 namespace APBH_CHn_BAR_ {
     using ADDRESS = Field<0, 0xFFFFFFFFu>;
 }
-using APBH_CHn_BAR = MultiRegister<0x80004070u, uint32_t, Access::RO, 0x00000070u, 8>;
+using APBH_CHn_BAR = MultiRegister<0x80004070u, hw_apbh_chn_bar_t, Access::RO, 0x00000070u, 8>;
 
 namespace APBH_CHn_SEMA_ {
     using PHORE = Field<16, 0x00FF0000u>;
     using INCREMENT_SEMA = Field<0, 0x000000FFu>;
 }
-using APBH_CHn_SEMA = MultiRegister<0x80004080u, uint32_t, Access::RW, 0x00000070u, 8>;
+using APBH_CHn_SEMA = MultiRegister<0x80004080u, hw_apbh_chn_sema_t, Access::RW, 0x00000070u, 8>;
 
 namespace APBH_CHn_DEBUG1_ {
     using REQ = Field<31, 0x80000000u>;
@@ -175,13 +181,13 @@ namespace APBH_CHn_DEBUG1_ {
     using RSVD1 = Field<5, 0x000FFFE0u>;
     using STATEMACHINE = Field<0, 0x0000001Fu>;
 }
-using APBH_CHn_DEBUG1 = MultiRegister<0x80004090u, uint32_t, Access::RO, 0x00000070u, 8>;
+using APBH_CHn_DEBUG1 = MultiRegister<0x80004090u, hw_apbh_chn_debug1_t, Access::RO, 0x00000070u, 8>;
 
 namespace APBH_CHn_DEBUG2_ {
     using APB_BYTES = Field<16, 0xFFFF0000u>;
     using AHB_BYTES = Field<0, 0x0000FFFFu>;
 }
-using APBH_CHn_DEBUG2 = MultiRegister<0x800040A0u, uint32_t, Access::RO, 0x00000070u, 8>;
+using APBH_CHn_DEBUG2 = MultiRegister<0x800040A0u, hw_apbh_chn_debug2_t, Access::RO, 0x00000070u, 8>;
 
 namespace APBX_CTRL0_ {
     using SFTRST = Field<31, 0x80000000u>;
@@ -294,7 +300,7 @@ using APBX_CHANNEL_CTRL_TOG = Register<0x8002403Cu, uint32_t, Access::RO>;
 namespace APBX_CHn_CURCMDAR_ {
     using CMD_ADDR = Field<0, 0xFFFFFFFFu>;
 }
-using APBX_CHn_CURCMDAR = MultiRegister<0x80024040u, uint32_t, Access::RO, 0x00000070u, 16>;
+using APBX_CHn_CURCMDAR = MultiRegister<0x80024040u, hw_apbx_chn_curcmdar_t, Access::RO, 0x00000070u, 16>;
 
 namespace APBX_DEVSEL_ {
     using CH15 = Field<30, 0xC0000000u>;
@@ -319,7 +325,7 @@ using APBX_DEVSEL = Register<0x80024040u, hw_apbx_devsel_t, Access::RW>;
 namespace APBX_CHn_NXTCMDAR_ {
     using CMD_ADDR = Field<0, 0xFFFFFFFFu>;
 }
-using APBX_CHn_NXTCMDAR = MultiRegister<0x80024050u, uint32_t, Access::RW, 0x00000070u, 16>;
+using APBX_CHn_NXTCMDAR = MultiRegister<0x80024050u, hw_apbx_chn_nxtcmdar_t, Access::RW, 0x00000070u, 16>;
 
 namespace APBX_CHn_CMD_ {
     using XFER_COUNT = Field<16, 0xFFFF0000u>;
@@ -331,18 +337,18 @@ namespace APBX_CHn_CMD_ {
     using CHAIN = Field<2, 0x00000004u>;
     using COMMAND = Field<0, 0x00000003u>;
 }
-using APBX_CHn_CMD = MultiRegister<0x80024060u, uint32_t, Access::RO, 0x00000070u, 16>;
+using APBX_CHn_CMD = MultiRegister<0x80024060u, hw_apbx_chn_cmd_t, Access::RO, 0x00000070u, 16>;
 
 namespace APBX_CHn_BAR_ {
     using ADDRESS = Field<0, 0xFFFFFFFFu>;
 }
-using APBX_CHn_BAR = MultiRegister<0x80024070u, uint32_t, Access::RO, 0x00000070u, 16>;
+using APBX_CHn_BAR = MultiRegister<0x80024070u, hw_apbx_chn_bar_t, Access::RO, 0x00000070u, 16>;
 
 namespace APBX_CHn_SEMA_ {
     using PHORE = Field<16, 0x00FF0000u>;
     using INCREMENT_SEMA = Field<0, 0x000000FFu>;
 }
-using APBX_CHn_SEMA = MultiRegister<0x80024080u, uint32_t, Access::RW, 0x00000070u, 16>;
+using APBX_CHn_SEMA = MultiRegister<0x80024080u, hw_apbx_chn_sema_t, Access::RW, 0x00000070u, 16>;
 
 namespace APBX_CHn_DEBUG1_ {
     using REQ = Field<31, 0x80000000u>;
@@ -356,13 +362,13 @@ namespace APBX_CHn_DEBUG1_ {
     using WR_FIFO_FULL = Field<20, 0x00100000u>;
     using STATEMACHINE = Field<0, 0x0000001Fu>;
 }
-using APBX_CHn_DEBUG1 = MultiRegister<0x80024090u, uint32_t, Access::RO, 0x00000070u, 16>;
+using APBX_CHn_DEBUG1 = MultiRegister<0x80024090u, hw_apbx_chn_debug1_t, Access::RO, 0x00000070u, 16>;
 
 namespace APBX_CHn_DEBUG2_ {
     using APB_BYTES = Field<16, 0xFFFF0000u>;
     using AHB_BYTES = Field<0, 0x0000FFFFu>;
 }
-using APBX_CHn_DEBUG2 = MultiRegister<0x800240A0u, uint32_t, Access::RO, 0x00000070u, 16>;
+using APBX_CHn_DEBUG2 = MultiRegister<0x800240A0u, hw_apbx_chn_debug2_t, Access::RO, 0x00000070u, 16>;
 
 namespace APBX_VERSION_ {
     using MAJOR = Field<24, 0xFF000000u>;
@@ -1222,7 +1228,7 @@ using DIGCTL_L3_AHB_DATA_CYCLES = Register<0x8001C3F0u, hw_digctl_l3_ahb_data_cy
 namespace DIGCTL_MPTEn_LOC_ {
     using LOC = Field<0, 0x00000FFFu>;
 }
-using DIGCTL_MPTEn_LOC = MultiRegister<0x8001C400u, uint32_t, Access::RW, 0x00000010u, 16>;
+using DIGCTL_MPTEn_LOC = MultiRegister<0x8001C400u, hw_digctl_mpten_loc_t, Access::RW, 0x00000010u, 16>;
 
 namespace DIGCTL_EMICLK_DELAY_ {
     using NUM_TAPS = Field<0, 0x0000001Fu>;
@@ -1548,7 +1554,7 @@ using ICOLL_STAT = Register<0x80000030u, hw_icoll_stat_t, Access::RO>;
 namespace ICOLL_RAWn_ {
     using RAW_IRQS = Field<0, 0xFFFFFFFFu>;
 }
-using ICOLL_RAWn = MultiRegister<0x80000040u, uint32_t, Access::RO, 0x00000010u, 4>;
+using ICOLL_RAWn = MultiRegister<0x80000040u, hw_icoll_rawn_t, Access::RO, 0x00000010u, 4>;
 
 namespace ICOLL_PRIORITYn_ {
     using SOFTIRQ3 = Field<27, 0x08000000u>;
@@ -1564,7 +1570,7 @@ namespace ICOLL_PRIORITYn_ {
     using ENABLE0 = Field<2, 0x00000004u>;
     using PRIORITY0 = Field<0, 0x00000003u>;
 }
-using ICOLL_PRIORITYn = MultiRegister<0x80000060u, uint32_t, Access::RW, 0x00000010u, 16, 0x80000064u>;
+using ICOLL_PRIORITYn = MultiRegister<0x80000060u, hw_icoll_PRIORITYn_t, Access::RW, 0x00000010u, 16, 0x80000064u, 0x80000068u, 0x8000006Cu>;
 
 using ICOLL_PRIORITYn_SET = MultiRegister<0x80000064u, uint32_t, Access::RO, 0x00000010u, 0>;
 
@@ -1617,7 +1623,7 @@ using ICOLL_DBGFLAG_TOG = Register<0x8000115Cu, uint32_t, Access::RO>;
 namespace ICOLL_DBGREQUESTn_ {
     using BITS = Field<0, 0xFFFFFFFFu>;
 }
-using ICOLL_DBGREQUESTn = MultiRegister<0x80001160u, uint32_t, Access::RO, 0x00000010u, 4>;
+using ICOLL_DBGREQUESTn = MultiRegister<0x80001160u, hw_icoll_dbgrequestn_t, Access::RO, 0x00000010u, 4>;
 
 namespace ICOLL_VERSION_ {
     using MAJOR = Field<24, 0xFF000000u>;
@@ -2030,7 +2036,7 @@ namespace LRADC_CHn_ {
     using NUM_SAMPLES = Field<24, 0x1F000000u>;
     using VALUE = Field<0, 0x0003FFFFu>;
 }
-using LRADC_CHn = MultiRegister<0x80050050u, uint32_t, Access::RW, 0x00000010u, 6, 0x80050054u>;
+using LRADC_CHn = MultiRegister<0x80050050u, hw_lradc_chn_t, Access::RW, 0x00000010u, 6, 0x80050054u, 0x80050058u, 0x8005005Cu>;
 
 using LRADC_CHn_SET = MultiRegister<0x80050054u, uint32_t, Access::RO, 0x00000010u, 0>;
 
@@ -2074,7 +2080,7 @@ namespace LRADC_DELAYn_ {
     using LOOP_COUNT = Field<11, 0x0000F800u>;
     using DELAY = Field<0, 0x000007FFu>;
 }
-using LRADC_DELAYn = MultiRegister<0x800500D0u, uint32_t, Access::RW, 0x00000010u, 4, 0x800500D4u>;
+using LRADC_DELAYn = MultiRegister<0x800500D0u, hw_lradc_delayn_t, Access::RW, 0x00000010u, 4, 0x800500D4u, 0x800500D8u, 0x800500DCu>;
 
 using LRADC_DELAYn_SET = MultiRegister<0x800500D4u, uint32_t, Access::RO, 0x00000010u, 0>;
 
@@ -3633,7 +3639,7 @@ namespace TIMROT_TIMCTRLn_ {
     using PRESCALE = Field<4, 0x00000030u>;
     using SELECT = Field<0, 0x0000000Fu>;
 }
-using TIMROT_TIMCTRLn = MultiRegister<0x80068020u, uint32_t, Access::RW, 0x00000020u, 3, 0x80068024u>;
+using TIMROT_TIMCTRLn = MultiRegister<0x80068020u, hw_timrot_timctrln_t, Access::RW, 0x00000020u, 3, 0x80068024u, 0x80068028u, 0x8006802Cu>;
 
 using TIMROT_TIMCTRLn_SET = MultiRegister<0x80068024u, uint32_t, Access::RO, 0x00000020u, 0>;
 
@@ -3645,7 +3651,7 @@ namespace TIMROT_TIMCOUNTn_ {
     using RUNNING_COUNT = Field<16, 0xFFFF0000u>;
     using FIXED_COUNT = Field<0, 0x0000FFFFu>;
 }
-using TIMROT_TIMCOUNTn = MultiRegister<0x80068030u, uint32_t, Access::RW, 0x00000020u, 3>;
+using TIMROT_TIMCOUNTn = MultiRegister<0x80068030u, hw_timrot_timcountn_t, Access::RW, 0x00000020u, 3>;
 
 namespace TIMROT_TIMCTRL3_ {
     using TEST_SIGNAL = Field<16, 0x000F0000u>;
@@ -4226,7 +4232,7 @@ namespace USBCTRL_ENDPTCTRLn_ {
     using RXD = Field<1, 0x00000002u>;
     using RXS = Field<0, 0x00000001u>;
 }
-using USBCTRL_ENDPTCTRLn = MultiRegister<0x800801C0u, uint32_t, Access::RW, 0x00000004u, 5>;
+using USBCTRL_ENDPTCTRLn = MultiRegister<0x800801C0u, hw_usbctrl_endptctrln_t, Access::RW, 0x00000004u, 5>;
 
 namespace USBPHY_PWD_ {
     using RXPWDRX = Field<20, 0x00100000u>;

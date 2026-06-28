@@ -1,6 +1,11 @@
 /**
- * @file Bootloader/drivers/stmp_lradc.c
+ * @file Bootloader/drivers/stmp_lradc.cpp
  * @brief LRADC driver
+ *
+ * Migrated to the typed register model. LRADC_CTRL1 and the multi-instance
+ * LRADC_CHn carry MMIO atomic SET/CLR aliases -> reg::*::set/clr (and the
+ * channel-indexed set(n,..)/clr(n,..)). BW_LRADC_CTRL0_SCHEDULE is a plain
+ * bitfield write, so BF_WR(LRADC_CTRL0,SCHEDULE,v) maps to reg::*::B().SCHEDULE.
  */
 
 
@@ -8,7 +13,8 @@
 #include "stdbool.h"
 
 #include "hw_irq.h"
-#include "regslradc.h"
+#include "reg_model.hpp"
+#include "reg_values.hpp"
 #include "debug.h"
 
 #include "interrupt_up.h"
@@ -19,19 +25,19 @@
 
 void portLRADC_init()
 {
-    
-    HW_LRADC_CONVERSION.B.AUTOMATIC = 1;
 
-    INFO("LRADC_STATUS:%08x\n", HW_LRADC_STATUS_RD());
-    
+    reg::LRADC_CONVERSION::B().AUTOMATIC = 1;
 
-    HW_LRADC_CTRL4.B.LRADC5SELECT = BV_LRADC_CTRL4_LRADC7SELECT__CHANNEL15; //VDD5V
+    INFO("LRADC_STATUS:%08x\n", reg::LRADC_STATUS::rd());
 
-    HW_LRADC_CTRL2.B.TEMPSENSE_PWD = 0;
 
-    HW_LRADC_CTRL4.B.LRADC4SELECT = BV_LRADC_CTRL4_LRADC7SELECT__CHANNEL9;
-    HW_LRADC_CTRL4.B.LRADC3SELECT = BV_LRADC_CTRL4_LRADC7SELECT__CHANNEL8;
-    HW_LRADC_CTRL4.B.LRADC2SELECT = BV_LRADC_CTRL4_LRADC7SELECT__CHANNEL14;
+    reg::LRADC_CTRL4::B().LRADC5SELECT = reg::LRADC_CTRL4_sym::LRADC7SELECT__CHANNEL15; //VDD5V
+
+    reg::LRADC_CTRL2::B().TEMPSENSE_PWD = 0;
+
+    reg::LRADC_CTRL4::B().LRADC4SELECT = reg::LRADC_CTRL4_sym::LRADC7SELECT__CHANNEL9;
+    reg::LRADC_CTRL4::B().LRADC3SELECT = reg::LRADC_CTRL4_sym::LRADC7SELECT__CHANNEL8;
+    reg::LRADC_CTRL4::B().LRADC2SELECT = reg::LRADC_CTRL4_sym::LRADC7SELECT__CHANNEL14;
 
 }
 
@@ -40,12 +46,12 @@ void portLRADCEnable(bool enable ,uint32_t ch)
     INFO("Enable LRADC:%u,%d\n",ch, enable);
 
     portEnableIRQ(HW_IRQ_LRADC_CH0 + ch, (unsigned int)enable);
-    
+
     if(enable)
     {
-        HW_LRADC_CTRL1_SET( ((1) << 16) << ch);  
+        reg::LRADC_CTRL1::set( ((1) << 16) << ch);
     }else{
-        HW_LRADC_CTRL1_CLR( ((1) << 16) << ch);  
+        reg::LRADC_CTRL1::clr( ((1) << 16) << ch);
     }
 
 }
@@ -60,16 +66,18 @@ uint32_t portLRADCConvCh(uint32_t ch, uint32_t samples)
     uint32_t acc_val = 0;
 
     do{
-        BF_CLRn(LRADC_CHn, ch, VALUE);
-        BF_CLRn(LRADC_CHn, ch, TOGGLE);
-        BF_WRn(LRADC_CHn, ch,  ACCUMULATE, 1);
-        BF_CS1n(LRADC_CHn, ch, NUM_SAMPLES, 1);
-        BF_WR(LRADC_CTRL0, SCHEDULE, (1) << ch);
-        while(BF_RDn(LRADC_CHn, ch, TOGGLE) == 0);
-        acc_val += BF_RDn(LRADC_CHn, ch, VALUE);
+        reg::LRADC_CHn::clr(ch, reg::LRADC_CHn_::VALUE::mask);
+        reg::LRADC_CHn::clr(ch, reg::LRADC_CHn_::TOGGLE::mask);
+        reg::LRADC_CHn::clr(ch, reg::LRADC_CHn_::ACCUMULATE::mask);
+        reg::LRADC_CHn::set(ch, reg::LRADC_CHn_::ACCUMULATE::val(1));
+        reg::LRADC_CHn::clr(ch, reg::LRADC_CHn_::NUM_SAMPLES::mask);
+        reg::LRADC_CHn::set(ch, reg::LRADC_CHn_::NUM_SAMPLES::val(1));
+        reg::LRADC_CTRL0::B().SCHEDULE = (1) << ch;
+        while(reg::LRADC_CHn::B(ch).TOGGLE == 0);
+        acc_val += reg::LRADC_CHn::B(ch).VALUE;
         n--;
     }while(n > 0);
-    
+
     return acc_val / samples;
 
 }
@@ -78,13 +86,6 @@ uint32_t portLRADCConvCh(uint32_t ch, uint32_t samples)
 extern "C" void port_LRADC_IRQ(uint32_t ch)
 {
 
-    INFO("\n\nLRADC IRQ:%u, val:%d\n", ch, BF_RDn(LRADC_CHn, ch, VALUE));
-    HW_LRADC_CTRL1_CLR(1 << ch);  
-
-
-
-
-
+    INFO("\n\nLRADC IRQ:%u, val:%d\n", ch, reg::LRADC_CHn::B(ch).VALUE);
+    reg::LRADC_CTRL1::clr(1 << ch);
 }
-
-
