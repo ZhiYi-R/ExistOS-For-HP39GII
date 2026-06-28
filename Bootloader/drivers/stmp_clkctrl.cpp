@@ -8,9 +8,10 @@
  * their C++ consumers (start.cpp, llapi.cpp, mtd_up.cpp) as @c Clk::setCPUDivider
  * / @c Clk::enterSlow / etc.; the legacy extern "C" forwarding shims are gone.
  *
- * @c init() and the @c private PLL / HFreq-domain / USB-clock sequencing helpers
- * stay @c always_inline, folded into the one remaining seam @c portCLKCtrlInit
- * (its thin-wrapper merge with CLKCtrlInit/setCoreFreq is a later phase).
+ * @c init() is an ordinary out-of-line static method, called directly by
+ * @c boardInit; the @c private PLL / HFreq-domain / USB-clock sequencing helpers
+ * it calls stay @c always_inline, folded into @c init(). The portCLKCtrlInit /
+ * CLKCtrlInit / setCoreFreq thin wrappers are gone.
  *
  * The cross-cutting @c g_slowdown_enable is intentionally NOT encapsulated:
  * start.cpp reads it by name via `extern int g_slowdown_enable`, so it stays a
@@ -19,7 +20,6 @@
 
 #include "stmp_clkctrl.hpp"
 #include "stmp_board.hpp"
-#include "clkctrl_up.h"
 #include "reg_model.hpp"
 
 #include "debug.h"
@@ -147,7 +147,7 @@ inline void Clk::enableUSBClock(bool enable) {
     }
 }
 
-inline void Clk::init() {
+void Clk::init() {
     //BF_SETV(POWER_VDDDCTRL, TRG, 26); // Set voltage = 1.45 V
     //BF_SETV(POWER_VDDACTRL, TRG, 18); // Set voltage = 1.95 V  val = (TAG_v - 1.5v)/0.025v
 
@@ -174,10 +174,3 @@ void Clk::getCoreFreqDIV(uint32_t *CPU_DIV, uint32_t *CPU_Frac, uint32_t *HCLK_D
     *CPU_Frac = reg::CLKCTRL_FRAC::B().CPUFRAC;
     *HCLK_DIV = reg::CLKCTRL_HBUS::B().DIV;
 }
-
-// ---------------------------------------------------------------------------
-// portCLKCtrlInit is the one surviving seam: init() is reached by name from the
-// CLKCtrlInit bring-up wrapper (clkctrl_up.h) pending the thin-wrapper merge.
-// The divider / slowdown shims are gone -- their C++ callers now call Clk::.
-// ---------------------------------------------------------------------------
-extern "C" void portCLKCtrlInit(void) { Clk::init(); }

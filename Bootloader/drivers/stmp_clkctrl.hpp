@@ -8,12 +8,13 @@
  * @c Clk::enterSlow / etc. The three register-divider primitives are also used
  * by the bring-up sequence; the slowdown entries carry the policy.
  *
- * @c init() is the bring-up body: it stays @c always_inline, folded into the
- * @c portCLKCtrlInit seam (whose thin-wrapper merge is a later phase), and so
- * are the @c private PLL / HFreq-domain / USB-clock sequencing helpers it calls.
- * The slowdown policy state @c min_cpu_frac_sd is @c private and defined in the
- * .cpp (so its @c CPU_DIVIDE_IDLE_INITIAL seed keeps SystemConfig.h out of this
- * header, where it would otherwise collide reg_model's VERSION bitfield).
+ * @c init() is the bring-up entry, an ordinary out-of-line static method called
+ * directly by @c boardInit (the portCLKCtrlInit / CLKCtrlInit / setCoreFreq thin
+ * wrappers are gone). The @c private PLL / HFreq-domain / USB-clock sequencing
+ * helpers it calls stay @c always_inline, folded into @c init(). The slowdown
+ * policy state @c min_cpu_frac_sd is @c private and defined in the .cpp (so its
+ * @c CPU_DIVIDE_IDLE_INITIAL seed keeps SystemConfig.h out of this header, where
+ * it would otherwise collide reg_model's VERSION bitfield).
  *
  * The cross-cutting @c g_slowdown_enable is intentionally NOT encapsulated:
  * start.cpp reads it by name via `extern int g_slowdown_enable`, so it stays a
@@ -37,9 +38,8 @@ public:
     static void exitSlow();
     static void slowEnable(int mode);
 
-    // Bring-up entry; stays always_inline folded into the portCLKCtrlInit seam
-    // (thin-wrapper merge deferred to a later phase).
-    [[gnu::always_inline]] static void init();
+    // Bring-up entry; out-of-line static method, called directly by boardInit.
+    static void init();
 
 private:
     static uint8_t min_cpu_frac_sd;   // defined in .cpp (CPU_DIVIDE_IDLE_INITIAL seed)

@@ -7,7 +7,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "clkctrl_up.h"
+#include "stmp_clkctrl.hpp"
 #include "uart_up.h"
 #include "interrupt_up.h"
 
@@ -62,8 +62,8 @@ bool driverWaitFalseF(bool (*f)(), TickType_t timeout)
 void boardInit(void)
 {
     INFO("portBoardInit\n");
-    
-    CLKCtrlInit();
+
+    Clk::init();
 
     
 
