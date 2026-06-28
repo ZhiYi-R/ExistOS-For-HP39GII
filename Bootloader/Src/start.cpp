@@ -653,7 +653,7 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
     setHCLKDivider(2);
     setCPUDivider(2);
 
-    // portLRADCEnable(1, 7);
+    // Lradc::enable(true, 7);
     //  MTD_EraseAllBLock();
     //  while (g_FTL_status == 10) {
     //     vTaskDelay(pdMS_TO_TICKS(1000));
@@ -661,15 +661,15 @@ void __attribute__((target("thumb"))) vMainThread_thumb_entry(void *pvParameters
 
     printf("FTL Code:%u\n", g_FTL_status);
 
-    portLRADCConvCh(7, 1);
+    Lradc::convCh(7, 1);
 
     // g_CDC_TransTo = CDC_PATH_LOADER;
     //  vTaskDelay(pdMS_TO_TICKS(1000));
     /*
-    printf("Batt. voltage:%d mv, adc:%d\n", portGetBatterVoltage_mv(), portLRADCConvCh(7, 5));
-    printf("VDDIO: %d mV\n", (int)(portLRADCConvCh(6, 5) * 0.9));
-    printf("VDD5V: %d mV\n", (int)(portLRADCConvCh(5, 5) * 0.45 * 4));
-    printf("Core Temp: %d ℃\n", (int)((portLRADCConvCh(4, 5) - portLRADCConvCh(3, 5)) * 1.012 / 4 - 273.15));
+    printf("Batt. voltage:%d mv, adc:%d\n", portGetBatterVoltage_mv(), Lradc::convCh(7, 5));
+    printf("VDDIO: %d mV\n", (int)(Lradc::convCh(6, 5) * 0.9));
+    printf("VDD5V: %d mV\n", (int)(Lradc::convCh(5, 5) * 0.45 * 4));
+    printf("Core Temp: %d ℃\n", (int)((Lradc::convCh(4, 5) - Lradc::convCh(3, 5)) * 1.012 / 4 - 273.15));
 */
 
     vTaskDelay(pdMS_TO_TICKS(1000));
@@ -911,10 +911,10 @@ void vBatteryMon(void *__n) {
 
     for (;;) {
 
-        vatt_adc = portLRADCConvCh(7, 5);
+        vatt_adc = Lradc::convCh(7, 5);
         batt_voltage = portGetBatterVoltage_mv();
-        vdd5v_voltage = (int)(portLRADCConvCh(5, 5) * 0.45 * 4);
-        coreTemp = (int)((portLRADCConvCh(4, 5) - portLRADCConvCh(3, 5)) * 1.012 / 4 - 273.15);
+        vdd5v_voltage = (int)(Lradc::convCh(5, 5) * 0.45 * 4);
+        coreTemp = (int)((Lradc::convCh(4, 5) - Lradc::convCh(3, 5)) * 1.012 / 4 - 273.15);
 
         extern bool g_chargeEnable;
         if (g_chargeEnable) {
@@ -942,9 +942,9 @@ void vBatteryMon(void *__n) {
                         }
                         */
             printf("Batt. voltage:%u mv, adc:%u\n", batt_voltage, vatt_adc);
-            printf("VDDIO: %d mV\n", (int)(portLRADCConvCh(6, 5) * 0.9));
+            printf("VDDIO: %d mV\n", (int)(Lradc::convCh(6, 5) * 0.9));
             printf("VDD5V: %u mV\n", vdd5v_voltage);
-            // printf("VBG: %d mV\n", (int)(portLRADCConvCh(2, 5) * 0.45));
+            // printf("VBG: %d mV\n", (int)(Lradc::convCh(2, 5) * 0.45));
             printf("Core Temp: %d ℃\n", coreTemp);
             printf("Power Speed:%u\n", portGetPWRSpeed());
         }

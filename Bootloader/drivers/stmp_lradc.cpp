@@ -1,17 +1,15 @@
 /**
  * @file Bootloader/drivers/stmp_lradc.cpp
- * @brief LRADC driver — pure-static singleton class.
+ * @brief LRADC driver — pure-static @c Lradc singleton.
  *
- * Phase 2 of the HAL C++23 migration: the LRADC driver becomes the @c Lradc
- * pure-static singleton. The peripheral is stateless, so the class is the typed
- * home for its three operations; @c port_LRADC_IRQ touches no class state and so
- * stays a plain @c extern @c "C" free function (it is dispatched by name from the
- * C interrupt unit and holds its own logic).
+ * The LRADC driver is the @c Lradc pure-static singleton (declared in
+ * stmp_lradc.hpp). Its three operations are ordinary out-of-line static methods,
+ * called directly by their C++ consumers as @c Lradc::init / @c Lradc::enable /
+ * @c Lradc::convCh.
  *
- * The legacy @c portLRADC* entry points survive as thin @c extern @c "C"
- * forwarding shims (stmp_lradc.hpp declares them @c extern @c "C"); the methods are
- * always_inline so each shim folds back to the pre-class body bit-for-bit.
- * Caller migration onto @c Lradc:: is deferred to the layer-merge phase.
+ * @c port_LRADC_IRQ is dispatched by name from the C interrupt unit and touches
+ * no class state, so it stays a plain @c extern @c "C" free function holding its
+ * own logic.
  */
 
 
@@ -28,17 +26,7 @@
 #include "stmp_lradc.hpp"
 
 
-class Lradc {
-public:
-    // Each method has a single caller (its extern "C" shim); always_inline folds
-    // the body straight into that named entry so it is bit-for-bit the pre-class
-    // function. Phase 3 migrates callers onto Lradc:: directly.
-    [[gnu::always_inline]] static void init();
-    [[gnu::always_inline]] static void enable(bool enable, uint32_t ch);
-    [[gnu::always_inline]] static uint32_t convCh(uint32_t ch, uint32_t samples);
-};
-
-inline void Lradc::init()
+void Lradc::init()
 {
 
     reg::LRADC_CONVERSION::B().AUTOMATIC = 1;
@@ -56,7 +44,7 @@ inline void Lradc::init()
 
 }
 
-inline void Lradc::enable(bool enable, uint32_t ch)
+void Lradc::enable(bool enable, uint32_t ch)
 {
     INFO("Enable LRADC:%u,%d\n",ch, enable);
 
@@ -71,7 +59,7 @@ inline void Lradc::enable(bool enable, uint32_t ch)
 
 }
 
-inline uint32_t Lradc::convCh(uint32_t ch, uint32_t samples)
+uint32_t Lradc::convCh(uint32_t ch, uint32_t samples)
 {
     if(!samples)
     {
@@ -98,25 +86,9 @@ inline uint32_t Lradc::convCh(uint32_t ch, uint32_t samples)
 }
 
 // ---------------------------------------------------------------------------
-// extern "C" seams. The portLRADC* entries (stmp_lradc.hpp) forward to the class.
 // port_LRADC_IRQ is dispatched by name from interrupt_up.c (stays C); it touches
-// no Lradc state, so it stays a free function holding its logic directly.
+// no Lradc state, so it stays a free extern "C" function holding its logic.
 // ---------------------------------------------------------------------------
-extern "C" void portLRADC_init()
-{
-    Lradc::init();
-}
-
-extern "C" void portLRADCEnable(bool enable, uint32_t ch)
-{
-    Lradc::enable(enable, ch);
-}
-
-extern "C" uint32_t portLRADCConvCh(uint32_t ch, uint32_t samples)
-{
-    return Lradc::convCh(ch, samples);
-}
-
 extern "C" void port_LRADC_IRQ(uint32_t ch)
 {
 

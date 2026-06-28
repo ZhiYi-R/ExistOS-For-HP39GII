@@ -64,7 +64,7 @@ public:
     }
     static uint32_t getBatteryVoltage_mv()
     {
-        //portLRADCConvCh(7, 1);
+        //Lradc::convCh(7, 1);
         uint32_t ad_val = reg::POWER_BATTMONITOR::B().BATT_VAL;
         return ad_val * 8;
     }
@@ -329,7 +329,7 @@ inline void Board::init()
     LCDIF_Init();
     RTC_Init();
     LRADC_init();
-    portLRADC_init();
+    Lradc::init();
 
 
 
