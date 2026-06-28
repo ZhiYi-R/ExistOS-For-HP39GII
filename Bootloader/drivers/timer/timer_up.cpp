@@ -6,6 +6,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "stmp_timer.hpp"
 #include "timer_up.h"
 #include "interrupt_up.h"
 
@@ -18,16 +19,16 @@ int LFTimer = -1;
 
 bool up_TimerSetup( void ){
 
-    portTimerInit();
+    Timer::init();
 
-    LFTimer = portGetTimer();
-    
-    portSetTimerPeriod(LFTimer, 1000000 / (LF_TimerFreq));
+    LFTimer = Timer::getTimer();
 
-    portEnableTimerIRQ(LFTimer, true);
+    Timer::setPeriod(LFTimer, 1000000 / (LF_TimerFreq));
 
-    portEnableTimer(LFTimer, true);
-    
+    Timer::enableIRQ(LFTimer, true);
+
+    Timer::enable(LFTimer, true);
+
     return true;
 }
 

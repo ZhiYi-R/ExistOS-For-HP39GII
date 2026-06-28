@@ -9,23 +9,18 @@
 #include <stdbool.h>
 #include "interrupt_up.h"
 
-// Timer HAL is implemented in the (now C++) timer driver but called by name from
-// board_up.c and the C ISR dispatch, so the interface keeps C linkage.
+// The timer driver is the (now C++) Timer class (drivers/timer/stmp_timer.hpp);
+// this header keeps C linkage only for the seams still reached by name:
+// up_TimerSetup (called from the FreeRTOS port layer under External/) and
+// portAckTimerIRQ (the up_isr ack dispatch, to be wired by the interrupt_up
+// refactor). up_TimerTick is the FreeRTOS tick service.
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int portGetTimerNum(void);
-bool portSetTimerPeriod(int timer, unsigned int us);
-bool portEnableTimerIRQ(int timer, bool enable);
-bool portEnableTimer(int timer, bool enable);
-void portTimerInit(void);
-
 void portAckTimerIRQ(void);
-int portGetTimer(void);
 
 bool up_TimerSetup(void);
-void up_TimerIRQ(IRQNumber IRQNum);
 void up_TimerTick(void);
 
 #ifdef __cplusplus
