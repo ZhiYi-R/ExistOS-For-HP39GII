@@ -509,7 +509,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
                 }
                 LLAPI_INFO("VM Read:%d, pages:%d, buf:%08x\n", currentCall.para0, currentCall.para1, currentCall.para2);
                 while (pages) {
-                    ret = FTL_ReadSector(FLASH_FTL_DATA_SECTOR + spage, 1, (uint8_t *)data_page_buffer);
+                    ret = Ftl::readSector(FLASH_FTL_DATA_SECTOR + spage, 1, (uint8_t *)data_page_buffer);
                     memcpy(buffer, data_page_buffer, 2048);
                     buffer += (2048 / sizeof(uint32_t));
                     spage++;
@@ -535,7 +535,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
                 LLAPI_INFO("VM Write:%d, pages:%d, buf:%08x\n", currentCall.para0, currentCall.para1, currentCall.para2);
                 while (pages) {
                     memcpy(data_page_buffer, buffer, 2048);
-                    ret = FTL_WriteSector(FLASH_FTL_DATA_SECTOR + spage, 1, (uint8_t *)data_page_buffer);
+                    ret = Ftl::writeSector(FLASH_FTL_DATA_SECTOR + spage, 1, (uint8_t *)data_page_buffer);
                     buffer += (2048 / sizeof(uint32_t));
                     spage++;
                     pages--;
@@ -549,19 +549,19 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
             } break;
 
             case LL_SWI_FLASH_PAGE_TRIM: {
-                FTL_TrimSector(FLASH_FTL_DATA_SECTOR + currentCall.para0);
+                Ftl::trimSector(FLASH_FTL_DATA_SECTOR + currentCall.para0);
             } break;
 
             case LL_SWI_FLASH_PAGE_NUM: {
-                *currentCall.pRet = FTL_GetSectorCount() - FLASH_FTL_DATA_SECTOR;
+                *currentCall.pRet = Ftl::getSectorCount() - FLASH_FTL_DATA_SECTOR;
             } break;
 
             case LL_SWI_FLASH_PAGE_SIZE_B: {
-                *currentCall.pRet = FTL_GetSectorSize();
+                *currentCall.pRet = Ftl::getSectorSize();
             } break;
 
             case LL_SWI_FLASH_SYNC: {
-                FTL_Sync();
+                Ftl::sync();
             }break;
 
             case LL_SWI_CHARGE_ENABLE: 

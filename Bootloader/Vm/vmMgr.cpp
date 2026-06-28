@@ -415,9 +415,9 @@ static inline int save_cache_page(CachePageInfo_t *cache_page) {
         } else {
             // printf("TO SWAP AREA\n");
             if (mem_swap_enable) {
-                FTL_ReadSector(cache_page->onSector, 1, (uint8_t *)compress_buffer);
+                Ftl::readSector(cache_page->onSector, 1, (uint8_t *)compress_buffer);
                 memcpy((void *)((uint32_t)compress_buffer + cache_page->sectorOffset), (uint8_t *)cache_page->PageOnPhyAddr, PAGE_SIZE);
-                FTL_WriteSector(cache_page->onSector, 1, (uint8_t *)compress_buffer);
+                Ftl::writeSector(cache_page->onSector, 1, (uint8_t *)compress_buffer);
 
             } else {
                 printf("SWAP IS NOT ENABLE!!\n");
@@ -440,9 +440,9 @@ static inline int save_cache_page(CachePageInfo_t *cache_page) {
         */
 
         /*
-                FTL_ReadSector(cache_page->onSector, 1, page_save_wr_buf);
+                Ftl::readSector(cache_page->onSector, 1, page_save_wr_buf);
                 memcpy(&page_save_wr_buf[CachePageCur->sectorOffset], (uint8_t *)cache_page->PageOnPhyAddr, PAGE_SIZE);
-                ret = FTL_WriteSector(cache_page->onSector, 1, (uint8_t *)page_save_wr_buf);
+                ret = Ftl::writeSector(cache_page->onSector, 1, (uint8_t *)page_save_wr_buf);
                 if (pagebuf_last_rd == cache_page->onSector) {
                     pagebuf_last_rd = 0xFFFFFFFF;
                 }
@@ -511,14 +511,14 @@ static inline int save_cache_page(CachePageInfo_t *cache_page) {
         mmu_clean_invalidated_dcache(cache_page->mapToVirtAddr, PAGE_SIZE);
         mmu_drain_buffer();
 #if USE_TINY_PAGE
-        FTL_ReadSector(cache_page->onSector, 1, page_save_wr_buf);
+        Ftl::readSector(cache_page->onSector, 1, page_save_wr_buf);
         memcpy(&page_save_wr_buf[CachePageCur->sectorOffset], (uint8_t *)cache_page->PageOnPhyAddr, PAGE_SIZE);
-        ret = FTL_WriteSector(cache_page->onSector, 1, (uint8_t *)page_save_wr_buf);
+        ret = Ftl::writeSector(cache_page->onSector, 1, (uint8_t *)page_save_wr_buf);
         if (pagebuf_last_rd == cache_page->onSector) {
             pagebuf_last_rd = 0xFFFFFFFF;
         }
 #else
-        ret = FTL_WriteSector(cache_page->onSector, 2, (uint8_t *)cache_page->PageOnPhyAddr);
+        ret = Ftl::writeSector(cache_page->onSector, 2, (uint8_t *)cache_page->PageOnPhyAddr);
 #endif
         cache_page->dirty = false;
     }
@@ -799,7 +799,7 @@ void __attribute__((optimize("-Os"))) vmMgr_task() {
                             }
                         } else {
                             if (mem_swap_enable) {
-                                FTL_ReadSector(CachePageVRAMCur->onSector, 1, (uint8_t *)compress_buffer);
+                                Ftl::readSector(CachePageVRAMCur->onSector, 1, (uint8_t *)compress_buffer);
                                 memcpy((uint8_t *)CachePageVRAMCur->PageOnPhyAddr, (void *)((uint32_t)compress_buffer + CachePageVRAMCur->sectorOffset), PAGE_SIZE);
 
                             } else {
@@ -866,7 +866,7 @@ void __attribute__((optimize("-Os"))) vmMgr_task() {
                         g_page_vram_fault_cnt++;
 #if USE_TINY_PAGE
                         if (pagebuf_last_rd != CachePageCur->onSector) {
-                            ret = FTL_ReadSector(CachePageCur->onSector, 1, (uint8_t *)page_save_rd_buf);
+                            ret = Ftl::readSector(CachePageCur->onSector, 1, (uint8_t *)page_save_rd_buf);
                         }
 
                         {
@@ -875,7 +875,7 @@ void __attribute__((optimize("-Os"))) vmMgr_task() {
                         }
 
 #else
-                        ret = FTL_ReadSector(CachePageCur->onSector, 2, (uint8_t *)CachePageCur->PageOnPhyAddr);
+                        ret = Ftl::readSector(CachePageCur->onSector, 2, (uint8_t *)CachePageCur->PageOnPhyAddr);
 #endif
                         // INFO("ram:%d\n", CachePageCur->onSector );
                         break;
@@ -1022,7 +1022,7 @@ void vmMgr_init() {
     for (int i = 54; i <= 90; ++i)
         Display::fillBox(i - 2, 84, i, 92, 72);
     for (int i = 0; i < FLASH_FTL_DATA_SECTOR; i++) {
-        // FTL_TrimSector(i);
+        // Ftl::trimSector(i);
     }
 
     mapList_AddPartitionMap(MAP_PART_RAWFLASH, PERM_R, VM_ROM_BASE, FLASH_SYSTEM_BLOCK * 64, VM_ROM_SIZE);

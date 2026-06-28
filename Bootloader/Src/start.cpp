@@ -229,7 +229,7 @@ void System(void *par) {
             vTaskDelay(pdMS_TO_TICKS(200));
             getKey(&k, &kp);
             if ((k == KEY_VIEWS) && kp) {
-                FTL_Sync();
+                Ftl::sync();
 
                 tud_disconnect();
 
@@ -634,7 +634,7 @@ void tud_cdc_rx_cb(uint8_t itf) {
             }
 
             if (strcmp(cdc_path_loader_buffer, "clearall") == 0) {
-                FTL_ClearAllSector();
+                Ftl::clearAllSector();
                 printf("clear all sector.\n");
                 goto fin;
             }
@@ -853,7 +853,7 @@ int __attribute__((target("thumb"))) capt_ON_Key(int ck, int cp) {
     if ((ck == KEY_F6) && cp) { // [ON] + [F6]
         // Display::clean();
 
-        // FTL_Sync();
+        // Ftl::sync();
         portBoardReset();
         return 1;
     }

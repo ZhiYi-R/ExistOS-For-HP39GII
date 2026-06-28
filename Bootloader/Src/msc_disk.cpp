@@ -225,8 +225,8 @@ void tud_msc_capacity_cb(uint8_t lun, uint32_t *block_count, uint16_t *block_siz
         break;
     case MSC_CONF_SYS_DATA:
     #ifndef RAW_FLASH_ACCESS
-        *block_count = FTL_GetSectorCount() - FLASH_FTL_DATA_SECTOR;
-        *block_size = FTL_GetSectorSize();
+        *block_count = Ftl::getSectorCount() - FLASH_FTL_DATA_SECTOR;
+        *block_size = Ftl::getSectorSize();
         
        #else
         *block_count = 65536;
@@ -244,7 +244,7 @@ void tud_msc_capacity_cb(uint8_t lun, uint32_t *block_count, uint16_t *block_siz
     /*
       if(CurMount > 0){
         *block_count = MSCpartSectors;
-        *block_size  = FTL_GetSectorSize();
+        *block_size  = Ftl::getSectorSize();
       }else{
         *block_count = 0;
         *block_size  = 0;
@@ -265,7 +265,7 @@ bool tud_msc_start_stop_cb(uint8_t lun, uint8_t power_condition, bool start, boo
         } else {
             // unload disk storage
             if (g_MSC_Configuration == MSC_CONF_SYS_DATA) {
-                FTL_Sync();
+                Ftl::sync();
                 return false;
             }
         }
@@ -274,7 +274,7 @@ bool tud_msc_start_stop_cb(uint8_t lun, uint8_t power_condition, bool start, boo
 
         } else {
             if (g_MSC_Configuration == MSC_CONF_SYS_DATA) {
-                FTL_Sync();
+                Ftl::sync();
                 return false;
                 //tud_disconnect();
             }
@@ -337,12 +337,12 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void *buff
             //
             if(bufsize <= 2048)
             {/*
-            FTL_ReadSector(FLASH_FTL_DATA_SECTOR + lba, 1, MSCRBuffer);
+            Ftl::readSector(FLASH_FTL_DATA_SECTOR + lba, 1, MSCRBuffer);
             uint8_t const *addr = MSCRBuffer + offset;
             memcpy(buffer, addr, bufsize);*/
             
             #ifndef RAW_FLASH_ACCESS
-            FTL_ReadSector(FLASH_FTL_DATA_SECTOR + lba, 1, (uint8_t *)buffer);
+            Ftl::readSector(FLASH_FTL_DATA_SECTOR + lba, 1, (uint8_t *)buffer);
             #else
             Mtd::readPhyPage(lba, offset, bufsize, buffer);
             #endif
@@ -358,11 +358,11 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void *buff
         break;
     }
 
-    // FTL_ReadSector(lba, MSCRBuffer);
+    // Ftl::readSector(lba, MSCRBuffer);
     // uint8_t const* addr = MSCRBuffer + offset;
     // memcpy(buffer, addr, bufsize);
 
-    // FTL_ReadSector(MSCpartStartSector + lba, 1, buffer);
+    // Ftl::readSector(MSCpartStartSector + lba, 1, buffer);
 
     // Mtd::readPhyPage(lba, offset, bufsize, buffer);
 
@@ -412,22 +412,22 @@ int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t *
 
     case MSC_CONF_SYS_DATA:
         //printf("WR:lba%d, off:%d, len:%d\n",lba, offset, bufsize);
-        //FTL_WriteSector(FLASH_FTL_DATA_SECTOR + lba, 1, buffer);
+        //Ftl::writeSector(FLASH_FTL_DATA_SECTOR + lba, 1, buffer);
         if(bufsize ==  2048)
         {/*
             if (last_lba != lba) {
-                FTL_ReadSector(FLASH_FTL_DATA_SECTOR + lba, 1, MSCWRBuf);
+                Ftl::readSector(FLASH_FTL_DATA_SECTOR + lba, 1, MSCWRBuf);
                 last_lba = lba;
             }
             uint8_t *addr = MSCWRBuf + offset;
             memcpy(addr, buffer, bufsize);
             if(offset == 1536)
-                FTL_WriteSector(FLASH_FTL_DATA_SECTOR + lba, 1, MSCWRBuf);
+                Ftl::writeSector(FLASH_FTL_DATA_SECTOR + lba, 1, MSCWRBuf);
                 */
             //Mtd::writePhyPage(lba, buffer);
             
             #ifndef RAW_FLASH_ACCESS
-            FTL_WriteSector(FLASH_FTL_DATA_SECTOR + lba, 1, buffer);
+            Ftl::writeSector(FLASH_FTL_DATA_SECTOR + lba, 1, buffer);
             #else
             Mtd::writePhyPage(lba, buffer);
             #endif
@@ -444,12 +444,12 @@ int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t *
     /*
       uint8_t *addr = MSCWRBuf + offset;
       memcpy(addr, buffer, bufsize);
-      FTL_WriteSector(lba, MSCWRBuf);
+      Ftl::writeSector(lba, MSCWRBuf);
     */
 
     // Mtd::writePhyPage(lba, buffer);
 
-    // FTL_WriteSector(MSCpartStartSector + lba, 1, buffer);
+    // Ftl::writeSector(MSCpartStartSector + lba, 1, buffer);
 
     return bufsize;
 }

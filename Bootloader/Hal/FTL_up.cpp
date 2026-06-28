@@ -1,29 +1,20 @@
 /**
- * @file Bootloader/Hal/FTL_up.c
- * @brief FTL_up module
+ * @file Bootloader/Hal/FTL_up.cpp
+ * @brief Ftl class method bodies + the extern "C" dhara_nand_* seam (Phase 3.5c).
+ *
+ * The class declaration and the Dhara/Mtd seam rationale live in FTL_up.hpp.
  */
 
-#include "FTL_up.h"
+#include "FTL_up.hpp"
 #include "debug.h"
-#include "mtd_up.h"
 
+#include <stdio.h>
 #include <string.h>
 
-static mtdInfo_t *pMtdinfo;
-
-static uint8_t PageBuffer[2048] __attribute__((aligned(4)));
-//static uint8_t CopyBuffer[2048] __attribute__((aligned(4)));
-
-static struct dhara_nand nandDevice;
-static struct dhara_map FTLmap;
 //#define PR_FTL_TIMING_STATUS
 #ifdef PR_FTL_TIMING_STATUS
 #include "reg_model.hpp"
-static uint32_t ftl_rdt;
-static uint32_t ftl_wrt;
 #endif
-
-PartitionInfo_t *PartitionInfo;
 
 static int _pow(int x, int y) // x^y
 {
@@ -45,12 +36,16 @@ static int _log2(int x) // log2(x)
     return res;
 }
 
-uint32_t meta;
+// ---------------------------------------------------------------------------
+// Dhara NAND page primitives. Dhara (vendored C) dispatches these by name, so
+// they are free extern "C" functions (C linkage from the wrapped map.h include
+// in FTL_up.hpp) and reach Ftl's private geometry / scratch state via friendship.
+// ---------------------------------------------------------------------------
 int dhara_nand_is_bad(const struct dhara_nand *n, dhara_block_t b) {
     uint32_t ret = 0;
-    ret = Mtd::readPhyPageMeta((DATA_START_BLOCK + b) * pMtdinfo->PagesPerBlock, 4, (uint8_t *)&meta);
+    ret = Mtd::readPhyPageMeta((DATA_START_BLOCK + b) * Ftl::st.mtdinfo->PagesPerBlock, 4, (uint8_t *)&Ftl::st.meta);
     // printf("TEST BAD\n");
-    if ((ret == -1) || (meta == BAD_BLOCK)) {
+    if ((ret == -1) || (Ftl::st.meta == BAD_BLOCK)) {
 
         printf("Found BAD Block:%u\n", DATA_START_BLOCK + b);
         return 1;
@@ -59,7 +54,7 @@ int dhara_nand_is_bad(const struct dhara_nand *n, dhara_block_t b) {
 }
 
 void dhara_nand_mark_bad(const struct dhara_nand *n, dhara_block_t b) {
-    meta = BAD_BLOCK;
+    Ftl::st.meta = BAD_BLOCK;
     printf("MARK BAD BLOCK\n");
     uint8_t *tempbuf = (uint8_t *)pvPortMalloc(2048);
     uint8_t *tempmeta = (uint8_t *)pvPortMalloc(19);
@@ -69,10 +64,10 @@ void dhara_nand_mark_bad(const struct dhara_nand *n, dhara_block_t b) {
         if (tempmeta) vPortFree(tempmeta);
         return;
     }
-    Mtd::readPhyPage((DATA_START_BLOCK + b) * pMtdinfo->PagesPerBlock, 0, 2048, tempbuf);
+    Mtd::readPhyPage((DATA_START_BLOCK + b) * Ftl::st.mtdinfo->PagesPerBlock, 0, 2048, tempbuf);
     memset(tempmeta, 0, 19);
     *((uint32_t *)&tempmeta[0]) = BAD_BLOCK;
-    Mtd::writePhyPageWithMeta((DATA_START_BLOCK + b) * pMtdinfo->PagesPerBlock, 4, tempbuf, tempmeta);
+    Mtd::writePhyPageWithMeta((DATA_START_BLOCK + b) * Ftl::st.mtdinfo->PagesPerBlock, 4, tempbuf, tempmeta);
     // MTD_WritePhyPageMeta((DATA_START_BLOCK + b) * _pow(2, n->log2_ppb), 4, (uint8_t *)&meta);
     vPortFree(tempbuf);
     vPortFree(tempmeta);
@@ -97,9 +92,9 @@ int dhara_nand_prog(const struct dhara_nand *n, dhara_page_t p,
     int ret = 0;
     uint32_t metadata = DATA_BLOCK;
     // printf("PROG page:%d, data:%p\n",p, data);
-    // ret = Mtd::writePhyPage(p + (DATA_START_BLOCK *  pMtdinfo->PagesPerBlock) , (uint8_t *)data);
+    // ret = Mtd::writePhyPage(p + (DATA_START_BLOCK *  Ftl::st.mtdinfo->PagesPerBlock) , (uint8_t *)data);
     ret = Mtd::writePhyPageWithMeta(
-        p + (DATA_START_BLOCK * pMtdinfo->PagesPerBlock),
+        p + (DATA_START_BLOCK * Ftl::st.mtdinfo->PagesPerBlock),
         4,
         (uint8_t *)data,
         (uint8_t *)&metadata);
@@ -116,7 +111,7 @@ int dhara_nand_prog(const struct dhara_nand *n, dhara_page_t p,
 
 int dhara_nand_is_free(const struct dhara_nand *n, dhara_page_t p) {
     int ret = 0;
-    ret = Mtd::readPhyPage(p + (DATA_START_BLOCK * pMtdinfo->PagesPerBlock), 0, _pow(2, n->log2_page_size), NULL);
+    ret = Mtd::readPhyPage(p + (DATA_START_BLOCK * Ftl::st.mtdinfo->PagesPerBlock), 0, _pow(2, n->log2_page_size), NULL);
     // printf("is_free %d\n",ret);
     return (ret == 1);
 }
@@ -127,7 +122,7 @@ int dhara_nand_read(const struct dhara_nand *n, dhara_page_t p,
                     dhara_error_t *err) {
     int ret = 0;
     // printf("start READ page:%d, offset:%d, len:%d, buff:%p\n", p,offset,length,data);
-    ret = Mtd::readPhyPage(p + (DATA_START_BLOCK * pMtdinfo->PagesPerBlock), offset, length, data);
+    ret = Mtd::readPhyPage(p + (DATA_START_BLOCK * Ftl::st.mtdinfo->PagesPerBlock), offset, length, data);
 
     // printf("READ END\n");
     /*
@@ -145,8 +140,8 @@ int dhara_nand_read(const struct dhara_nand *n, dhara_page_t p,
      * Mtd::readPhyPage() currently collapses every correctable read to ret==0,
      * so the per-read bit-correction count is not visible here. Scrubbing must
      * also run out-of-band (re-entering dhara_map_* from this callback is
-     * forbidden). The actual refresh hook therefore lives in FTL_task()'s
-     * FTL_SECTOR_READ branch; see the note there and mtd_up.c (ECCResult /
+     * forbidden). The actual refresh hook therefore lives in Ftl::task()'s
+     * FTL_SECTOR_READ branch; see the note there and mtd_up.cpp (ECCResult /
      * g_mtd_ecc_cnt) for the correction count that would need to be exposed. */
     return 0;
 }
@@ -157,21 +152,21 @@ int dhara_nand_copy(const struct dhara_nand *n,
     int ret = 0;
     // printf("COPY SRC %d dst %d\n",src,dst);
     /*
-    ret = Mtd::copyPhyPage(src + (DATA_START_BLOCK *  pMtdinfo->PagesPerBlock),
-                          dst + (DATA_START_BLOCK *  pMtdinfo->PagesPerBlock));*/
+    ret = Mtd::copyPhyPage(src + (DATA_START_BLOCK *  Ftl::st.mtdinfo->PagesPerBlock),
+                          dst + (DATA_START_BLOCK *  Ftl::st.mtdinfo->PagesPerBlock));*/
 
     uint8_t *CopyBuffer = (uint8_t *)pvPortMalloc(2048);
 
     *err = DHARA_E_NONE;
 
-    ret = Mtd::readPhyPage(src + (DATA_START_BLOCK * pMtdinfo->PagesPerBlock), 0, pMtdinfo->PageSize_B, (uint8_t *)CopyBuffer);
+    ret = Mtd::readPhyPage(src + (DATA_START_BLOCK * Ftl::st.mtdinfo->PagesPerBlock), 0, Ftl::st.mtdinfo->PageSize_B, (uint8_t *)CopyBuffer);
     if (ret < 0) {
         *err = DHARA_E_ECC;
         printf("COPY RD ERR\n");
         vPortFree(CopyBuffer);
         return -1;
     }
-    ret = Mtd::writePhyPage(dst + (DATA_START_BLOCK * pMtdinfo->PagesPerBlock), (uint8_t *)CopyBuffer);
+    ret = Mtd::writePhyPage(dst + (DATA_START_BLOCK * Ftl::st.mtdinfo->PagesPerBlock), (uint8_t *)CopyBuffer);
 
     if (ret) {
         *err = DHARA_E_BAD_BLOCK;
@@ -185,7 +180,6 @@ int dhara_nand_copy(const struct dhara_nand *n,
 
 //===================================================================================
 
-static QueueHandle_t FTL_Operates_Queue;
 // static EventGroupHandle_t FTLLockEventGroup;
 
 // static int32_t FTLStatusBuf[32];
@@ -193,57 +187,49 @@ static QueueHandle_t FTL_Operates_Queue;
 
 // static int32_t FTLLockBit = 0;
 
-static bool inited = false;
-
-static uint32_t max_ftl_pages;
-
-static FTL_Operates curOpa;
-
-bool FTL_inited() {
-    return inited;
+bool Ftl::isInited() {
+    return st.inited;
 }
 
-char *testdat;
-
-void FTL_ClearAllSector() {
-    dhara_map_clear(&FTLmap);
+void Ftl::clearAllSector() {
+    dhara_map_clear(&st.ftlMap);
 }
 
-int FTL_MapInit() {
+int Ftl::mapInit() {
     dhara_error_t err;
     int ret = 0;
-    dhara_map_init(&FTLmap, &nandDevice, PageBuffer, GC_RATIO);
+    dhara_map_init(&st.ftlMap, &st.nandDevice, PageBuffer, GC_RATIO);
     err = (dhara_error_t)0;
-    ret = dhara_map_resume(&FTLmap, &err);
+    ret = dhara_map_resume(&st.ftlMap, &err);
     INFO("Resume FTL: %d\n", ret);
 
-    max_ftl_pages = dhara_map_capacity(&FTLmap);
-    INFO("FTL capacity %u/%u (%u K/ %u K)\n", dhara_map_size(&FTLmap), max_ftl_pages, dhara_map_size(&FTLmap) * pMtdinfo->PageSize_B / 1024, dhara_map_capacity(&FTLmap) * pMtdinfo->PageSize_B / 1024);
+    st.maxFtlPages = dhara_map_capacity(&st.ftlMap);
+    INFO("FTL capacity %u/%u (%u K/ %u K)\n", dhara_map_size(&st.ftlMap), st.maxFtlPages, dhara_map_size(&st.ftlMap) * st.mtdinfo->PageSize_B / 1024, dhara_map_capacity(&st.ftlMap) * st.mtdinfo->PageSize_B / 1024);
 
     return ret;
 }
 
-int FTL_init() {
+int Ftl::init() {
     int ret = 0;
 
-    FTL_Operates_Queue = xQueueCreate(32, sizeof(FTL_Operates));
+    st.opQueue = xQueueCreate(32, sizeof(FTL_Operates));
     // FTLLockEventGroup = xEventGroupCreate();
 
     while (!Mtd::isDeviceInited()) {
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 
-    pMtdinfo = Mtd::getDeviceInfo();
+    st.mtdinfo = Mtd::getDeviceInfo();
 
-    nandDevice.num_blocks = pMtdinfo->Blocks - DATA_START_BLOCK;
-    nandDevice.log2_page_size = _log2(pMtdinfo->PageSize_B);
-    nandDevice.log2_ppb = _log2(pMtdinfo->PagesPerBlock);
+    st.nandDevice.num_blocks = st.mtdinfo->Blocks - DATA_START_BLOCK;
+    st.nandDevice.log2_page_size = _log2(st.mtdinfo->PageSize_B);
+    st.nandDevice.log2_ppb = _log2(st.mtdinfo->PagesPerBlock);
 
-    INFO("FTL num_blocks:%d\n", nandDevice.num_blocks);
-    INFO("FTL log2_page_size:%d\n", nandDevice.log2_page_size);
-    INFO("FTL log2_ppb:%d\n", nandDevice.log2_ppb);
+    INFO("FTL num_blocks:%d\n", st.nandDevice.num_blocks);
+    INFO("FTL log2_page_size:%d\n", st.nandDevice.log2_page_size);
+    INFO("FTL log2_ppb:%d\n", st.nandDevice.log2_ppb);
 
-    ret = FTL_MapInit();
+    ret = mapInit();
 
     // err = 0;
     // ret = dhara_map_sync(&FTLmap, &err);
@@ -257,108 +243,108 @@ int FTL_init() {
         pFTLStatus = 0;
     */
 
-    inited = true;
+    st.inited = true;
 
     return ret;
 }
 
-void FTL_task() {
+void Ftl::task() {
     dhara_error_t err;
     int ret = 0;
     while (1) {
-        if (xQueueReceive(FTL_Operates_Queue, &curOpa, portMAX_DELAY) == pdTRUE) {
-            switch (curOpa.opa) {
+        if (xQueueReceive(st.opQueue, &st.curOpa, portMAX_DELAY) == pdTRUE) {
+            switch (st.curOpa.opa) {
             case FTL_SECTOR_READ:
-                for (int i = 0; i < curOpa.num; i++) {
+                for (int i = 0; i < st.curOpa.num; i++) {
                     #ifdef PR_FTL_TIMING_STATUS
-                    ftl_rdt = reg::DIGCTL_MICROSECONDS::rd();
+                    st.rdt = reg::DIGCTL_MICROSECONDS::rd();
                     #endif
-                    ret = dhara_map_read(&FTLmap, curOpa.sector++, curOpa.buf, &err);
+                    ret = dhara_map_read(&st.ftlMap, st.curOpa.sector++, st.curOpa.buf, &err);
                     #ifdef PR_FTL_TIMING_STATUS
-                    INFO("frd=%ld\n",reg::DIGCTL_MICROSECONDS::rd() - ftl_rdt);
+                    INFO("frd=%ld\n",reg::DIGCTL_MICROSECONDS::rd() - st.rdt);
                     #endif
                     /* ECC-scrub hook (not implemented this round):
-                     * The sector just read is (curOpa.sector - 1). To refresh a
+                     * The sector just read is (st.curOpa.sector - 1). To refresh a
                      * page whose ECC correction count crossed a threshold, rewrite
-                     * it here via dhara_map_write(&FTLmap, curOpa.sector - 1,
-                     * curOpa.buf, &err) -- this runs in FTL_task context, safely
+                     * it here via dhara_map_write(&st.ftlMap, st.curOpa.sector - 1,
+                     * st.curOpa.buf, &err) -- this runs in Ftl::task context, safely
                      * out of the Dhara NAND callbacks. Gate it on a real metric:
                      * MTD must first expose the per-read correction count
-                     * (mtd_up.c ECCResult / g_mtd_ecc_cnt), which it currently
+                     * (mtd_up.cpp ECCResult / g_mtd_ecc_cnt), which it currently
                      * does not surface through Mtd::readPhyPage(). */
-                    curOpa.buf += pMtdinfo->PageSize_B;
+                    st.curOpa.buf += st.mtdinfo->PageSize_B;
                     if (ret) {
                         FTL_WARN("FTL READ FAIL:%d,%s\n", ret, dhara_strerror(err));
                         break;
                     }
                 }
-                //*curOpa.StatusBuf = ret;
-                xTaskNotify(curOpa.task, ret, eSetValueWithOverwrite);
+                //*st.curOpa.StatusBuf = ret;
+                xTaskNotify(st.curOpa.task, ret, eSetValueWithOverwrite);
                 break;
 
             case FTL_SECTOR_WRITE:
-                for (int i = 0; i < curOpa.num; i++) {
+                for (int i = 0; i < st.curOpa.num; i++) {
                     #ifdef PR_FTL_TIMING_STATUS
-                    ftl_wrt = reg::DIGCTL_MICROSECONDS::rd();
+                    st.wrt = reg::DIGCTL_MICROSECONDS::rd();
                     #endif
-                    ret = dhara_map_write(&FTLmap, curOpa.sector++, curOpa.buf, &err);
+                    ret = dhara_map_write(&st.ftlMap, st.curOpa.sector++, st.curOpa.buf, &err);
                     #ifdef PR_FTL_TIMING_STATUS
-                    INFO("fwr=%ld\n",reg::DIGCTL_MICROSECONDS::rd() - ftl_wrt);
+                    INFO("fwr=%ld\n",reg::DIGCTL_MICROSECONDS::rd() - st.wrt);
                     #endif
-                    curOpa.buf += pMtdinfo->PageSize_B;
+                    st.curOpa.buf += st.mtdinfo->PageSize_B;
                     if (ret) {
                         FTL_WARN("FTL WRITE FAIL:%d,%s\n", ret, dhara_strerror(err));
                         break;
                     }
                 }
 
-                //*curOpa.StatusBuf = ret;
-                xTaskNotify(curOpa.task, ret, eSetValueWithOverwrite);
+                //*st.curOpa.StatusBuf = ret;
+                xTaskNotify(st.curOpa.task, ret, eSetValueWithOverwrite);
                 break;
 
             case FTL_SECTOR_TRIM:
-                ret = dhara_map_trim(&FTLmap, curOpa.sector, &err);
-                //*curOpa.StatusBuf = ret;
-                xTaskNotify(curOpa.task, ret, eSetValueWithOverwrite);
+                ret = dhara_map_trim(&st.ftlMap, st.curOpa.sector, &err);
+                //*st.curOpa.StatusBuf = ret;
+                xTaskNotify(st.curOpa.task, ret, eSetValueWithOverwrite);
                 break;
 
             case FTL_SYNC:
-                ret = dhara_map_sync(&FTLmap, &err);
+                ret = dhara_map_sync(&st.ftlMap, &err);
                 if (ret) {
                     FTL_WARN("FTL SYNC FAIL:%d,%s\n", ret, dhara_strerror(err));
                 }
-                //*curOpa.StatusBuf = ret;
-                xTaskNotify(curOpa.task, ret, eSetValueWithOverwrite);
+                //*st.curOpa.StatusBuf = ret;
+                xTaskNotify(st.curOpa.task, ret, eSetValueWithOverwrite);
                 break;
 
             default:
                 break;
             }
 
-            // xEventGroupSetBits(FTLLockEventGroup , (1 << curOpa.BLock));
+            // xEventGroupSetBits(FTLLockEventGroup , (1 << st.curOpa.BLock));
         }
     }
 }
 
-int FTL_GetSectorCount() {
-    return dhara_map_capacity(&FTLmap);
+int Ftl::getSectorCount() {
+    return dhara_map_capacity(&st.ftlMap);
 }
 
-int FTL_GetSectorSize() {
-    return pMtdinfo->PageSize_B;
+int Ftl::getSectorSize() {
+    return st.mtdinfo->PageSize_B;
 }
 
-int FTL_ReadSector(uint32_t sector, uint32_t num, uint8_t *buf) {
+int Ftl::readSector(uint32_t sector, uint32_t num, uint8_t *buf) {
 
     FTL_Operates newOpa;
     int retVal = 0;
-    if (!FTL_inited()) {
+    if (!isInited()) {
         INFO("FTL Not Inited.\n");
         return -1;
     }
 
-    if (sector + num > max_ftl_pages) {
-        INFO("sector + num > max_ftl_pages, %u, %u, %u\n", sector, num, max_ftl_pages);
+    if (sector + num > st.maxFtlPages) {
+        INFO("sector + num > max_ftl_pages, %u, %u, %u\n", sector, num, st.maxFtlPages);
         return -1;
     }
 
@@ -368,21 +354,21 @@ int FTL_ReadSector(uint32_t sector, uint32_t num, uint8_t *buf) {
     newOpa.buf = buf;
     newOpa.task = xTaskGetCurrentTaskHandle();
     xTaskNotifyStateClear(NULL);
-    xQueueSend(FTL_Operates_Queue, &newOpa, portMAX_DELAY);
+    xQueueSend(st.opQueue, &newOpa, portMAX_DELAY);
 
     xTaskNotifyWait(0, 0xFFFFFFFF, (uint32_t *)&retVal, portMAX_DELAY);
 
     return retVal;
 }
 
-int FTL_WriteSector(uint32_t sector, uint32_t num, uint8_t *buf) {
+int Ftl::writeSector(uint32_t sector, uint32_t num, uint8_t *buf) {
     FTL_Operates newOpa;
     int retVal = 0;
-    if (!FTL_inited()) {
+    if (!isInited()) {
         return -1;
     }
 
-    if (sector + num > max_ftl_pages) {
+    if (sector + num > st.maxFtlPages) {
         return -1;
     }
 
@@ -394,7 +380,7 @@ int FTL_WriteSector(uint32_t sector, uint32_t num, uint8_t *buf) {
     // newOpa.StatusBuf = FTL_GetStatusBuf();
     newOpa.task = xTaskGetCurrentTaskHandle();
     xTaskNotifyStateClear(NULL);
-    xQueueSend(FTL_Operates_Queue, &newOpa, portMAX_DELAY);
+    xQueueSend(st.opQueue, &newOpa, portMAX_DELAY);
     /*
         xEventGroupWaitBits(FTLLockEventGroup, (1 << newOpa.BLock), pdTRUE, pdFALSE, portMAX_DELAY);
         retVal = *newOpa.StatusBuf;
@@ -405,10 +391,10 @@ int FTL_WriteSector(uint32_t sector, uint32_t num, uint8_t *buf) {
     return retVal;
 }
 
-int FTL_TrimSector(uint32_t sector) {
+int Ftl::trimSector(uint32_t sector) {
     FTL_Operates newOpa;
     int retVal = 0;
-    if (!FTL_inited()) {
+    if (!isInited()) {
         INFO("FTL Not Inited.\n");
         return -1;
     }
@@ -421,7 +407,7 @@ int FTL_TrimSector(uint32_t sector) {
     newOpa.task = xTaskGetCurrentTaskHandle();
 
     xTaskNotifyStateClear(NULL);
-    xQueueSend(FTL_Operates_Queue, &newOpa, portMAX_DELAY);
+    xQueueSend(st.opQueue, &newOpa, portMAX_DELAY);
 
     /*
         xEventGroupWaitBits(FTLLockEventGroup, (1 << newOpa.BLock), pdTRUE, pdFALSE, portMAX_DELAY);
@@ -432,17 +418,17 @@ int FTL_TrimSector(uint32_t sector) {
     return retVal;
 }
 
-int FTL_Sync() {
+int Ftl::sync() {
     //FTL_Operates newOpa;
     dhara_error_t err;
     int ret = 0;
 
     int retVal = 0;
-    if (!FTL_inited()) {
+    if (!isInited()) {
         return -1;
     }
 
-    ret = dhara_map_sync(&FTLmap, &err);
+    ret = dhara_map_sync(&st.ftlMap, &err);
     if (ret) {
         FTL_WARN("FTL SYNC FAIL:%d,%s\n", ret, dhara_strerror(err));
     }
@@ -464,23 +450,23 @@ int FTL_Sync() {
     return retVal;
 }
 
-PartitionInfo_t *FTL_GetPartitionInfo() {
-    return PartitionInfo;
+PartitionInfo_t *Ftl::getPartitionInfo() {
+    return st.partitionInfo;
 }
 
 /*
-bool FTL_ScanPartition()
+bool Ftl::scanPartition()
 {
   uint8_t *buf;
   uint32_t SectorStart[4];
   uint32_t Sectors[4];
 
-    if(PartitionInfo == NULL){
-        PartitionInfo = pvPortMalloc(sizeof(PartitionInfo_t));
+    if(st.partitionInfo == NULL){
+        st.partitionInfo = pvPortMalloc(sizeof(PartitionInfo_t));
       }
-    memset(PartitionInfo, 0, sizeof(PartitionInfo_t));
-  buf = pvPortMalloc(FTL_GetSectorSize());
-  FTL_ReadSector(0, 1, buf);
+    memset(st.partitionInfo, 0, sizeof(PartitionInfo_t));
+  buf = pvPortMalloc(getSectorSize());
+  readSector(0, 1, buf);
 
   if((buf[0x1FE] != 0x55) || (buf[0x1FF] != 0xAA)){
     return false;
@@ -491,15 +477,15 @@ bool FTL_ScanPartition()
     memcpy(&Sectors[i],(void *) (((uint32_t)&buf[0x1ca]) + 0x10 * i)  , 4);
   }
   for(int i = 0; i < 4 ; i++){
-    if((SectorStart[i] < FTL_GetSectorCount()) && (Sectors[i] > 0)){
-      INFO("DISK PART[%d], Start Sector:%u, Size:%ld\n",i,SectorStart[i], Sectors[i] * FTL_GetSectorSize());
-      PartitionInfo->Partitions++;
-      PartitionInfo->Sectors[i] = Sectors[i];
-      PartitionInfo->SectorStart[i] = SectorStart[i];
+    if((SectorStart[i] < getSectorCount()) && (Sectors[i] > 0)){
+      INFO("DISK PART[%d], Start Sector:%u, Size:%ld\n",i,SectorStart[i], Sectors[i] * getSectorSize());
+      st.partitionInfo->Partitions++;
+      st.partitionInfo->Sectors[i] = Sectors[i];
+      st.partitionInfo->SectorStart[i] = SectorStart[i];
     }
   }
 
-  if(PartitionInfo->Partitions > 1){
+  if(st.partitionInfo->Partitions > 1){
     return true;
   }
   return false;
