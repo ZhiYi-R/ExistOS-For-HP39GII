@@ -24,7 +24,7 @@
 #include "llapi.h"
 #include "llapi_code.h"
 
-#include "rtc_up.h"
+#include "stmp_rtc.hpp"
 
 extern volatile void *pxCurrentTCB;
 extern volatile uint32_t ulCriticalNesting;

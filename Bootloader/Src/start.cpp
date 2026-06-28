@@ -29,7 +29,7 @@
 #include "llapi.h"
 #include "llapi_code.h"
 #include "mtd_up.h"
-#include "rtc_up.h"
+#include "stmp_rtc.hpp"
 #include "vmMgr.h"
 
 #include "debug.h"

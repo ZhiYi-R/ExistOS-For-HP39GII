@@ -17,7 +17,7 @@
 #include "display_up.h"
 #include "keyboard_up.h"
 #include "stmp_gpio.hpp"
-#include "rtc_up.h"
+#include "stmp_rtc.hpp"
 
 #include "debug.h"
 
@@ -79,8 +79,8 @@ void boardInit(void)
 
     Keyboard::gpioInit();
 
-    
-    rtc_init();
+
+    Rtc::init();
 
     
 #ifdef ENABLE_AUIDIOOUT
