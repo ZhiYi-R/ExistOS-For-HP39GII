@@ -84,7 +84,7 @@ void boardInit(void)
 
     
 #ifdef ENABLE_AUIDIOOUT
-    stmp_audio_init();
+    AudioOut::init();
 #endif
 }
 

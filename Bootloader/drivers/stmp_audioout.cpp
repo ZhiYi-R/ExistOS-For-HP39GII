@@ -13,9 +13,10 @@
  *     forward-declared and called by name from the C translation unit vectors.c
  *     (hence C linkage).
  * All three are granted @c friend access so they can operate on that private
- * state directly. The class itself has no external consumer (the @c
- * stmp_audio_init entry survives as a thin forwarding shim called from
- * board_up.cpp), so it is defined here rather than in a header.
+ * state directly. Phase 3.C folds the former @c stmp_audio_init shim away: the
+ * @c AudioOut class is declared in stmp_audioout.hpp and boardInit calls
+ * @c AudioOut::init() by name, so this file carries only the method and seam
+ * definitions.
  *
  * The whole driver is gated on @c ENABLE_AUIDIOOUT, which is not defined in any
  * current build; the encapsulation is purely structural and changes no codegen
@@ -36,70 +37,6 @@
 #include "SystemConfig.h"
 
 #ifdef ENABLE_AUIDIOOUT
-
-// ---------------------------------------------------------------------------
-// DMA command descriptor types (file scope; only used by AudioOut below).
-// ---------------------------------------------------------------------------
-struct apb_dma_command_t
-{
-    struct apb_dma_command_t *next;
-    uint32_t cmd;
-    void *buffer;
-    /* PIO words follow */
-} __attribute__((packed));
-
-struct pcm_dma_command_t
-{
-    struct apb_dma_command_t dma;
-    /* padded to next multiple of cache line size (32 bytes) */
-    uint32_t pad[5];
-} __attribute__((packed));
-
-// ---------------------------------------------------------------------------
-// Dual-context seams: the DAC completion IRQ (dispatched by name from up_isr())
-// and the two arm_do_swi fast-path entries (called by name from the C unit
-// vectors.c) all share AudioOut's private buffer state. They keep C linkage and
-// are declared before the class so it can friend them.
-// ---------------------------------------------------------------------------
-extern "C" {
-void portDAC_IRQ(uint32_t IRQn);
-bool is_pcm_buffer_idle();
-void pcm_buffer_load(void *pcmdat);
-}
-
-class AudioOut {
-public:
-    static void init();
-
-private:
-    // ---- ping-pong sample buffers and the DMA descriptor ----------------
-    static inline uint32_t pcm_buffer1[4096] __attribute__((aligned(4)));
-    static inline uint32_t pcm_buffer2[4096] __attribute__((aligned(4)));
-    static inline pcm_dma_command_t dac_dma;
-
-    // ---- shared scalar runtime state -----------------------------------
-    // Touched by the DAC IRQ *and* the two vectors.c SWI entries. Grouped into
-    // one object so this originally-contiguous block keeps its section-anchor
-    // base+offset codegen: separate `static inline` members are distinct COMDAT
-    // symbols the compiler cannot prove adjacent, so each would cost its own
-    // address load. The seams reach these through friendship as AudioOut::st.* .
-    struct SharedState {
-        volatile bool  pcm_buffer_1_fin;
-        volatile bool  pcm_buffer_2_fin;
-        volatile bool  pcm_playing;
-        volatile void *cur_pcm_buffer;
-    };
-    static inline SharedState st{ true, true, false, nullptr };
-
-    // ---- internal helper (was a file-scope `inline static` function) ----
-    static void pcm_dma_load();
-
-    // ---- dual-context friends: the DAC IRQ and the two vectors.c SWI
-    //      entries operate on the shared state above ----------------------
-    friend void ::portDAC_IRQ(uint32_t);
-    friend bool ::is_pcm_buffer_idle();
-    friend void ::pcm_buffer_load(void *);
-};
 
 inline void AudioOut::pcm_dma_load()
 {
@@ -276,14 +213,6 @@ void AudioOut::init()
 
 
     reg::AUDIOOUT_DACVOLUME::wr(0x00ff00ff);
-}
-
-// Named entry shim: board_up.cpp (C++) still calls stmp_audio_init() by its
-// legacy name (declared extern "C" in stmp_audioout.hpp); forward to the class.
-// Caller migration onto AudioOut::init() is deferred to the layer-merge phase.
-void stmp_audio_init()
-{
-    AudioOut::init();
 }
 
 #endif
