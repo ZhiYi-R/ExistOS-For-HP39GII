@@ -8,7 +8,7 @@
 #include "task.h"
 
 #include "stmp_clkctrl.hpp"
-#include "uart_up.h"
+#include "stmp_uartdbg.hpp"
 #include "interrupt_up.h"
 
 #include "stmp_board.hpp"
@@ -69,7 +69,7 @@ void boardInit(void)
 
     portBoardInit();
 
-    uartInit();
+    Uart::init();
 
     IRQInit();
 
