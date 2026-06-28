@@ -913,7 +913,7 @@ void vBatteryMon(void *__n) {
     for (;;) {
 
         vatt_adc = Lradc::convCh(7, 5);
-        batt_voltage = portGetBatterVoltage_mv();
+        batt_voltage = Board::getBatteryVoltage_mv();
         vdd5v_voltage = (int)(Lradc::convCh(5, 5) * 0.45 * 4);
         coreTemp = (int)((Lradc::convCh(4, 5) - Lradc::convCh(3, 5)) * 1.012 / 4 - 273.15);
 
@@ -947,7 +947,7 @@ void vBatteryMon(void *__n) {
             printf("VDD5V: %u mV\n", vdd5v_voltage);
             // printf("VBG: %d mV\n", (int)(Lradc::convCh(2, 5) * 0.45));
             printf("Core Temp: %d ℃\n", coreTemp);
-            printf("Power Speed:%u\n", portGetPWRSpeed());
+            printf("Power Speed:%u\n", Board::getPWRSpeed());
         }
         t++;
 

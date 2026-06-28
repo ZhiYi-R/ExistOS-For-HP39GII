@@ -103,7 +103,7 @@ void Power::init()
 
 
 
-    portGetBatterVoltage_mv();
+    Board::getBatteryVoltage_mv();
 
     //goto fin;
 /*

@@ -576,7 +576,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
 
             case LL_SWI_PWR_SPEED:
             {
-                *currentCall.pRet = portGetPWRSpeed();
+                *currentCall.pRet = Board::getPWRSpeed();
             }break;
 
             case LL_SWI_SLOW_DOWN_MINFRAC:

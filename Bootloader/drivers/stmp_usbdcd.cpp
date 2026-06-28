@@ -627,9 +627,9 @@ bool dcd_edpt_xfer (uint8_t rhport, uint8_t ep_addr, uint8_t * buffer, uint16_t 
     if (epnum == 0) {
         // follows UM 24.10.8.1.1 Setup packet handling using setup lockout mechanism
         // wait until ENDPTSETUPSTAT before priming data/status in response TODO add time out
-        uint32_t start = portBoardGetTime_s();
+        uint32_t start = Board::getTime_s();
         while (dcd_reg->ENDPTSETUPSTAT & TU_BIT(0)) {
-            if(portBoardGetTime_s() - start > 3)
+            if(Board::getTime_s() - start > 3)
             {
                 printf("USB TIME OUT!!\n");
                 break;

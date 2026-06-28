@@ -1,25 +1,26 @@
 /**
  * @file Bootloader/drivers/stmp_board.cpp
- * @brief Board bring-up driver — pure-static singleton class.
+ * @brief Board bring-up / timing / identity driver — pure-static @c Board singleton.
  *
- * Phase 2 of the HAL C++23 migration: the board bring-up sequence and the only
- * piece of board state (@c boardTick) become the @c Board pure-static singleton.
- * @c boardTick was a file-scope global with no cross-TU reference, so it moves
- * into the class as a @c private @c static @c inline member; the eight one-shot
- * sub-block init helpers become @c private @c always_inline methods so -Os folds
- * them into @c Board::init exactly as it folded the file-scope @c static helpers.
+ * Phase 3.B of the HAL C++23 migration. The @c Board class is now declared in
+ * stmp_board.hpp; this file carries its out-of-line method definitions and the one
+ * piece of board state, @c boardTick (a @c private @c static @c inline member with
+ * no cross-TU reference). The eight one-shot sub-block init helpers stay @c private
+ * @c always_inline so -Os folds them into @c Board::init, and @c init itself stays
+ * @c always_inline folded into the @c portBoardInit bring-up seam.
  *
  * Three stateless cross-cutting leaf primitives stay free @c extern @c "C"
  * functions: @c nsToCycles (a pure units helper used by name from lcdif/gpmi),
  * and @c portDelayus / @c portDelayms (hot busy-wait primitives called from five
- * other TUs). They hold no board state, so encapsulating them buys nothing and
- * only adds shim hops; folding them into a HAL facade is left to Phase 3.
+ * other TUs). They hold no board state, so encapsulating them buys nothing.
  *
- * The legacy @c portBoard* / @c portGet* entries survive as thin @c extern @c "C"
- * forwarding shims (stmp_board.hpp declares the interface @c extern @c "C"; the time
- * reads are also SWI seams reached by name from vectors.c, and @c portBoardReset
- * from stub.c). The tiny accessors are implicitly inline so -Os folds each into
- * its shim bit-for-bit; caller migration onto @c Board:: is deferred to Phase 3.
+ * The surviving @c extern @c "C" shims are the hard seams only: @c portBoardGetTime_us
+ * / @c portBoardGetTime_ms (SWI reads from vectors.c), @c portBoardReset (stub.c),
+ * @c portBoardGetTick / @c portBoardResetTick (FreeRTOSConfig.h run-time-stats
+ * macros), and @c portBoardInit (bring-up). Their tiny accessors are @c inline so
+ * -Os folds each into its shim bit-for-bit. The migratable @c portBoardGetTime_s /
+ * @c portGetBatterVoltage_mv / @c portGetBatteryMode / @c portGetPWRSpeed shims are
+ * gone: their C++ callers now invoke @c Board:: directly.
  */
 
 #include "stmp_board.hpp"
@@ -37,53 +38,36 @@ uint64_t nsToCycles(uint64_t nstime, uint64_t period, uint64_t min)
     return (k > min) ? k : min;
 }
 
-class Board {
-public:
-    // Larger single-caller entry; always_inline folds the body into its extern
-    // "C" shim so the named entry is bit-for-bit the pre-class function.
-    [[gnu::always_inline]] static void init();
+// ---------------------------------------------------------------------------
+// Board timing / identity accessors (class declared in stmp_board.hpp).
+//
+// getTime_us/ms, getTick, resetTick and reset are reached only through their
+// kept extern "C" shims in this TU, so they are `inline` here: -Os folds each
+// into its shim bit-for-bit (getTime_ms also into getTick/resetTick), leaving no
+// standalone symbol, exactly as the in-class inline defs did. getTime_s /
+// getBatteryVoltage_mv / getBatteryMode are now called directly via Board:: from
+// other TUs, so they are ordinary out-of-line external methods.
+// ---------------------------------------------------------------------------
+inline uint32_t Board::getTime_us() { return reg::DIGCTL_MICROSECONDS::rd(); }
+inline uint32_t Board::getTime_ms() { return reg::RTC_MILLISECONDS::rd(); }
+inline uint32_t Board::getTick()    { return getTime_ms() - boardTick; }
+inline void     Board::resetTick()  { boardTick = getTime_ms(); }
+inline void Board::reset()
+{
+    reg::CLKCTRL_RESET::wr(reg::CLKCTRL_RESET::rd() & ~reg::CLKCTRL_RESET_::CHIP::mask);
+    reg::CLKCTRL_RESET::wr(reg::CLKCTRL_RESET::rd() | reg::CLKCTRL_RESET_::CHIP::val(1));
+}
 
-    // getPWRSpeed owns a function-local `static last_val`. As a non-inline
-    // method that static keeps internal linkage, so -Os eliminates its dead
-    // store exactly as it did for the file-scope function; marking the method
-    // inline would give the static vague (COMDAT) linkage and defeat that DSE.
-    // It stays out-of-line behind its shim (one body, +1 trampoline hop).
-    static uint32_t getPWRSpeed();
+uint32_t Board::getTime_s() { return reg::RTC_SECONDS::rd(); }
 
-    // Tiny accessors: implicitly inline, -Os folds them into their shims (and,
-    // for getTime_ms, into getTick/resetTick) exactly as the originals folded.
-    static uint32_t getTime_us() { return reg::DIGCTL_MICROSECONDS::rd(); }
-    static uint32_t getTime_ms() { return reg::RTC_MILLISECONDS::rd(); }
-    static uint32_t getTime_s()  { return reg::RTC_SECONDS::rd(); }
-    static uint32_t getTick()    { return getTime_ms() - boardTick; }
-    static void resetTick()      { boardTick = getTime_ms(); }
-    static void reset()
-    {
-        reg::CLKCTRL_RESET::wr(reg::CLKCTRL_RESET::rd() & ~reg::CLKCTRL_RESET_::CHIP::mask);
-        reg::CLKCTRL_RESET::wr(reg::CLKCTRL_RESET::rd() | reg::CLKCTRL_RESET_::CHIP::val(1));
-    }
-    static uint32_t getBatteryVoltage_mv()
-    {
-        //Lradc::convCh(7, 1);
-        uint32_t ad_val = reg::POWER_BATTMONITOR::B().BATT_VAL;
-        return ad_val * 8;
-    }
-    static uint32_t getBatteryMode() { return reg::POWER_STS::B().MODE; }
+uint32_t Board::getBatteryVoltage_mv()
+{
+    //Lradc::convCh(7, 1);
+    uint32_t ad_val = reg::POWER_BATTMONITOR::B().BATT_VAL;
+    return ad_val * 8;
+}
 
-private:
-    static inline uint32_t boardTick = 0;
-
-    // One-shot sub-block init helpers (file-scope `static`, single call site in
-    // init() -> -Os folded them); always_inline preserves that folding.
-    [[gnu::always_inline]] static void AHBH_DMAInit();
-    [[gnu::always_inline]] static void AHBX_DMAInit();
-    [[gnu::always_inline]] static void GPMI_Init();
-    [[gnu::always_inline]] static void HardECC8_Init();
-    [[gnu::always_inline]] static void USBPHYInit();
-    [[gnu::always_inline]] static void LCDIF_Init();
-    [[gnu::always_inline]] static void RTC_Init();
-    [[gnu::always_inline]] static void LRADC_init();
-};
+uint32_t Board::getBatteryMode() { return reg::POWER_STS::B().MODE; }
 
 
 inline void Board::AHBH_DMAInit()
@@ -358,17 +342,16 @@ void portDelayms(uint32_t ms)
 }
 
 // ---------------------------------------------------------------------------
-// extern "C" seams (stmp_board.hpp declares the interface extern "C"; the time reads
-// are SWI seams from vectors.c and portBoardReset is reached from stub.c).
-// Caller migration onto Board:: is deferred to the layer-merge phase.
+// Surviving extern "C" seams — hard C / config / bring-up boundaries only.
+// portBoardGetTime_us/ms are SWI reads from vectors.c; portBoardReset from stub.c;
+// portBoardGetTick / portBoardResetTick are FreeRTOSConfig.h run-time-stats macros;
+// portBoardInit is the bring-up entry. Each accessor folds into its shim
+// bit-for-bit. The portBoardGetTime_s / portGetBatterVoltage_mv / portGetBatteryMode
+// / portGetPWRSpeed shims are gone — their C++ callers now invoke Board:: directly.
 // ---------------------------------------------------------------------------
 extern "C" uint32_t portBoardGetTime_us()       { return Board::getTime_us(); }
 extern "C" uint32_t portBoardGetTime_ms()       { return Board::getTime_ms(); }
-extern "C" uint32_t portBoardGetTime_s()        { return Board::getTime_s(); }
 extern "C" uint32_t portBoardGetTick()          { return Board::getTick(); }
 extern "C" void portBoardResetTick()            { Board::resetTick(); }
 extern "C" void portBoardReset()                { Board::reset(); }
-extern "C" uint32_t portGetBatterVoltage_mv()   { return Board::getBatteryVoltage_mv(); }
-extern "C" uint32_t portGetBatteryMode()        { return Board::getBatteryMode(); }
-extern "C" uint32_t portGetPWRSpeed()           { return Board::getPWRSpeed(); }
 extern "C" void portBoardInit()                 { Board::init(); }
