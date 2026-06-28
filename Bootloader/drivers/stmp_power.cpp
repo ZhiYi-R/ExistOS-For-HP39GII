@@ -1,19 +1,17 @@
 /**
  * @file Bootloader/drivers/stmp_power.cpp
- * @brief Power management driver — pure-static singleton class.
+ * @brief Power management driver — pure-static @c Power singleton.
  *
- * Phase 2 of the HAL C++23 migration: the power driver becomes the @c Power
- * pure-static singleton. Its only piece of cross-cutting state, @c g_chargeEnable,
- * is intentionally NOT encapsulated: vectors.c (which stays C) and start.cpp read
- * it by name via `extern bool g_chargeEnable`, so it must remain a global-scope
- * (unmangled) symbol -- a data seam, the moral twin of the extern "C" function
- * seams. @c portPowerIRQ is dispatched by name from the C interrupt unit and
+ * The power driver is the @c Power pure-static singleton (declared in
+ * stmp_power.hpp). Its three operations are ordinary out-of-line static methods,
+ * called directly by their C++ consumers as @c Power::init / @c Power::chargeEnable
+ * / @c Power::powerOff.
+ *
+ * Two things are intentionally NOT class members. @c g_chargeEnable is a cross-TU
+ * data seam: vectors.c (which stays C) and start.cpp read it by name via
+ * `extern bool g_chargeEnable`, so it must remain a global-scope (unmangled)
+ * symbol. @c portPowerIRQ is dispatched by name from the C interrupt unit and
  * touches no class state, so it stays a plain @c extern @c "C" free function.
- *
- * The legacy @c portPowerInit / @c portChargeEnable / @c portBoardPowerOff entries
- * survive as thin @c extern @c "C" forwarding shims (stmp_power.hpp); the methods are
- * always_inline so each shim folds back to the pre-class body bit-for-bit. Caller
- * migration onto @c Power:: is deferred to the layer-merge phase.
  */
 
 #include "stmp_power.hpp"
@@ -28,16 +26,7 @@
 // Cross-TU data seam (see file banner): must stay a global-scope symbol.
 bool g_chargeEnable = false;
 
-class Power {
-public:
-    // Single-caller entries; always_inline folds each body into its extern "C"
-    // shim so the named entry is bit-for-bit the pre-class function.
-    [[gnu::always_inline]] static void init();
-    [[gnu::always_inline]] static void chargeEnable(bool enable);
-    [[gnu::always_inline]] static void powerOff();
-};
-
-inline void Power::chargeEnable(bool enable)
+void Power::chargeEnable(bool enable)
 {
     g_chargeEnable = enable;
     if(g_chargeEnable)
@@ -52,7 +41,7 @@ inline void Power::chargeEnable(bool enable)
     }
 }
 
-inline void Power::powerOff()
+void Power::powerOff()
 {
 
     //HW_POWER_VDDIOCTRL.B.DISABLE_FET = 0;
@@ -67,7 +56,7 @@ inline void Power::powerOff()
 
 }
 
-inline void Power::init()
+void Power::init()
 {
 
     INFO("PWR Init.\n");
@@ -257,25 +246,9 @@ inline void Power::init()
 }
 
 // ---------------------------------------------------------------------------
-// extern "C" seams. portChargeEnable/portBoardPowerOff/portPowerInit (stmp_power.hpp)
-// forward to the class. portPowerIRQ is dispatched by name from interrupt_up.c
-// (stays C); it touches no Power state, so it stays a free function.
+// portPowerIRQ is dispatched by name from interrupt_up.c (stays C); it touches
+// no Power state, so it stays a free extern "C" function holding its logic.
 // ---------------------------------------------------------------------------
-extern "C" void portChargeEnable(bool enable)
-{
-    Power::chargeEnable(enable);
-}
-
-extern "C" void portBoardPowerOff()
-{
-    Power::powerOff();
-}
-
-extern "C" void portPowerInit()
-{
-    Power::init();
-}
-
 extern "C" void portPowerIRQ(uint32_t nirq)
 {
     switch (nirq)

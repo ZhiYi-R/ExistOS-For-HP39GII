@@ -627,7 +627,7 @@ void tud_cdc_rx_cb(uint8_t itf) {
             }
 
             if (strcmp(cdc_path_loader_buffer, "poweroff") == 0) {
-                portBoardPowerOff();
+                Power::powerOff();
                 goto fin;
             }
 
@@ -827,7 +827,7 @@ void __attribute__((target("arm"))) vMainThread(void *pvParameters) {
 int __attribute__((target("thumb"))) capt_ON_Key(int ck, int cp) {
 
     if (ck == KEY_F3 && cp) {
-        portBoardPowerOff();
+        Power::powerOff();
     }
 
     if ((ck == KEY_PLUS)) {
@@ -925,7 +925,7 @@ void vBatteryMon(void *__n) {
 
                 extern bool g_chargeEnable;
                 if (batt_voltage >= 1500) {
-                    portChargeEnable(false);
+                    Power::chargeEnable(false);
                 }; //
             }
         }

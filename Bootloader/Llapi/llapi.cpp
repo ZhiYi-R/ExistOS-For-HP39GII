@@ -566,7 +566,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
 
             case LL_SWI_CHARGE_ENABLE: 
             {
-                portChargeEnable(currentCall.para0 != 0u);
+                Power::chargeEnable(currentCall.para0 != 0u);
             }break;
 
             case LL_SWI_SLOW_DOWN_ENABLE:
@@ -587,7 +587,7 @@ void __attribute__((target("thumb"))) LLAPI_Task_thumb_entry() {
             case LL_SWI_PWR_POWEROFF:
             {
                 
-                portBoardPowerOff();
+                Power::powerOff();
             }break;
 
             case LL_SWI_MEM_PHY_INFO:

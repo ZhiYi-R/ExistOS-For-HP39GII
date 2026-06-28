@@ -319,7 +319,7 @@ inline void Board::init()
 
 
 
-    portPowerInit();
+    Power::init();
 
     USBPHYInit();
     AHBH_DMAInit();
