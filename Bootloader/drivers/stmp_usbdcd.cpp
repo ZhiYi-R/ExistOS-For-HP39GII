@@ -38,7 +38,7 @@
 #include "hw_irq.h"
 
 #include "interrupt_up.h"
-#include "board_up.h"
+#include "stmp_board.hpp"
 
 //--------------------------------------------------------------------+
 // MACRO TYPEDEF CONSTANT ENUM DECLARATION

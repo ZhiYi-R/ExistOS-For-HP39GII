@@ -11,14 +11,15 @@
  * (unmangled) symbol -- a data seam, the moral twin of the extern "C" seams.
  *
  * The legacy entries survive as thin @c extern @c "C" forwarding shims
- * (board_up.h / clkctrl_up.h declare the interface @c extern @c "C"). The single-
+ * (stmp_clkctrl.hpp / clkctrl_up.h declare the interface @c extern @c "C"). The single-
  * caller policy/bring-up entries are always_inline so each shim folds back to the
  * pre-class body bit-for-bit; the three register-divider primitives are shared by
  * the bring-up sequence AND external callers, so they stay out-of-line methods
  * behind their shims (caller migration onto @c Clk:: is deferred to Phase 3).
  */
 
-#include "board_up.h"
+#include "stmp_clkctrl.hpp"
+#include "stmp_board.hpp"
 #include "clkctrl_up.h"
 #include "reg_model.hpp"
 
@@ -198,7 +199,7 @@ inline void Clk::getCoreFreqDIV(uint32_t *CPU_DIV, uint32_t *CPU_Frac, uint32_t 
 }
 
 // ---------------------------------------------------------------------------
-// extern "C" seams (board_up.h / clkctrl_up.h declare the interface extern "C").
+// extern "C" seams (stmp_clkctrl.hpp / clkctrl_up.h declare the interface extern "C").
 // Caller migration onto Clk:: is deferred to the layer-merge phase.
 // ---------------------------------------------------------------------------
 extern "C" void portCLKCtrlInit(void)            { Clk::init(); }

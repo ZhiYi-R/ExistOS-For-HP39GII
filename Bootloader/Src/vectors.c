@@ -20,7 +20,7 @@
 #include "mmu.h"
 #include "vmMgr.h"
 
-#include "board_up.h"
+#include "stmp_board.hpp"
 #include "llapi.h"
 #include "llapi_code.h"
 

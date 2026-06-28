@@ -16,13 +16,15 @@
  * only adds shim hops; folding them into a HAL facade is left to Phase 3.
  *
  * The legacy @c portBoard* / @c portGet* entries survive as thin @c extern @c "C"
- * forwarding shims (board_up.h declares the interface @c extern @c "C"; the time
+ * forwarding shims (stmp_board.hpp declares the interface @c extern @c "C"; the time
  * reads are also SWI seams reached by name from vectors.c, and @c portBoardReset
  * from stub.c). The tiny accessors are implicitly inline so -Os folds each into
  * its shim bit-for-bit; caller migration onto @c Board:: is deferred to Phase 3.
  */
 
-#include "board_up.h"
+#include "stmp_board.hpp"
+#include "stmp_power.hpp"
+#include "stmp_lradc.hpp"
 #include "reg_model.hpp"
 #include "reg_values.hpp"
 
@@ -356,7 +358,7 @@ void portDelayms(uint32_t ms)
 }
 
 // ---------------------------------------------------------------------------
-// extern "C" seams (board_up.h declares the interface extern "C"; the time reads
+// extern "C" seams (stmp_board.hpp declares the interface extern "C"; the time reads
 // are SWI seams from vectors.c and portBoardReset is reached from stub.c).
 // Caller migration onto Board:: is deferred to the layer-merge phase.
 // ---------------------------------------------------------------------------

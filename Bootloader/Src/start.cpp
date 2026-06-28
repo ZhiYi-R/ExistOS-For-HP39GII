@@ -18,7 +18,10 @@
 #include "usbd.h"
 
 #include "FTL_up.h"
-#include "board_up.h"
+#include "stmp_clkctrl.hpp"
+#include "stmp_board.hpp"
+#include "stmp_lradc.hpp"
+#include "stmp_power.hpp"
 #include "display_up.h"
 #include "keyboard_up.h"
 #include "llapi.h"

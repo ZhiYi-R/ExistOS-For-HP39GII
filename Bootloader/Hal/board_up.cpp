@@ -11,7 +11,8 @@
 #include "uart_up.h"
 #include "interrupt_up.h"
 
-#include "board_up.h"
+#include "stmp_board.hpp"
+#include "stmp_audioout.hpp"
 #include "mtd_up.h"
 #include "display_up.h"
 #include "keyboard_up.h"

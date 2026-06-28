@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "board_up.h"
+#include "stmp_audioout.hpp"
 #include "interrupt_up.h"
 
 #include "reg_model.hpp"
@@ -279,7 +279,7 @@ void AudioOut::init()
 }
 
 // Named entry shim: board_up.cpp (C++) still calls stmp_audio_init() by its
-// legacy name (declared extern "C" in board_up.h); forward to the class.
+// legacy name (declared extern "C" in stmp_audioout.hpp); forward to the class.
 // Caller migration onto AudioOut::init() is deferred to the layer-merge phase.
 void stmp_audio_init()
 {

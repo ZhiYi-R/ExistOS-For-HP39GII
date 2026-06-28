@@ -11,7 +11,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "board_up.h"
+#include "stmp_clkctrl.hpp"
+#include "stmp_power.hpp"
+#include "stmp_board.hpp"
 #include "display_up.h"
 #include "keyboard_up.h"
 

@@ -14,7 +14,7 @@
 
 #include "debug.h"
 
-#include "board_up.h"
+#include "stmp_board.hpp"
 
 //#define PR_NAND_WR_TIMING_STATUS   // enable NAND read/write timing instrumentation
 #include "stmp_gpmi.hpp"

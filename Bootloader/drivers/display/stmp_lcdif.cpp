@@ -11,7 +11,7 @@
  * synthesis (BV_FLD -> reg::APBH_CHn_CMD_::COMMAND::val(... _sym ...)), never MMIO.
  */
 
-#include "board_up.h"
+#include "stmp_board.hpp"
 #include "display_up.h"
 
 #include "reg_model.hpp"
@@ -19,7 +19,6 @@
 
 #include "debug.h"
 
-#include "board_up.h"
 #include "hw_irq.h"
 #include "interrupt_up.h"
 

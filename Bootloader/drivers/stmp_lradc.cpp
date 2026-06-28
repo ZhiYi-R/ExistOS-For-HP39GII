@@ -9,7 +9,7 @@
  * C interrupt unit and holds its own logic).
  *
  * The legacy @c portLRADC* entry points survive as thin @c extern @c "C"
- * forwarding shims (board_up.h declares them @c extern @c "C"); the methods are
+ * forwarding shims (stmp_lradc.hpp declares them @c extern @c "C"); the methods are
  * always_inline so each shim folds back to the pre-class body bit-for-bit.
  * Caller migration onto @c Lradc:: is deferred to the layer-merge phase.
  */
@@ -25,7 +25,7 @@
 
 #include "interrupt_up.h"
 
-#include "board_up.h"
+#include "stmp_lradc.hpp"
 
 
 class Lradc {
@@ -98,7 +98,7 @@ inline uint32_t Lradc::convCh(uint32_t ch, uint32_t samples)
 }
 
 // ---------------------------------------------------------------------------
-// extern "C" seams. The portLRADC* entries (board_up.h) forward to the class.
+// extern "C" seams. The portLRADC* entries (stmp_lradc.hpp) forward to the class.
 // port_LRADC_IRQ is dispatched by name from interrupt_up.c (stays C); it touches
 // no Lradc state, so it stays a free function holding its logic directly.
 // ---------------------------------------------------------------------------

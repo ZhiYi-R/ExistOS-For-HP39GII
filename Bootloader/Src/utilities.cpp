@@ -15,7 +15,7 @@
 
 #include "tusb.h"
 
-#include "board_up.h"
+#include "stmp_board.hpp"
 #include "mtd_up.h"
 #include "FTL_up.h"
 

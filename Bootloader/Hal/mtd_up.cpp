@@ -6,7 +6,7 @@
 #include "SystemConfig.h"
 #include "FreeRTOS.h"
 
-#include "board_up.h"
+#include "stmp_clkctrl.hpp"
 
 #include "mtd_up.h"
 #include "nand.h"

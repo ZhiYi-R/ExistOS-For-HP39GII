@@ -21,7 +21,7 @@
 #include "tusb.h"
 
 
-#include "board_up.h"
+#include "stmp_board.hpp"
 
 #undef errno
 extern int errno;

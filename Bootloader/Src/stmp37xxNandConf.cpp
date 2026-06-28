@@ -10,7 +10,6 @@
 #include "queue.h"
 #include "task.h"
 
-#include "board_up.h"
 #include "mtd_up.h"
 #include "FTL_up.h"
 #include "display_up.h"

@@ -11,12 +11,13 @@
  * touches no class state, so it stays a plain @c extern @c "C" free function.
  *
  * The legacy @c portPowerInit / @c portChargeEnable / @c portBoardPowerOff entries
- * survive as thin @c extern @c "C" forwarding shims (board_up.h); the methods are
+ * survive as thin @c extern @c "C" forwarding shims (stmp_power.hpp); the methods are
  * always_inline so each shim folds back to the pre-class body bit-for-bit. Caller
  * migration onto @c Power:: is deferred to the layer-merge phase.
  */
 
-#include "board_up.h"
+#include "stmp_power.hpp"
+#include "stmp_board.hpp"
 #include "reg_model.hpp"
 #include "reg_values.hpp"
 #include "interrupt_up.h"
@@ -256,7 +257,7 @@ inline void Power::init()
 }
 
 // ---------------------------------------------------------------------------
-// extern "C" seams. portChargeEnable/portBoardPowerOff/portPowerInit (board_up.h)
+// extern "C" seams. portChargeEnable/portBoardPowerOff/portPowerInit (stmp_power.hpp)
 // forward to the class. portPowerIRQ is dispatched by name from interrupt_up.c
 // (stays C); it touches no Power state, so it stays a free function.
 // ---------------------------------------------------------------------------
