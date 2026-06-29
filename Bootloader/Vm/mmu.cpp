@@ -13,11 +13,9 @@
 #include "mmu.h"
 #include <stdbool.h>
 
-#include "debug.h"  
+#include "debug.h"
 
-
-
-#define L1PTE_NUM       (2049)  
+#define L1PTE_NUM       (2049)
  
 #if USE_HARDWARE_DFLPT
     #define DFLPT_BASE  (0x800C0000)
@@ -156,8 +154,8 @@ volatile void mmu_set_rs(uint32_t rs) {
 
 void mmu_SetDomainPermCheck(uint32_t domain, bool check)
 {
-    register uint32_t c3 asm("r2") = 0;
-    __asm volatile("mrc p15,0,%0,c3,c0,0" ::"r"(c3)); 
+    register uint32_t c3 asm("r2");
+    __asm volatile("mrc p15,0,%0,c3,c0,0" :"=r"(c3));
 
 
     c3 &= ~(0x3 << (domain * 2));
